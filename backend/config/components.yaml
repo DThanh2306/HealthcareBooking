@@ -1,0 +1,179 @@
+components:
+  schemas:
+    Hospital:
+      type: object
+      properties:
+        id_bv:
+          type: integer
+          readOnly: true
+          description: ID bệnh viện
+        ten_bv:
+          type: string
+          description: Tên bệnh viện
+        address:
+          type: string
+          description: Địa chỉ
+        description:
+          type: string
+          description: Mô tả
+        phone_bv:
+          type: string
+          description: SĐT
+        logo:
+          type: string
+          readOnly: true
+          description: Đường dẫn logo
+        logoFile:
+          type: string
+          format: binary
+          writeOnly: true
+          description: Upload logo
+
+    Doctor:
+      type: object
+      properties:
+        id_bs:
+          type: integer
+          readOnly: true
+          description: ID bác sĩ
+        name:
+          type: string
+        specialty:
+          type: string
+        price:
+          type: number
+        description_bs:
+          type: string
+        bv_bs:
+          type: string
+        image:
+          type: string
+          readOnly: true
+        imageFile:
+          type: string
+          format: binary
+          writeOnly: true
+        schedules:
+          type: array
+          items:
+            type: string
+          description: Danh sách ca khám
+
+    Patient:
+      type: object
+      properties:
+        id_appointment:
+          type: integer
+          readOnly: true
+          description: ID lịch hẹn
+        id_u:
+          type: integer
+          description: ID người dùng
+        id_bs:
+          type: integer
+          description: ID bác sĩ
+        name:
+          type: string
+          description: Họ tên người đặt khám
+        gender:
+          type: string
+          enum: [Nam, Nữ, Khác]
+        phone:
+          type: string
+        email:
+          type: string
+        dob:
+          type: string
+          format: date
+        tinh:
+          type: string
+        quan:
+          type: string
+        xa:
+          type: string
+        to_thon:
+          type: string
+        reason:
+          type: string
+        appointment_date:
+          type: string
+          format: date
+        time_slot:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+          default: pending
+        proposed_appointment_date:
+          type: string
+          format: date
+        proposed_time_slot:
+          type: string
+        reschedule_reason:
+          type: string
+        reschedule_status:
+          type: string
+          enum: [none, requested, accepted, declined]
+          default: none
+        reschedule_requested_by:
+          type: string
+          enum: [doctor, patient]
+
+  responses:
+    404NotFound:
+      description: Không tìm thấy dữ liệu
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [error]
+              message:
+                type: string
+    500InternalServerError:
+      description: Lỗi máy chủ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [error]
+              message:
+                type: string
+
+  parameters:
+    hospitalIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: ID bệnh viện
+
+    doctorIdParam:
+      name: id_bs
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: ID bác sĩ
+
+    patientIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: ID lịch hẹn
+
+    userIdParam:
+      name: id_u
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: ID người dùng

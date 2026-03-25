@@ -1,0 +1,324 @@
+[
+  {
+    "category": "Hô hấp & Phổi",
+    "symptomKeywords": [
+      "ho", "ho khan", "ho có đờm", "ho ra máu", "ho gà", "ho lao", "ho kéo dài",
+      "khó thở", "ngạt thở", "hụt hơi", "thở dốc", "thở rít", "thở khò khè", "thở nhanh", "thở nông",
+      "đau ngực khi ho", "tức ngực", "nặng ngực", "đau màng phổi",
+      "viêm phổi", "hen suyễn", "viêm phế quản", "COPD", "tắc nghẽn phổi",
+      "lao phổi", "đờm xanh", "đờm vàng", "đờm đặc", "đờm có mủ", "đờm bọt hồng",
+      "ngứa họng", "rát họng", "mất tiếng", "khản tiếng", "hắt hơi liên tục",
+      "sổ mũi", "nghẹt mũi", "chảy nước mũi", "viêm họng hạt", "đau phổi",
+      "ngưng thở khi ngủ", "ngủ ngáy", "cảm cúm", "sốt siêu vi", "tràn dịch màng phổi"
+    ],
+    "summary": "Các vấn đề liên quan đến đường hô hấp trên (mũi, họng) và hô hấp dưới (phổi, phế quản). Cần phân biệt viêm họng thông thường và các bệnh lý phổi nghiêm trọng.",
+    "careTips": [
+      "Giữ ấm cơ thể, đặc biệt là vùng cổ và ngực.",
+      "Uống nước ấm, súc miệng nước muối sinh lý.",
+      "Đeo khẩu trang khi ra đường hoặc tiếp xúc khói bụi.",
+      "Theo dõi màu sắc đờm và nhiệt độ cơ thể."
+    ],
+    "warningSigns": [
+      "Khó thở dữ dội, tím tái môi và đầu ngón tay (Suy hô hấp).",
+      "Ho ra máu tươi hoặc đờm bọt hồng.",
+      "Sốt cao không hạ kèm đau tức ngực khi thở.",
+      "Thở rít, rút lõm lồng ngực."
+    ],
+    "recommendedSpecialties": ["Tai Mũi Họng", "Nội Khoa – Gan, Thận, Bao Tử"],
+    "urgencyLevel": "cần khám sớm",
+    "mappingNote": "Bệnh lý mũi họng ưu tiên Tai Mũi Họng; Bệnh lý phổi/phế quản ưu tiên Nội Khoa."
+  },
+  {
+    "category": "Tim mạch & Huyết áp",
+    "symptomKeywords": [
+      "đau tim", "đau ngực trái", "nhói tim", "thắt ngực", "đau vùng trước tim", "nặng ngực trái",
+      "hồi hộp", "đánh trống ngực", "tim đập nhanh", "tim đập chậm", "bỏ nhịp", "loạn nhịp tim",
+      "tăng huyết áp", "huyết áp cao", "tụt huyết áp", "huyết áp thấp",
+      "chóng mặt", "xây xẩm", "hoa mắt", "ngất xỉu", "choáng váng",
+      "vã mồ hôi lạnh", "khó thở khi nằm", "khó thở kịch phát về đêm",
+      "phù chân", "phù mắt cá chân", "tím môi", "đầu chi lạnh",
+      "đau lan ra tay trái", "đau lan lên hàm", "đau sau xương ức",
+      "mệt tim", "suy tim", "hở van tim", "thiếu máu cơ tim", "nhồi máu cơ tim",
+      "suy giãn tĩnh mạch", "nổi gân xanh"
+    ],
+    "summary": "Bệnh lý tim mạch và huyết áp. Đau thắt ngực và ngất xỉu là dấu hiệu nguy hiểm cần can thiệp ngay.",
+    "careTips": [
+      "Đo huyết áp hàng ngày, hạn chế ăn mặn.",
+      "Tránh xúc động mạnh, giảm căng thẳng.",
+      "Không tự ý ngưng thuốc huyết áp/tim mạch.",
+      "Nghỉ ngơi ngay khi thấy mệt hoặc hồi hộp."
+    ],
+    "warningSigns": [
+      "Đau thắt ngực trái lan lên vai/tay trái kéo dài > 15 phút (Nghi nhồi máu cơ tim).",
+      "Ngất xỉu đột ngột, mất ý thức.",
+      "Khó thở kịch phát về đêm, phải ngồi dậy mới thở được.",
+      "Huyết áp tăng quá cao (trên 180/110 mmHg)."
+    ],
+    "recommendedSpecialties": ["Tim mạch", "Nội Khoa – Gan, Thận, Bao Tử"],
+    "urgencyLevel": "khẩn cấp"
+  },
+  {
+    "category": "Tiêu hóa & Gan Mật",
+    "symptomKeywords": [
+      "đau bụng", "đau bao tử", "đau dạ dày", "đau thượng vị", "đau quanh rốn", "đau bụng dưới", "đau hạ sườn phải",
+      "ợ hơi", "ợ chua", "ợ nóng", "trào ngược", "nóng rát cổ họng",
+      "khó tiêu", "đầy bụng", "chướng hơi", "sôi bụng", "trung tiện nhiều",
+      "buồn nôn", "nôn mửa", "nôn ra máu", "nôn khan",
+      "tiêu chảy", "táo bón", "đi cầu ra máu", "phân đen", "phân sống", "phân có nhầy", "phân nát",
+      "kiết lỵ", "đau ruột thừa", "viêm đại tràng", "hội chứng ruột kích thích",
+      "trĩ", "lòi dom", "nứt kẽ hậu môn", "ngứa hậu môn",
+      "vàng da", "vàng mắt", "nước tiểu sẫm màu", "chán ăn", "sụt cân", "đắng miệng",
+      "gan nhiễm mỡ", "viêm gan", "xơ gan", "sỏi mật", "polyp túi mật"
+    ],
+    "summary": "Các vấn đề về dạ dày, đại tràng, gan, mật. Đau bụng dữ dội hoặc xuất huyết tiêu hóa là tình trạng cấp cứu.",
+    "careTips": [
+      "Ăn chín uống sôi, chia nhỏ bữa ăn.",
+      "Tránh thức ăn chua, cay, rượu bia, cà phê.",
+      "Không nằm ngay sau khi ăn.",
+      "Bổ sung men vi sinh và chất xơ."
+    ],
+    "warningSigns": [
+      "Nôn ra máu hoặc đi ngoài phân đen như nhựa đường (Xuất huyết tiêu hóa).",
+      "Đau bụng dữ dội, bụng cứng như gỗ (Thủng tạng rỗng/Viêm phúc mạc).",
+      "Đau quặn bụng kèm bí trung đại tiện (Tắc ruột).",
+      "Đau khu trú hố chậu phải (Viêm ruột thừa)."
+    ],
+    "recommendedSpecialties": ["Tiêu hóa", "Nội Khoa – Gan, Thận, Bao Tử", "Khoa Ngoại"],
+    "urgencyLevel": "cần khám sớm",
+    "mappingNote": "Bệnh lý nội khoa ưu tiên Tiêu hóa; Cần can thiệp phẫu thuật (ruột thừa, trĩ nặng) ưu tiên Khoa Ngoại."
+  },
+  {
+    "category": "Cơ Xương Khớp & Cột Sống",
+    "symptomKeywords": [
+      "đau lưng", "đau thắt lưng", "đau cột sống", "đau cổ vai gáy", "cứng cổ",
+      "thoái hóa khớp", "thoát vị đĩa đệm", "gai cột sống", "đau thần kinh tọa",
+      "tê bì chân tay", "tê đầu ngón tay", "mất cảm giác",
+      "đau khớp", "sưng khớp", "viêm khớp", "nóng khớp", "cứng khớp buổi sáng",
+      "gout", "gút", "tràn dịch khớp", "viêm đa khớp dạng thấp",
+      "loãng xương", "xương thủy tinh",
+      "chuột rút", "vọp bẻ", "căng cơ", "đau cơ", "nhược cơ",
+      "đau đầu gối", "lục cục khớp gối", "đau háng", "đau gót chân", "gai gót chân",
+      "bong gân", "trật khớp", "gãy xương", "rạn xương", "chấn thương phần mềm",
+      "mỏi gối", "chùn lưng", "đau nhức trong xương"
+    ],
+    "summary": "Bệnh lý xương khớp, cột sống và chấn thương vận động. Cần phân biệt đau do viêm và đau do chèn ép thần kinh.",
+    "careTips": [
+      "Tránh mang vác nặng, sai tư thế.",
+      "Bổ sung Canxi, Vitamin D.",
+      "Vận động nhẹ nhàng, không nằm/ngồi một chỗ quá lâu.",
+      "Chườm lạnh nếu sưng đau cấp tính."
+    ],
+    "warningSigns": [
+      "Sưng nóng đỏ đau dữ dội tại khớp (Gout cấp/Viêm khớp nhiễm khuẩn).",
+      "Mất kiểm soát đại tiểu tiện kèm đau lưng (Hội chứng chùm đuôi ngựa).",
+      "Biến dạng chi sau té ngã (Gãy xương/Trật khớp).",
+      "Yếu liệt tay chân đột ngột."
+    ],
+    "recommendedSpecialties": ["Cột sống – Xương khớp", "Khoa Ngoại"],
+    "urgencyLevel": "cần khám sớm",
+    "mappingNote": "Bệnh lý mãn tính ưu tiên Cột sống - Xương khớp; Chấn thương gãy xương ưu tiên Khoa Ngoại."
+  },
+  {
+    "category": "Thần kinh & Não bộ",
+    "symptomKeywords": [
+      "đau đầu", "đau nửa đầu", "nhức đầu", "đau đỉnh đầu", "đau sau gáy",
+      "chóng mặt", "hoa mắt", "tiền đình", "rối loạn tiền đình", "say tàu xe",
+      "mất ngủ", "khó ngủ", "ngủ không sâu", "mơ màng", "giảm trí nhớ", "hay quên", "lú lẫn",
+      "run tay chân", "parkinson", "căng thẳng thần kinh", "stress",
+      "tai biến", "đột quỵ", "nhồi máu não", "xuất huyết não",
+      "liệt mặt", "méo miệng", "sụp mi mắt",
+      "co giật", "động kinh", "ngất", "bất tỉnh",
+      "tê yếu nửa người", "yếu tay chân", "đi lại khó khăn",
+      "nói lắp", "nói đớ", "khó diễn đạt", "ù tai (do thần kinh)"
+    ],
+    "summary": "Các rối loạn hệ thần kinh trung ương và ngoại biên. Đặc biệt lưu ý dấu hiệu đột quỵ (FAST).",
+    "careTips": [
+      "Ngủ đủ giấc, tránh căng thẳng thần kinh.",
+      "Hạn chế chất kích thích (cà phê, rượu).",
+      "Thay đổi tư thế từ từ để tránh chóng mặt."
+    ],
+    "warningSigns": [
+      "Đau đầu dữ dội như sét đánh.",
+      "Yếu liệt một bên người, méo miệng, nói khó (Đột quỵ).",
+      "Co giật, sùi bọt mép.",
+      "Mất thị lực đột ngột."
+    ],
+    "recommendedSpecialties": ["Thần Kinh", "Nội Khoa – Gan, Thận, Bao Tử"],
+    "urgencyLevel": "khẩn cấp"
+  },
+  {
+    "category": "Thận & Tiết niệu (Nam khoa)",
+    "symptomKeywords": [
+      "tiểu buốt", "tiểu rắt", "tiểu ra máu", "tiểu đêm", "tiểu nhiều lần", "tiểu són",
+      "bí tiểu", "khó tiểu", "tia nước tiểu yếu", "tiểu ngắt quãng",
+      "nước tiểu đục", "nước tiểu có bọt", "nước tiểu mùi hôi", "tiểu mủ",
+      "đau lưng eo", "đau hông", "đau vùng thận",
+      "sỏi thận", "sỏi bàng quang", "sỏi niệu quản", "suy thận", "chạy thận", "thận ứ nước",
+      "yếu sinh lý", "xuất tinh sớm", "rối loạn cương dương", "liệt dương", "mãn dục nam",
+      "đau tinh hoàn", "sưng bìu", "xoắn tinh hoàn", "viêm mào tinh hoàn",
+      "hẹp bao quy đầu", "dài bao quy đầu", "viêm bao quy đầu",
+      "viêm đường tiết niệu", "lậu", "giang mai", "sùi mào gà (nam)",
+      "thận yếu", "đau bàng quang", "viêm tuyến tiền liệt", "phì đại tuyến tiền liệt"
+    ],
+    "summary": "Bệnh lý hệ tiết niệu (Thận, bàng quang) và sức khỏe nam giới. Đau quặn thận hoặc bí tiểu cấp là tình trạng cần xử lý sớm.",
+    "careTips": [
+      "Uống đủ 2-2.5 lít nước mỗi ngày.",
+      "Không nhịn tiểu.",
+      "Vệ sinh vùng kín sạch sẽ.",
+      "Quan hệ tình dục an toàn."
+    ],
+    "warningSigns": [
+      "Đau quặn dữ dội vùng thắt lưng lan xuống bẹn (Cơn đau quặn thận).",
+      "Tiểu ra máu tươi toàn bãi.",
+      "Bí tiểu hoàn toàn, bàng quang căng tức.",
+      "Đau tinh hoàn dữ dội một bên (Xoắn tinh hoàn)."
+    ],
+    "recommendedSpecialties": ["Nội Khoa – Gan, Thận, Bao Tử", "Khoa Ngoại"],
+    "urgencyLevel": "cần khám sớm",
+    "mappingNote": "Các vấn đề về thận/tiết niệu khám Nội Khoa; Các vấn đề cần phẫu thuật (sỏi to, bao quy đầu, xoắn tinh hoàn) khám Khoa Ngoại."
+  },
+  {
+    "category": "Sản Phụ khoa",
+    "symptomKeywords": [
+      "đau bụng kinh", "thống kinh", "trễ kinh", "chậm kinh", "mất kinh", "vô kinh",
+      "rong kinh", "cường kinh", "ra máu bất thường", "ra máu giữa chu kỳ",
+      "khí hư", "huyết trắng", "huyết trắng có mùi", "huyết trắng màu xanh/vàng",
+      "ngứa vùng kín", "nổi mụn vùng kín", "đau khi quan hệ", "khô âm đạo",
+      "viêm âm đạo", "viêm lộ tuyến", "viêm cổ tử cung", "polyp tử cung",
+      "u nang buồng trứng", "u xơ tử cung", "lạc nội mạc tử cung", "đa nang buồng trứng",
+      "có thai", "nghén", "dọa sảy thai", "sảy thai", "thai ngoài tử cung",
+      "đau bụng bầu", "ra nước ối", "rỉ ối", "động thai", "khám thai",
+      "đau vú", "tắc tia sữa", "viêm tuyến vú", "áp xe vú", "nứt cổ gà",
+      "sinh con", "mổ đẻ", "sa tử cung", "tiền mãn kinh", "bốc hỏa"
+    ],
+    "summary": "Sức khỏe sinh sản nữ giới và thai kỳ. Ra máu khi mang thai hoặc đau bụng dưới dữ dội là dấu hiệu nguy hiểm.",
+    "careTips": [
+      "Vệ sinh vùng kín đúng cách, không thụt rửa sâu.",
+      "Khám phụ khoa định kỳ.",
+      "Theo dõi chu kỳ kinh nguyệt."
+    ],
+    "warningSigns": [
+      "Ra máu âm đạo ồ ạt (Băng huyết).",
+      "Đau bụng dữ dội khi chậm kinh (Thai ngoài tử cung).",
+      "Ra nước ối/máu khi đang mang thai.",
+      "Sờ thấy khối u cứng ở vú."
+    ],
+    "recommendedSpecialties": ["Sản khoa"],
+    "urgencyLevel": "cần khám sớm"
+  },
+  {
+    "category": "Nhi Khoa (Bệnh trẻ em)",
+    "symptomKeywords": [
+      "trẻ sốt cao", "trẻ quấy khóc", "khóc dạ đề", "trẻ biếng ăn", "bỏ bú",
+      "suy dinh dưỡng", "còi xương", "chậm lớn", "chậm nói", "chậm đi",
+      "mọc răng", "sốt mọc răng", "tưa miệng", "nấm miệng",
+      "phát ban đỏ", "mẩn ngứa ở trẻ", "rôm sảy", "hăm tã", "chàm sữa",
+      "tay chân miệng", "sởi", "thủy đậu ở trẻ", "quai bị", "sốt xuất huyết",
+      "trẻ nôn trớ", "trào ngược dạ dày ở trẻ",
+      "tiêu chảy ở trẻ", "táo bón ở trẻ", "phân sống", "đi ngoài phân lỏng",
+      "ho gà", "viêm phế quản phổi", "viêm tiểu phế quản", "khò khè ở trẻ",
+      "sốt co giật", "vàng da sơ sinh", "đau bụng quanh rốn ở trẻ", "nhiễm giun sán", "giun kim"
+    ],
+    "summary": "Các bệnh lý thường gặp ở trẻ sơ sinh và trẻ nhỏ. Trẻ em diễn biến bệnh rất nhanh, cần theo dõi sát sao.",
+    "careTips": [
+      "Theo dõi nhiệt độ thường xuyên khi trẻ sốt.",
+      "Bù nước và điện giải nếu trẻ tiêu chảy/nôn.",
+      "Không tự ý dùng kháng sinh cho trẻ.",
+      "Tiêm chủng đầy đủ."
+    ],
+    "warningSigns": [
+      "Trẻ sốt cao không hạ, li bì hoặc co giật.",
+      "Trẻ bỏ bú, nôn tất cả mọi thứ.",
+      "Trẻ thở nhanh, rút lõm lồng ngực.",
+      "Trẻ đi ngoài phân có máu."
+    ],
+    "recommendedSpecialties": ["Nhi Khoa"],
+    "urgencyLevel": "cần khám sớm"
+  },
+  {
+    "category": "Da Liễu",
+    "symptomKeywords": [
+      "mụn", "mụn trứng cá", "mụn bọc", "mụn ẩn", "mụn đầu đen", "mụn mủ",
+      "ngứa da", "nổi mẩn đỏ", "kích ứng da", "dị ứng thời tiết", "dị ứng mỹ phẩm",
+      "mề đay", "phát ban", "viêm da cơ địa", "chàm", "eczema", "tổ đỉa",
+      "vảy nến", "nấm da", "hắc lào", "lang ben", "nấm móng", "nấm kẽ chân",
+      "rụng tóc", "hói đầu", "nấm da đầu", "gàu",
+      "thủy đậu", "zona thần kinh", "giời leo", "herpes",
+      "mụn cóc", "mụn thịt", "sùi mào gà", "lậu cầu",
+      "nốt ruồi lạ", "thay đổi sắc tố da", "nám da", "tàn nhang", "đồi mồi",
+      "sẹo lồi", "sẹo lõm", "sẹo rỗ", "vết thương lâu lành", "loét da",
+      "bạch biến", "da khô nứt nẻ", "nhọt", "áp xe da"
+    ],
+    "summary": "Các bệnh về da, tóc, móng và bệnh lây qua đường tình dục biểu hiện ngoài da.",
+    "careTips": [
+      "Giữ da sạch sẽ, khô thoáng.",
+      "Không tự ý nặn mụn hay bôi thuốc lạ.",
+      "Tránh cào gãi gây trầy xước nhiễm trùng.",
+      "Chống nắng kỹ khi ra đường."
+    ],
+    "warningSigns": [
+      "Phát ban lan rộng kèm khó thở (Sốc phản vệ).",
+      "Vết loét da lâu lành, chảy dịch hôi.",
+      "Nốt ruồi thay đổi màu sắc, kích thước nhanh.",
+      "Mụn nước mọc thành chùm đau rát (Zona/Herpes)."
+    ],
+    "recommendedSpecialties": ["Da liễu"],
+    "urgencyLevel": "cần theo dõi"
+  },
+  {
+    "category": "Mắt",
+    "symptomKeywords": [
+      "đau mắt", "đỏ mắt", "cộm mắt", "ngứa mắt", "chảy nước mắt sống", "ghèn mắt", "dử mắt",
+      "nhìn mờ", "mờ mắt", "nhìn đôi", "song thị", "quáng gà",
+      "cận thị", "viễn thị", "loạn thị", "lão thị", "nhược thị",
+      "đục thủy tinh thể", "cườm khô", "cườm nước", "tăng nhãn áp", "glaucoma", "thiên đầu thống",
+      "lẹo mắt", "chắp mắt", "viêm bờ mi", "viêm kết mạc", "đau mắt đỏ",
+      "mộng thịt", "khô mắt", "mỏi mắt", "sụp mí", "lé mắt", "lác mắt",
+      "ruồi bay trước mắt", "chớp sáng trong mắt", "xuất huyết dưới kết mạc"
+    ],
+    "summary": "Các bệnh lý về thị lực và mắt. Đau nhức mắt dữ dội hoặc nhìn mờ đột ngột là dấu hiệu nguy hiểm.",
+    "careTips": [
+      "Hạn chế nhìn màn hình điện thoại/máy tính lâu.",
+      "Đeo kính râm khi ra nắng.",
+      "Sử dụng nước mắt nhân tạo nếu khô mắt.",
+      "Không dụi mắt bằng tay bẩn."
+    ],
+    "warningSigns": [
+      "Mất thị lực đột ngột (Mù đột ngột).",
+      "Đau nhức mắt dữ dội kèm đau đầu, buồn nôn (Glaucoma/Thiên đầu thống).",
+      "Chấn thương, dị vật đâm vào mắt."
+    ],
+    "recommendedSpecialties": ["Mắt"],
+    "urgencyLevel": "khẩn cấp"
+  },
+  {
+    "category": "Tai Mũi Họng",
+    "symptomKeywords": [
+      "đau tai", "ù tai", "chảy mủ tai", "ngứa tai", "nặng tai",
+      "nghe kém", "điếc", "lãng tai", "viêm tai giữa", "viêm ống tai",
+      "ráy tai", "nút ráy tai",
+      "ngạt mũi", "sổ mũi", "chảy nước mũi", "hắt xì",
+      "viêm mũi dị ứng", "viêm xoang", "đau xoang trán", "polyp mũi", "vẹo vách ngăn",
+      "mất mùi", "giảm khứu giác", "chảy máu cam",
+      "đau họng", "rát họng", "viêm họng", "viêm amidan", "sưng amidan", "hốc mủ amidan",
+      "hóc xương", "nuốt vướng", "nuốt đau", "cảm giác có dị vật trong họng",
+      "khàn tiếng", "mất tiếng", "hạt xơ dây thanh", "viêm thanh quản",
+      "ngủ ngáy", "hơi thở có mùi hôi"
+    ],
+    "summary": "Bệnh lý vùng tai, mũi, họng và thanh quản.",
+    "careTips": [
+      "Vệ sinh mũi họng bằng nước muối sinh lý.",
+      "Giữ ấm vùng cổ.",
+      "Không ngoáy tai bằng vật cứng.",
+      "Đeo khẩu trang tránh bụi."
+    ],
+    "warningSigns": [
+      "Chảy máu cam ồ ạt không cầm.",
+      "Đau tai dữ dội kèm sốt cao, sưng sau tai.",
+      "Hóc dị vật đường thở/đường ăn.",
+      "Khàn tiếng kéo dài > 3 tuần (Nghi u thanh quản)."
+    ],
+    "recommendedSpecialties": ["Tai Mũi Họng"],
+    "urgencyLevel": "cần khám sớm"
+  }
+]

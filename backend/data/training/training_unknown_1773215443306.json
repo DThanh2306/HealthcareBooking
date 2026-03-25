@@ -1,0 +1,140 @@
+{
+  "id": "unknown_1773215443306",
+  "timestamp": "2026-03-11T07:50:43.306Z",
+  "input": {
+    "symptoms": "ho",
+    "age": "18",
+    "gender": "Nữ",
+    "duration": "1 ngày"
+  },
+  "systemOutput": {
+    "recommendations": {
+      "specialties": [
+        "Hô hấp",
+        "Nội khoa",
+        "Tai Mũi Họng",
+        "Sản Phụ khoa",
+        "Nội tiết"
+      ],
+      "doctors": [
+        {
+          "dr_id": 18,
+          "id": 18,
+          "name": "PGS.TS.BS. Nguyễn Triều Việt",
+          "specialty": "Tai Mũi Họng",
+          "hospitalName": "Bệnh viện Trường Đại Học Y Dược Cần Thơ",
+          "hospitalAddress": "179 Nguyễn Văn Cừ Nối Dài, phường Tân An, Ninh Kiều, Cần Thơ, Việt Nam",
+          "price": "150000",
+          "matchScore": 1,
+          "image": "/uploads/1766478811050-710478777.png",
+          "description": "BẰNG CẤP:\r\nBác sĩ đa khoa.\r\nTiến sĩ chuyên ngành Tai Mũi Họng (do Đại học y Dược TP Hồ Chí Minh cấp).\r\nKINH NGHIỆM:\r\nĐược đào tạo chuyên sâu về phẫu thuật Mũi xoang, Tai từ 1-3 tháng tại Đại học Hong Kong, Đại học Pittsburgh (Hoa kỳ)\r\nCó kinh nghiệm 20 năm điều trị và phẫu thuật chuyên sâu về Mũi xoang, vi phẫu Tai, Họng-Thanh quản, VA, Amidan..",
+          "distance": 3.5,
+          "distanceText": "3.5km",
+          "sameProvince": true,
+          "regionLevel": "same_province",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        },
+        {
+          "dr_id": 10,
+          "id": 10,
+          "name": "Ths BS. Trần Thị Oanh ",
+          "specialty": "Sản khoa",
+          "hospitalName": "Bệnh viện Phương Châu",
+          "hospitalAddress": "300 Nguyễn Văn Cừ nối dài, P. Tân An, Tp. Cần Thơ",
+          "price": "150000",
+          "matchScore": 0.589,
+          "image": "/uploads/1755211075971-191752372.png",
+          "description": "- Thạc sĩ Bác Sĩ Trần Thị Oanh đã hoàn thành chương trình Bác sĩ Chuyên khoa I tại Đại Học Y Dược Thành Phố Hồ Chí Minh và hiện đang là Bác Sĩ Sản Phụ Khoa tại Bệnh viện Hùng Vương.\r\n\r\n- Với hơn 5 năm kinh nghiệm, Bác sĩ Oanh chuyên môn trong việc khám, tư vấn, và điều trị các bệnh lý Sản Phụ Khoa như u xơ tử cung, u nang buồng trứng, kinh nguyệt không đều, đau bụng kinh.\r\n\r\n- Bác cũng có kinh nghiệm trong tư vấn về hiếm muộn, các biện pháp tránh thai, kế hoạch hóa gia đình, theo dõi thai kỳ, và dinh dưỡng cho thai phụ, cũng như chăm sóc sản phụ sau sinh.",
+          "distance": 4,
+          "distanceText": "4km",
+          "sameProvince": true,
+          "regionLevel": "same_province",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        }
+      ],
+      "hospitals": [
+        {
+          "h_id": 15,
+          "id": 15,
+          "name": "Bệnh viện Xuyên Á Vĩnh Long",
+          "address": "QL1A, Tân Ngãi, TP. Vĩnh Long",
+          "score": 0.85,
+          "phone": "(0270) 6250",
+          "description": "Bệnh viện đi vào hoạt động từ năm 2014, là một trong những cơ sở y tế chất lượng và thu hút hàng nghìn lượt bệnh nhân từ TP.HCM cũng như các tỉnh lân cận phía Tây Nam Bộ đến thăm khám.\r\n\r\nVới tổng diện tích xây dựng lên đến 72.000m2, Bệnh viện Xuyên Á được thiết kế hài hòa, tạo cho người bệnh cảm giác thoải mái. Bố cục các khoa, phòng chức năng và phòng xét nghiệm đều theo mô hình chuẩn mực nhằm tạo sự cân bằng giữa công năng và thẩm mỹ.\r\n\r\nHiện nay, bệnh viện có đầy đủ các chuyên khoa lâm sàng, cận lâm sàng: Khoa xét nghiệm, Nội tổng quát, Ngoại tiết niệu, Chấn thương chỉnh hình, Tai Mũi Họng, Nội hô hấp, Chẩn đoán hình ảnh, khoa Mắt, Trung tâm Nội soi, Xét nghiệm, ...\r\n\r\nHơn thế nữa, bệnh viện cũng sở hữu đội ngũ chuyên gia, y bác sĩ và điều dưỡng viên dày dặn kinh nghiệm sẵn sàng tư vấn, thăm khám với thái độ tận tình nhất.",
+          "distance": 30.1,
+          "distanceText": "30.1km",
+          "locationMethod": "gps",
+          "sameProvince": false,
+          "regionLevel": "same_region"
+        },
+        {
+          "h_id": 6,
+          "id": 6,
+          "name": "Bệnh viện Phương Châu",
+          "address": "300 Nguyễn Văn Cừ nối dài, P. Tân An, Tp. Cần Thơ",
+          "score": 0.755,
+          "phone": "1900 54 54 ",
+          "description": "Hệ thống chăm sóc sức khỏe của Tập đoàn Y tế Phương Châu bao gồm 4 Bệnh viện tại Việt Nam, tạo nên mạng lưới chăm sóc sức khỏe chuẩn mực tầm quốc tế, phụng sự cho cộng đồng và góp phần vào sự phát triển của y tế cả nước. Hệ thống y tế Phương Châu hoạt động đầy đủ và kết nối chặt chẽ các chuyên khoa trong tầm soát sớm, chẩn đoán, điều trị bệnh: Sản-Phụ khoa, Nhi-Sơ sinh, Hiếm muộn, Nam khoa, Đa khoa, Thẩm mỹ,... và không ngừng hoàn thiện “sứ mệnh chăm sóc sức khỏe sinh sản toàn diện” cùng các gia đình.",
+          "distance": 4,
+          "distanceText": "4km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 14,
+          "id": 14,
+          "name": "Bệnh viện Hoàn Mỹ Cửu Long",
+          "address": "Lô 20 Võ Nguyên Giáp, Phú Thứ, Cái Răng, Cần Thơ, Việt Nam",
+          "score": 0.681,
+          "phone": "0292 3917 3",
+          "description": "Bệnh viện Hoàn Mỹ Cửu Long Được thành lập vào năm 2007, Bệnh viện Hoàn Mỹ Cửu Long phục vụ nhu cầu chăm sóc sức khỏe cho cộng đồng dân cư khu vực Đồng bằng sông Cửu Long và các tỉnh lân cận. Cung cấp dịch vụ chăm sóc sức khỏe chất lượng cao với chi phí hợp lý, đội ngũ nhân viên Bệnh viện Hoàn Mỹ Cửu Long luôn tận tâm vì sức khỏe và hạnh phúc của bệnh nhân; với văn hóa của chúng tôi gắn liền với phương châm “Tận tâm chăm sóc”.",
+          "distance": 3.7,
+          "distanceText": "3.7km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 8,
+          "id": 8,
+          "name": "Bệnh viện Quân Y Cần Thơ",
+          "address": "Số 01, Đường 30/4, Phường Ninh Kiều, Thành phố Cần Thơ",
+          "score": 0.396,
+          "phone": "84-4-382636",
+          "description": "Bệnh viện Y học Cổ truyền Trung ương tiền thân là Viện Nghiên cứu Đông Y được chính thức thành lập năm 1957. Trải qua quá trình xây dựng và trưởng thành, cơ sở vật chất của bệnh viện ngày càng được đầu tư mở rộng, nâng cấp khang trang, hiện đại;  Trình độ đội ngũ y bác sĩ ngày càng được lớn mạnh cả về số lượng và chất lượng. Đặc biệt trong tiến trình hội nhập y tế quốc tế hiện nay, song hành với việc tham gia hội nhập với nền y học thế giới nói chung và nền y học cổ truyền của các nước trong khu vực và thế giới nói riêng, Bệnh viện Y học cổ truyền Trung ương vẫn luôn từng bước hiện đại hóa trên cơ sở giữ vững và phát huy bản sắc của y học cổ truyền Việt Nam; kết hợp tinh hoa của hai nền y học cổ truyền và y học hiện đại, góp phần chăm sóc sức khỏe  cộng  đồng ngày một tốt hơn.",
+          "distance": 0.9,
+          "distanceText": "0.9km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 3,
+          "id": 3,
+          "name": "Bệnh viện Trường Đại Học Y Dược Cần Thơ",
+          "address": "179 Nguyễn Văn Cừ Nối Dài, phường Tân An, Ninh Kiều, Cần Thơ, Việt Nam",
+          "score": 0.383,
+          "phone": "023244234",
+          "description": "null",
+          "distance": 3.5,
+          "distanceText": "3.5km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        }
+      ],
+      "noDoctorsFound": false,
+      "enhancedAnalysis": {}
+    },
+    "confidence": 0.8
+  },
+  "feedback": {
+    "helpful": null,
+    "accurate": null,
+    "rating": null
+  },
+  "groundTruth": null
+}

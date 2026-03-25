@@ -1,0 +1,89 @@
+{
+  "id": "unknown_1766857348889",
+  "timestamp": "2025-12-27T17:42:28.889Z",
+  "input": {
+    "symptoms": "Đau lưng mãn tính tăng khi bê nặng",
+    "age": "55",
+    "gender": "Nam",
+    "duration": "3 tuần"
+  },
+  "systemOutput": {
+    "recommendations": {
+      "specialties": [
+        "Nam khoa"
+      ],
+      "doctors": [],
+      "hospitals": [
+        {
+          "h_id": 18,
+          "id": 18,
+          "name": "Bệnh viện Đa khoa Bạc Liêu",
+          "address": "Số 06 Nguyễn Huệ, Phường Bạc Liêu, Tỉnh Cà Mau",
+          "score": 0.195,
+          "phone": "0291.382228",
+          "description": "Bệnh viện Đa khoa Bạc Liêu là bệnh viện đa khoa trung tâm tuyến tỉnh của tỉnh Bạc Liêu, đóng vai trò quan trọng trong khám, chẩn đoán và điều trị đa dạng các bệnh cho người dân địa phương và khu vực lân cận. Trực thuộc Sở Y tế tỉnh Bạc Liêu, đơn vị hiện là Bệnh viện Đa khoa hạng II, có đội ngũ y bác sĩ chuyên môn cao, kinh nghiệm và đầy đủ các chuyên khoa cơ bản đáp ứng nhu cầu khám chữa bệnh ngày càng tăng của nhân dân. Bệnh viện tọa lạc tại Số 06 Nguyễn Huệ, Thành phố Bạc Liêu và được đầu tư trang thiết bị y tế hiện đại, phục vụ công tác chẩn đoán và điều trị từ nội – ngoại khoa đến các dịch vụ hỗ trợ chuyên sâu. Trong lịch sử phát triển, bệnh viện đã được tỉnh quan tâm đầu tư nâng cấp, mở rộng quy mô giường bệnh và hệ thống xét nghiệm nhằm nâng cao chất lượng dịch vụ y tế cho cộng đồng. Ngoài ra, bệnh viện còn tích cực tổ chức các hoạt động khám chữa bệnh từ thiện và tham gia các chương trình chăm sóc sức khỏe cộng đồng, góp phần quan trọng vào việc bảo vệ và nâng cao sức khỏe cho người dân tỉnh Bạc Liêu.",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "different_region"
+        },
+        {
+          "h_id": 19,
+          "id": 19,
+          "name": "Bệnh viện Tâm Thần Tiền Giang",
+          "address": "ấp Trung A, xã Long Định, Tỉnh Đồng Tháp",
+          "score": 0.183,
+          "phone": "02733834437",
+          "description": "Bệnh viện Tâm thần Tiền Giang là cơ sở y tế chuyên khoa tâm thần tuyến tỉnh, giữ vai trò quan trọng trong công tác chăm sóc, bảo vệ và nâng cao sức khỏe tâm thần cho người dân trên địa bàn tỉnh Tiền Giang. Bệnh viện có chức năng khám, chẩn đoán, điều trị, quản lý và phục hồi chức năng cho người bệnh mắc các rối loạn tâm thần và tâm lý, đồng thời tham gia công tác phòng ngừa, tư vấn và giáo dục sức khỏe tâm thần cộng đồng. Với đội ngũ y bác sĩ và nhân viên y tế có chuyên môn, giàu kinh nghiệm cùng hệ thống khoa phòng phù hợp, bệnh viện đáp ứng nhu cầu điều trị nội trú và ngoại trú cho bệnh nhân. Ngoài nhiệm vụ khám chữa bệnh, Bệnh viện Tâm thần Tiền Giang còn tham gia đào tạo, chỉ đạo chuyên môn cho tuyến dưới và góp phần thực hiện các chương trình y tế nhằm nâng cao chất lượng chăm sóc sức khỏe tâm thần cho nhân dân trong khu vực.",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "different_region"
+        },
+        {
+          "h_id": 11,
+          "id": 11,
+          "name": "Bệnh viện Mắt TP.HCM",
+          "address": "Số 280 Điện Biên Phủ, phường 7, quận 3, TP.HCM",
+          "score": 0.17,
+          "phone": "19002115",
+          "description": "Được thành lập vào năm 1978, Bệnh viện Mắt TP. HCM hay còn được biết đến với cái tên Bệnh viện Mắt Điện Biên Phủ, là bệnh viện chuyên khoa hạng nhất, với chất lượng khám chữa bệnh hàng đầu tại khu vực miền Nam.\r\n\r\nLà địa chỉ khám nhãn khoa uy tín, chất lượng, bệnh viện luôn thu hút lượng người dân từ khắp nơi đến khám và điều trị đông đảo. Bệnh viện hiện đang tiếp nhận và điều trị các bệnh lý về mắt, đồng thời phát triển đào tạo, nâng cao trình độ chuyên môn của đội ngũ cán bộ y tế, tham gia hợp tác nghiên cứu khoa học một cách sôi nổi.\r\n\r\nDịch vụ khám khám chữa bệnh tại Bệnh viện Mắt TP. HCM luôn được người dân đánh giá cao, với bàn tay và khối óc của những chuyên gia, bác sĩ hàng đầu trong lĩnh vực Nhãn khoa, mang đến hiệu quả điều trị tốt nhất cho người bệnh. Là bệnh viện công trực thuộc Sở Y tế, Bệnh viện Mắt TP. HCM sở hữu 25 chuyên khoa khác nhau, đáp ứng nhu cầu khám chữa bệnh đa dạng cho cộng đồng.",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "different_region"
+        },
+        {
+          "h_id": 17,
+          "id": 17,
+          "name": "Bệnh viện Đa Khoa Cà Mau",
+          "address": "Số 16 Hải Thượng Lãn Ông, K6, P6, TP Cà Mau, Cà Mau",
+          "score": 0.156,
+          "phone": "02903.83101",
+          "description": "Bệnh viện Đa khoa Cà Mau là bệnh viện đa khoa trung tâm tuyến tỉnh của tỉnh Cà Mau, đóng vai trò then chốt trong công tác chăm sóc và bảo vệ sức khỏe người dân địa phương. Được đặt tại Số 16 – Hải Thượng Lãn Ông, Phường 6, TP. Cà Mau, bệnh viện tiền thân là Bệnh viện Minh Hải (phục vụ hai tỉnh Cà Mau – Bạc Liêu) và từ năm 1997 phát triển độc lập phục vụ riêng tỉnh Cà Mau sau khi hai tỉnh tách ra. Qua nhiều năm, đơn vị đã không ngừng sửa chữa, nâng cấp cơ sở vật chất và mở rộng các khoa, phòng theo đúng quy định của Bộ Y tế nhằm đáp ứng nhu cầu khám chữa bệnh đa dạng cho người dân; cơ sở hiện tại được đánh giá khang trang và sạch đẹp hơn kể từ khi di dời về cơ sở mới vào tháng 4/2009. Với đội ngũ y bác sĩ có trình độ, bệnh viện thực hiện khám, chẩn đoán và điều trị nhiều chuyên khoa cùng các dịch vụ y tế tổng hợp, góp phần giảm tải cho các tuyến trên và hỗ trợ tuyến dưới trong công tác y tế. Đồng thời, tỉnh Cà Mau cũng đang đầu tư xây dựng dự án bệnh viện mới quy mô lớn (khoảng 1.200 giường) nhằm nâng cao năng lực khám chữa bệnh hiện đại hơn trong tương lai",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "different_region"
+        },
+        {
+          "h_id": 5,
+          "id": 5,
+          "name": "Bệnh viện Việt Đức",
+          "address": "Số 16 Phủ Doãn, Hàng Bông, Hoàn Kiếm, Hà Nội",
+          "score": 0.138,
+          "phone": "1900 1902",
+          "description": "Bệnh viện Việt Đức là một trong 5 bệnh viện tuyến Trung ương, hạng đặc biệt của Việt Nam. Bệnh viện có lịch sử trên 100 năm, bề dày truyền thống danh tiếng, là cái nôi của ngành ngoại khoa Việt Nam gắn liền với những thành tựu Y học quan trọng của đất nước. \r\n\r\nViệt Đức là địa chỉ uy tín hàng đầu về ngoại khoa, tiến hành khám bệnh, chữa bệnh và thực hiện các kỹ thuật chụp chiếu, xét nghiệm, thăm dò chức năng cơ bản và chuyên sâu hàng ngày cho người dân. \r\n\r\nBệnh viện có đội ngũ y bác sĩ hùng hậu, nhiều người kiêm là cán bộ giảng dạy tại Đại học Y khoa Hà Nội hoặc Khoa Y Dược - Đại học Quốc gia Hà Nội. Trong số họ nhiều người là chuyên gia đầu ngành và bác sĩ giàu kinh nghiệm ở các chuyên khoa khác nhau. ",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "different_region"
+        }
+      ],
+      "noDoctorsFound": true,
+      "enhancedAnalysis": {}
+    },
+    "confidence": 0.8
+  },
+  "feedback": {
+    "helpful": null,
+    "accurate": null,
+    "rating": null
+  },
+  "groundTruth": null
+}

@@ -1,0 +1,140 @@
+{
+  "id": "unknown_1773215590083",
+  "timestamp": "2026-03-11T07:53:10.083Z",
+  "input": {
+    "symptoms": "ho",
+    "age": "18",
+    "gender": "Nữ",
+    "duration": "2 ngày"
+  },
+  "systemOutput": {
+    "recommendations": {
+      "specialties": [
+        "Hô hấp",
+        "Nội khoa",
+        "Tai Mũi Họng",
+        "Sản Phụ khoa",
+        "Nội tiết"
+      ],
+      "doctors": [
+        {
+          "dr_id": 15,
+          "id": 15,
+          "name": "TS. BS Trần Anh Bích",
+          "specialty": "Tai Mũi Họng",
+          "hospitalName": "Bệnh viện Chợ Rẫy",
+          "hospitalAddress": "201B Nguyễn Chí Thanh, Quận 5, TP.HCM",
+          "price": "150000",
+          "matchScore": 0.982,
+          "image": "/uploads/1766478006351-807810305.png",
+          "description": "20 năm kinh nghiệm trong lĩnh vực TAI MŨI HỌNG",
+          "distance": 7.9,
+          "distanceText": "7.9km",
+          "sameProvince": true,
+          "regionLevel": "same_province",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        },
+        {
+          "dr_id": 12,
+          "id": 12,
+          "name": "Bác sĩ CK2 Nguyễn Văn Minh",
+          "specialty": "Tai Mũi Họng",
+          "hospitalName": "Bệnh viện Nhi Đồng 1",
+          "hospitalAddress": "341 Sư Vạn Hạnh, Phường Vườn Lài, TP.Hồ Chí Minh (Địa chỉ cũ: 341 Sư Vạn Hạnh, Phường 10, Quận 10, TP.HCM)",
+          "price": "150000",
+          "matchScore": 0.973,
+          "image": "/uploads/1755212562436-979916083.webp",
+          "description": "Phòng khám Tai Mũi Họng BS.CKII Nguyễn Văn Minh chuyên chẩn đoán và điều trị các bệnh lý liên quan đến vùng Tai Mũi Họng\r\n\r\nBác Sĩ chuyên khoa có trình độ chuyên môn cao cùng với kỹ thuật chẩn đoán, điều trị tiên tiến sẽ đáp ứng đầy đủ các nhu cầu của người bệnh Tai Mũi Họng.\r\n\r\nPhòng khám Bs Nguyễn Văn Minh có những trang thiết bị máy móc hiện đại nhằm hỗ trợ trong việc thăm khám và điều trị, không gian thoáng mát sạch sẽ.",
+          "distance": 0,
+          "distanceText": "0km",
+          "sameProvince": true,
+          "regionLevel": "same_province",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        }
+      ],
+      "hospitals": [
+        {
+          "h_id": 1,
+          "id": 1,
+          "name": "Bệnh viện Chợ Rẫy",
+          "address": "201B Nguyễn Chí Thanh, Quận 5, TP.HCM",
+          "score": 0.736,
+          "phone": "0949843322",
+          "description": "Bệnh viện Chợ Rẫy với lịch sử thành lập trên 100 năm, là bệnh viện hạng đặc biệt tuyến Trung ương lớn nhất cả nước với trên 1.800 giường và trên 3.000 kỹ thuật y tế được thực hiện. Hàng ngày Bệnh viện Chợ Rẫy tiếp nhận trung bình 6,000 -  8,000 bệnh nhân đến khám.\r\n\r\nBệnh viện Chợ Rẫy là bệnh viện đa khoa hoàn chỉnh, xếp hạng đặc biệt, tuyến kỹ thuật sau cùng các tỉnh thành phía Nam, trực thuộc Bộ Y tế. Thế mạnh nổi bật tại Bệnh viện Chợ Rẫy là sự kết hợp giữa các chuyên khoa mang lại hiệu quả tốt nhất trong việc chẩn đoán và điều trị cho người bệnh.",
+          "distance": 7.9,
+          "distanceText": "7.9km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 13,
+          "id": 13,
+          "name": "Bệnh viện Da Liễu TP.HCM",
+          "address": "02 Nguyễn Thông, Phường Xuân Hòa, TP.Hồ Chí Minh (Địa chỉ cũ: 2 Nguyễn Thông, Phường Võ Thị Sáu, Quận 3, TP.HCM)",
+          "score": 0.735,
+          "phone": "19002115",
+          "description": "Với uy tín và chất lượng phục vụ hàng đầu trong khu vực, Bệnh viện Da Liễu TP.HCM đã thu hút nhiều bệnh nhân có các vấn đề về da tới khám và điều trị tại đây. Bệnh viện chuyên tư vấn và điều trị nhiều bệnh lý da phổ biến như bệnh phong, chàm, nấm da cùng với các dịch vụ thẩm mỹ da.\r\n\r\nChức năng, nhiệm vụ được giao\r\nNhiệm vụ và chức năng của Bệnh viện Da Liễu TP.HCM bao gồm:\r\n\r\nCấp cứu, khám bệnh và chữa bệnh: Bệnh viện cung cấp dịch vụ cấp cứu, khám bệnh và chữa bệnh đa dạng về các bệnh về da.\r\nĐào tạo cán bộ y tế: Bệnh viện tham gia đào tạo cán bộ y tế trong lĩnh vực da liễu, cung cấp kiến thức và kỹ năng cho sinh viên và bác sĩ đa khoa, bác sĩ chuyên khoa.\r\nNghiên cứu khoa học về y tế: Bệnh viện thường xuyên tiến hành nghiên cứu về các vấn đề y học và áp dụng các kết quả nghiên cứu vào thực hành lâm sàng.\r\nChỉ đạo tuyến trước về chuyên môn kỹ thuật: Bệnh viện tham gia vào việc chỉ đạo tuyến trước về các chương trình phòng chống bệnh Phong và các bệnh lây truyền qua đường tình dục, đảm bảo rằng khu vực này nhận được sự quan tâm chuyên môn.\r\nPhòng bệnh: Bệnh viện thực hiện các hoạt động truyền thông và giáo dục sức khỏe cộng đồng để tăng cường nhận thức về các vấn đề liên quan đến da và phòng ngừa bệnh tật.\r\nHợp tác quốc tế: Bệnh viện hợp tác với các tổ chức quốc tế để cùng nhau nghiên cứu và phát triển lĩnh vực da và thẩm mỹ, tham gia vào các hội nghị và trao đổi kiến thức với đồng nghiệp quốc tế.\r\nCơ cấu tổ chức\r\nBan Giám Đốc: Bệnh viện có một Giám Đốc và hai Phó Giám Đốc, đảm bảo quản lý toàn diện.\r\nPhòng chức năng: Có 10 phòng chức năng, bao gồm Tổ chức Cán bộ, Hành chính Quản trị, Kế hoạch Tổng hợp, Điều dưỡng, Vật tư - Trang thiết bị Y tế, Tài chính Kế toán, Chỉ đạo tuyến, Công nghệ thông tin, Công tác xã hội, và Quản lý chất lượng.\r\nCó 10 khoa chuyên khoa với 120 giường điều trị nội trú, bao gồm Khoa khám bệnh, Khoa Thẩm mỹ da, Khoa Lâm sàng 1 (bệnh nhân nữ và nhi), Khoa Lâm sàng 2 (bệnh nhân nam), Khoa Lâm sàng 3 (đặc biệt cho bệnh nhân nhiễm HIV/AIDS có bệnh da và bệnh nhân mắc bệnh lây nhiễm qua đường tình dục), Khoa Ngoại - Phong, Khoa Xét nghiệm, Khoa Dược, Khoa Kiểm soát nhiễm khuẩn, Khoa Dinh dưỡng.\r\nBệnh viện cũng phối hợp với nhiều cơ sở y tế, trường đại học và tổ chức quốc tế trong việc đào tạo, nghiên cứu và chuyển giao kiến thức.\r\nVề nhân lực, trình độ:\r\nTính đến năm 2018, Bệnh Viện Da Liễu TP.HCM có tổng số 307 cán bộ nhân viên, trong đó 207 là nữ. Trình độ của nhân viên đa dạng, bao gồm sau đại học, đại học, cao đẳng, trung cấp và các trình độ khác. Bên cạnh đó, có cán bộ viên chức của Bộ môn Da Liễu của Trường Đại học Y Dược TP.HCM và Bộ môn Da Liễu của Trường Đại học Y khoa Phạm Ngọc Thạch TP. HCM cũng làm việc tại bệnh viện.\r\n\r\nMục tiêu chất lượng\r\nHỘI NHẬP THẾ GIỚI, NÂNG TẦM NGÀNH DA\r\n\r\nBệnh Viện Da Liễu TP.HCM đã đặt ra sứ mệnh \"Dẫn đầu trong việc chăm sóc và bảo vệ sức khỏe da liễu\". Bệnh viện cam kết cung cấp dịch vụ y tế chất lượng cao và không ngừng cải thiện để đáp ứng nhu cầu của bệnh nhân với các dịch vụ chính:\r\n\r\nKhám bệnh và điều trị các bệnh lý da liễu.\r\nPhẫu thuật thẩm mỹ da.\r\nChẩn đoán và điều trị các bệnh lây qua đường tình dục.\r\nChăm sóc da liễu cho bệnh nhân nhiễm HIV/AIDS.\r\nCác dịch vụ về da liễu thẩm mỹ như trị mụn, làm trắng da, điều trị nám da, và nhiều dịch vụ khác.\r\nLịch sử hình thành Bệnh viện Da Liễu TP.HCM\r\nBệnh Viện Da Liễu TP.Hồ Chí Minh có một lịch sử phát triển và hình thành quan trọng trong lĩnh vực chăm sóc sức khỏe da liễu tại thành phố và khu vực phía Nam Việt Nam. Dưới đây là mô tả chi tiết về lịch sử hình thành của bệnh viện:\r\n\r\nTrước 1975:\r\n\r\nTrước năm 1975, công tác chăm sóc da liễu phía Nam được thực hiện bởi ba đơn vị chính:\r\nBộ môn Da liễu của Trường Đại học Y Khoa Sài Gòn và Khoa Da Bệnh viện Bình Dân: Đây là nơi chủ yếu thực hiện công tác khám và điều trị bệnh da.\r\nTrung Tâm Quốc Gia Bài Trừ Hoa Liễu (BTBHL): Được thành lập từ năm 1965, BTBHL chuyên điều trị bệnh liên quan đến gái mãi dâm.\r\nChương trình Bài Trừ Bệnh Hansen (BTBH): Bao gồm nhiều cơ sở điều trị, đã được quản lý bởi Nha Y Tế Công Cộng, Bộ Y Tế Sài Gòn.\r\nTháng 8 năm 1975:\r\n\r\nBệnh Viện Da Liễu được thành lập chính thức, kế thừa vai trò của Trung Tâm Quốc Gia Bài Trừ Hoa Liễu với 100 giường bệnh.\r\nTháng 10 năm 1975:\r\n\r\nChương Trình Bài Trừ Bệnh Hansen (Phong) được sát nhập vào Bệnh Viện Da Liễu.\r\nTháng 6 năm 1976:\r\n\r\nTrạm Da Liễu TP.Hồ Chí Minh được thành lập, chịu trách nhiệm giáo dục sức khỏe, điều trị bệnh da liễu cho nhân dân TP.Hồ Chí Minh, đào tạo cán bộ chuyên khoa da liễu, và nghiên cứu khoa học.\r\nTháng 9 năm 1978:\r\n\r\nBộ Y Tế quyết định chuyển quản lý Bệnh Viện Da Liễu từ Bộ Y Tế về Sở Y Tế TP.Hồ Chí Minh, đồng thời bệnh viện được giao trách nhiệm chuyên khoa da liễu cho các tỉnh và thành phố phía Nam.\r\nTháng 2 năm 1979:\r\n\r\nTrạm Da Liễu TP.Hồ Chí Minh được hợp nhất với Bệnh Viện Da Liễu, đồng thời hợp nhất tất cả các đơn vị và công việc chuyên khoa da liễu tại TP.Hồ Chí Minh.\r\nBệnh Viện Da Liễu TP.Hồ Chí Minh đã không ngừng phát triển và mở rộng mạng lưới chăm sóc da liễu, đảm bảo cung cấp dịch vụ y tế chất lượng cho người dân TP.Hồ Chí Minh và khu vực phía Nam. Công sức của cán bộ, nhân viên, và sự quan tâm từ các cơ quan chính quyền đã góp phần quan trọng vào sự phát triển này.",
+          "distance": 8.1,
+          "distanceText": "8.1km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 12,
+          "id": 12,
+          "name": "Bệnh viện Nhi Đồng 1",
+          "address": "341 Sư Vạn Hạnh, Phường Vườn Lài, TP.Hồ Chí Minh (Địa chỉ cũ: 341 Sư Vạn Hạnh, Phường 10, Quận 10, TP.HCM)",
+          "score": 0.7,
+          "phone": "19002115",
+          "description": "Trải qua nhiều thập kỷ, Bệnh viện Nhi Đồng 1 đã mạnh mẽ phát triển và để lại dấu ấn đặc biệt trong lĩnh vực y tế nhi khoa. Với sự cam kết vượt trội trong việc chăm sóc sức khỏe trẻ em và lòng tận tâm của đội ngũ y bác sĩ, bệnh viện đã xây dựng niềm tin mạnh mẽ từ cộng đồng. Chính nhờ điều này, Bệnh viện Nhi Đồng 1 ngày càng khẳng định vị thế là địa chỉ đáng tin cậy cho việc khám và điều trị bệnh cho trẻ em không chỉ tại TP.HCM mà còn ở các khu vực lân cận.",
+          "distance": 0,
+          "distanceText": "0km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 16,
+          "id": 16,
+          "name": "Bệnh viện Bệnh Nhiệt đới",
+          "address": "764 Võ Văn Kiệt, Phường Chợ Quán, TP. Hồ Chí Minh",
+          "score": 0.652,
+          "phone": "675756",
+          "description": "Bệnh viện Nhiệt đới là cơ sở y tế chuyên khoa đầu ngành trong lĩnh vực phòng ngừa, chẩn đoán và điều trị các bệnh truyền nhiễm, bệnh nhiệt đới và dịch bệnh nguy hiểm. Bệnh viện giữ vai trò quan trọng trong công tác bảo vệ sức khỏe cộng đồng, đặc biệt trong việc tiếp nhận và điều trị các bệnh như sốt xuất huyết, tay chân miệng, viêm gan siêu vi, lao, HIV/AIDS và các bệnh truyền nhiễm mới nổi. Với đội ngũ y bác sĩ có trình độ chuyên môn cao, giàu kinh nghiệm cùng hệ thống trang thiết bị y tế ngày càng hiện đại, bệnh viện không chỉ thực hiện tốt nhiệm vụ khám chữa bệnh mà còn là trung tâm nghiên cứu khoa học, đào tạo và chỉ đạo tuyến dưới trong công tác phòng chống dịch. Bệnh viện Nhiệt đới đóng vai trò nòng cốt trong việc phát hiện sớm, kiểm soát và khống chế dịch bệnh, góp phần quan trọng vào sự nghiệp chăm sóc và bảo vệ sức khỏe nhân dân.",
+          "distance": 9.5,
+          "distanceText": "9.5km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 11,
+          "id": 11,
+          "name": "Bệnh viện Mắt TP.HCM",
+          "address": "Số 280 Điện Biên Phủ, phường 7, quận 3, TP.HCM",
+          "score": 0.618,
+          "phone": "19002115",
+          "description": "Được thành lập vào năm 1978, Bệnh viện Mắt TP. HCM hay còn được biết đến với cái tên Bệnh viện Mắt Điện Biên Phủ, là bệnh viện chuyên khoa hạng nhất, với chất lượng khám chữa bệnh hàng đầu tại khu vực miền Nam.\r\n\r\nLà địa chỉ khám nhãn khoa uy tín, chất lượng, bệnh viện luôn thu hút lượng người dân từ khắp nơi đến khám và điều trị đông đảo. Bệnh viện hiện đang tiếp nhận và điều trị các bệnh lý về mắt, đồng thời phát triển đào tạo, nâng cao trình độ chuyên môn của đội ngũ cán bộ y tế, tham gia hợp tác nghiên cứu khoa học một cách sôi nổi.\r\n\r\nDịch vụ khám khám chữa bệnh tại Bệnh viện Mắt TP. HCM luôn được người dân đánh giá cao, với bàn tay và khối óc của những chuyên gia, bác sĩ hàng đầu trong lĩnh vực Nhãn khoa, mang đến hiệu quả điều trị tốt nhất cho người bệnh. Là bệnh viện công trực thuộc Sở Y tế, Bệnh viện Mắt TP. HCM sở hữu 25 chuyên khoa khác nhau, đáp ứng nhu cầu khám chữa bệnh đa dạng cho cộng đồng.",
+          "distance": 16.5,
+          "distanceText": "16.5km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        }
+      ],
+      "noDoctorsFound": false,
+      "enhancedAnalysis": {}
+    },
+    "confidence": 0.8
+  },
+  "feedback": {
+    "helpful": null,
+    "accurate": null,
+    "rating": null
+  },
+  "groundTruth": null
+}
