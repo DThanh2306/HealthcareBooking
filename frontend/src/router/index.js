@@ -108,7 +108,6 @@ const routes = [
         name: 'adminoverview',
         component: () => import('@/views/AdminOverview.vue')
       },
-
       {
         path: 'doctors',
         name: 'admindoctor',

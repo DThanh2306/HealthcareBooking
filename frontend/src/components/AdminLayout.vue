@@ -33,6 +33,10 @@
             <li>
               <router-link to="/admin/users">👨🏻‍💻 Quản lý người dùng</router-link>
             </li>
+
+             <li>
+              <router-link to="/admin/workflow">QUY TRINH DONG</router-link>
+            </li>
           </ul>
         </div>
       </nav>
