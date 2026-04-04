@@ -67,30 +67,7 @@ const db = require("./config/db");
 
 (async function ensureSchema() {
   try {
-    const [c1] = await db.query("SHOW COLUMNS FROM patients LIKE 'proposed_appointment_date'");
-    if (c1.length === 0) {
-      await db.query("ALTER TABLE patients ADD COLUMN proposed_appointment_date DATE NULL");
-    }
-
-    const [c2] = await db.query("SHOW COLUMNS FROM patients LIKE 'proposed_time_slot'");
-    if (c2.length === 0) {
-      await db.query("ALTER TABLE patients ADD COLUMN proposed_time_slot VARCHAR(100) NULL");
-    }
-
-    const [c3] = await db.query("SHOW COLUMNS FROM patients LIKE 'reschedule_reason'");
-    if (c3.length === 0) {
-      await db.query("ALTER TABLE patients ADD COLUMN reschedule_reason VARCHAR(255) NULL");
-    }
-
-    const [c4] = await db.query("SHOW COLUMNS FROM patients LIKE 'reschedule_status'");
-    if (c4.length === 0) {
-      await db.query("ALTER TABLE patients ADD COLUMN reschedule_status ENUM('none','requested','accepted','declined') NOT NULL DEFAULT 'none'");
-    }
-
-    const [c5] = await db.query("SHOW COLUMNS FROM patients LIKE 'reschedule_requested_by'");
-    if (c5.length === 0) {
-      await db.query("ALTER TABLE patients ADD COLUMN reschedule_requested_by ENUM('doctor','patient') NULL");
-    }
+    // Schema migrations removed - new table structure (patient_profiles, appointments, appointment_reschedules) is used
 
     // Ensure doctor_notifications table exists (already create if not exists)
     await db.query(`CREATE TABLE IF NOT EXISTS doctor_notifications (

@@ -5,7 +5,7 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '', // nếu bạn chưa đặt mật khẩu XAMPP
-  database: 'bookingmedical',
+  database: 'bookingmedical2',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

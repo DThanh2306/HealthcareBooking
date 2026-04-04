@@ -194,13 +194,13 @@ exports.getOverviewStats = async (req, res) => {
   try {
     const db = require('../config/db');
     const [[{ totalAppointments }]] = await db.query(
-      "SELECT COUNT(*) AS totalAppointments FROM patients"
+      "SELECT COUNT(*) AS totalAppointments FROM appointments"
     );
     const [[{ approvedAppointments }]] = await db.query(
-      "SELECT COUNT(*) AS approvedAppointments FROM patients WHERE status = 'approved'"
+      "SELECT COUNT(*) AS approvedAppointments FROM appointments WHERE status = 'approved'"
     );
     const [[{ rejectedAppointments }]] = await db.query(
-      "SELECT COUNT(*) AS rejectedAppointments FROM patients WHERE status = 'rejected'"
+      "SELECT COUNT(*) AS rejectedAppointments FROM appointments WHERE status = 'rejected'"
     );
     const [[{ totalDoctors }]] = await db.query(
       "SELECT COUNT(*) AS totalDoctors FROM doctors"
@@ -211,9 +211,9 @@ exports.getOverviewStats = async (req, res) => {
     // Tổng doanh thu dựa trên cuộc hẹn đã duyệt và giá khám của bác sĩ
     const [[{ totalRevenue }]] = await db.query(
         `SELECT COALESCE(SUM(CAST(REPLACE(REPLACE(d.dr_price, '.', ''), ',', '') AS UNSIGNED)), 0) AS totalRevenue
-         FROM patients p
-         JOIN doctors d ON p.dr_id = d.dr_id
-         WHERE p.status = 'approved'`
+         FROM appointments a
+         JOIN doctors d ON a.dr_id = d.dr_id
+         WHERE a.status = 'approved'`
       );
 
     res.json({
@@ -239,10 +239,10 @@ exports.getRevenueBreakdown = async (req, res) => {
     const db = require('../config/db');
     const { mode = 'doctor', date_from, date_to } = req.query;
 
-    const where = ["p.status = 'approved'"];
+    const where = ["a.status = 'approved'"];
     const params = [];
-    if (date_from) { where.push('p.appointment_date >= ?'); params.push(date_from); }
-    if (date_to) { where.push('p.appointment_date <= ?'); params.push(date_to); }
+    if (date_from) { where.push('a.appointment_date >= ?'); params.push(date_from); }
+    if (date_to) { where.push('a.appointment_date <= ?'); params.push(date_to); }
     const whereSql = `WHERE ${where.join(' AND ')}`;
 
     if (mode === 'hospital') {
@@ -251,9 +251,9 @@ exports.getRevenueBreakdown = async (req, res) => {
              h.h_id AS id,
              COALESCE(h.h_name, 'Chưa gán bệnh viện') AS name,
              COALESCE(SUM(CAST(REPLACE(REPLACE(d.dr_price, '.', ''), ',', '') AS UNSIGNED)), 0) AS revenue,
-             COUNT(p.id_appointment) AS approvedCount
-           FROM patients p
-           JOIN doctors d ON p.dr_id = d.dr_id
+             COUNT(a.id_appointment) AS approvedCount
+           FROM appointments a
+           JOIN doctors d ON a.dr_id = d.dr_id
            LEFT JOIN hospitals h ON d.h_id = h.h_id
            ${whereSql}
            GROUP BY h.h_id, h.h_name
@@ -269,9 +269,9 @@ exports.getRevenueBreakdown = async (req, res) => {
            d.dr_id AS id,
            d.dr_name AS name,
            COALESCE(SUM(CAST(REPLACE(REPLACE(d.dr_price, '.', ''), ',', '') AS UNSIGNED)), 0) AS revenue,
-           COUNT(p.id_appointment) AS approvedCount
-         FROM patients p
-         JOIN doctors d ON p.dr_id = d.dr_id
+           COUNT(a.id_appointment) AS approvedCount
+         FROM appointments a
+         JOIN doctors d ON a.dr_id = d.dr_id
          ${whereSql}
          GROUP BY d.dr_id, d.dr_name
          ORDER BY revenue DESC`,
@@ -306,12 +306,12 @@ exports.getMonthlyTrends = async (req, res) => {
 
     // Get totals per month
     const [appointmentRows] = await db.query(
-      `SELECT DATE_FORMAT(p.appointment_date, '%Y-%m') AS ym,
+      `SELECT DATE_FORMAT(a.appointment_date, '%Y-%m') AS ym,
               COUNT(*) AS total,
-              SUM(CASE WHEN p.status = 'approved' THEN 1 ELSE 0 END) AS approved,
-              SUM(CASE WHEN p.status = 'rejected' THEN 1 ELSE 0 END) AS rejected
-       FROM patients p
-       WHERE p.appointment_date >= ?
+              SUM(CASE WHEN a.status = 'approved' THEN 1 ELSE 0 END) AS approved,
+              SUM(CASE WHEN a.status = 'rejected' THEN 1 ELSE 0 END) AS rejected
+       FROM appointments a
+       WHERE a.appointment_date >= ?
        GROUP BY ym
        ORDER BY ym ASC`,
       [startDate]
@@ -319,11 +319,11 @@ exports.getMonthlyTrends = async (req, res) => {
 
     // Get revenue per month (approved only)
     const [revenueRows] = await db.query(
-      `SELECT DATE_FORMAT(p.appointment_date, '%Y-%m') AS ym,
+      `SELECT DATE_FORMAT(a.appointment_date, '%Y-%m') AS ym,
               COALESCE(SUM(CAST(REPLACE(REPLACE(d.dr_price, '.', ''), ',', '') AS UNSIGNED)), 0) AS revenue
-       FROM patients p
-       JOIN doctors d ON p.dr_id = d.dr_id
-       WHERE p.status = 'approved' AND p.appointment_date >= ?
+       FROM appointments a
+       JOIN doctors d ON a.dr_id = d.dr_id
+       WHERE a.status = 'approved' AND a.appointment_date >= ?
        GROUP BY ym
        ORDER BY ym ASC`,
       [startDate]
@@ -378,12 +378,12 @@ exports.getRevenueDetails = async (req, res) => {
     if (!id) return res.status(400).json({ error: 'Thiếu tham số id' });
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
-    const where = ["p.status = 'approved'"];
+    const where = ["a.status = 'approved'"];
     const params = [];
-    if (date_from) { where.push('p.appointment_date >= ?'); params.push(date_from); }
-    if (date_to) { where.push('p.appointment_date <= ?'); params.push(date_to); }
+    if (date_from) { where.push('a.appointment_date >= ?'); params.push(date_from); }
+    if (date_to) { where.push('a.appointment_date <= ?'); params.push(date_to); }
 
-    let baseJoin = 'JOIN doctors d ON p.dr_id = d.dr_id LEFT JOIN hospitals h ON d.h_id = h.h_id';
+    let baseJoin = 'JOIN doctors d ON a.dr_id = d.dr_id LEFT JOIN hospitals h ON d.h_id = h.h_id LEFT JOIN patient_profiles pp ON a.id_patient = pp.id_patient';
     if (mode === 'doctor') {
       where.push('d.dr_id = ?'); params.push(id);
     } else {
@@ -393,33 +393,36 @@ exports.getRevenueDetails = async (req, res) => {
 
     const listSql = `
       SELECT 
-        p.id_appointment,
-        p.id_u,
-        p.p_name,
-        p.appointment_date,
-        p.time_slot,
+        a.id_appointment,
+        a.id_patient,
+        pp.p_name,
+        pp.phone,
+        pp.email,
+        a.appointment_date,
+        a.time_slot,
+        a.reason,
         d.dr_id,
         d.dr_name,
         d.dr_price,
         CAST(REPLACE(REPLACE(d.dr_price, '.', ''), ',', '') AS UNSIGNED) AS numeric_dr_price,
         d.h_id,
         h.h_name
-      FROM patients p
+      FROM appointments a
       ${baseJoin}
       ${whereSql}
-      ORDER BY p.appointment_date DESC, p.time_slot DESC
+      ORDER BY a.appointment_date DESC, a.time_slot DESC
       LIMIT ? OFFSET ?`;
     const listParams = [...params, parseInt(limit), offset];
 
     const countSql = `
       SELECT COUNT(*) AS total
-      FROM patients p
+      FROM appointments a
       ${baseJoin}
       ${whereSql}`;
 
     const revenueSql = `
       SELECT COALESCE(SUM(CAST(REPLACE(REPLACE(d.dr_price, '.', ''), ',', '') AS UNSIGNED)), 0) AS revenue
-      FROM patients p
+      FROM appointments a
       ${baseJoin}
       ${whereSql}`;
 
