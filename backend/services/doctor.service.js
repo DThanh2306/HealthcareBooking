@@ -247,7 +247,7 @@ async function getBookedSlots(doctorId, date) {
   try {
     const sql = `
       SELECT time_slot 
-      FROM patients 
+      FROM appointments 
       WHERE dr_id = ? AND appointment_date = ? AND status IN ('pending', 'approved')
     `;
     const [results] = await db.query(sql, [doctorId, date]);
