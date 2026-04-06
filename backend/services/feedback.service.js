@@ -473,7 +473,11 @@ class FeedbackService {
   async getDoctorFeedbacks(doctorId, page = 1, limit = 10) {
     try {
       const db = require("../config/db");
-      const offset = (page - 1) * limit;
+      
+      // Ensure page and limit are valid numbers
+      const validPage = parseInt(page) || 1;
+      const validLimit = parseInt(limit) || 10;
+      const offset = (validPage - 1) * validLimit;
 
       // Lấy danh sách đánh giá
       const [ratings] = await db.execute(
@@ -489,8 +493,8 @@ class FeedbackService {
          LEFT JOIN users u ON dr.id_u = u.id_u 
          WHERE dr.dr_id = ? 
          ORDER BY dr.created_at DESC 
-         LIMIT ? OFFSET ?`,
-        [doctorId, limit, offset]
+         LIMIT ${validLimit} OFFSET ${offset}`,
+        [doctorId]
       );
 
       // Lấy tổng số đánh giá
@@ -532,7 +536,11 @@ class FeedbackService {
   async getHospitalFeedbacks(hospitalId, page = 1, limit = 10) {
     try {
       const db = require("../config/db");
-      const offset = (page - 1) * limit;
+      
+      // Ensure page and limit are valid numbers
+      const validPage = parseInt(page) || 1;
+      const validLimit = parseInt(limit) || 10;
+      const offset = (validPage - 1) * validLimit;
 
       // Lấy danh sách đánh giá
       const [ratings] = await db.execute(
@@ -548,8 +556,8 @@ class FeedbackService {
          LEFT JOIN users u ON hr.id_u = u.id_u 
          WHERE hr.h_id = ? 
          ORDER BY hr.created_at DESC 
-         LIMIT ? OFFSET ?`,
-        [hospitalId, limit, offset]
+         LIMIT ${validLimit} OFFSET ${offset}`,
+        [hospitalId]
       );
 
       // Lấy tổng số đánh giá

@@ -72,9 +72,9 @@ Analyze what the patient is doing:
 
 1. ANSWER_QUESTION: Trả lời đúng câu hỏi hiện tại (phải hợp lý với câu hỏi)
 2. SYMPTOM_MENTIONED: Người dùng nói về triệu chứng bệnh (ngay cả khi đang hỏi thông tin khác)
-3. ASK_PRICE: Hỏi về giá khám, chi phí
-4. ASK_SCHEDULE: Hỏi về lịch khám, thời gian
-5. ASK_GENERAL: Hỏi thông tin chung về bệnh viện, bác sĩ
+3. ASK_PRICE: Hỏi về giá khám, chi phí (ngay cả khi đang hỏi thông tin khác)
+4. ASK_SCHEDULE: Hỏi về lịch khám, thời gian (ngay cả khi đang hỏi thông tin khác)
+5. ASK_GENERAL: Hỏi thông tin chung về bệnh viện, bác sĩ (ngay cả khi đang hỏi thông tin khác)
 6. OFF_TOPIC: Câu hỏi HOÀN TOÀN không liên quan (thời tiết, chính trị, thể thao, v.v.)
 7. EMERGENCY: Tình huống khẩn cấp cần xử lý ngay
 
