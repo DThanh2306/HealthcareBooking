@@ -233,7 +233,7 @@ onMounted(() => {
   text-align: center;
   margin-bottom: 50px;
   padding: 50px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 20px;
   color: white;
 }
@@ -365,7 +365,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.8));
+  background: linear-gradient(135deg, rgba(255, 131, 226, 0.8) 0%, rgba(128, 195, 246, 0.8) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
   display: flex;
@@ -547,7 +547,7 @@ onMounted(() => {
 .stat-number {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: #335283;
   margin-bottom: 8px;
 }
 

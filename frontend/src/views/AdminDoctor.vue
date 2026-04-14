@@ -259,7 +259,7 @@ onMounted(async () => {
   min-height: 100vh;
 }
 .hero {
-  background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 16px;
   color: #fff;
   padding: 28px 24px;

@@ -64,7 +64,7 @@ exports.updateStatus = async (req, res) => {
             <b>Chuyên khoa:</b> ${appt.specialty || 'Đang cập nhật'}<br/>
             <b>Bệnh viện:</b> ${appt.dr_h_name}<br/>
             <b>Ngày khám:</b> ${appt.appointment_date}<br/>
-            <b>Giờ khám:</b> ${appt.time_slot}<br/>
+            <b>Số thứ tự:</b> ${appt.queue_number}<br/>
             <b>Lý do khám:</b> ${appt.reason || ''}`
         };
         try {
@@ -146,13 +146,13 @@ exports.getDoctorAppointments = async (req, res) => {
 // Doctor or patient proposes reschedule
 exports.proposeReschedule = async (req, res) => {
   const { id } = req.params;
-  const { proposed_date, proposed_time_slot, reason } = req.body || {};
+  const { proposed_date, reason } = req.body || {};
   try {
-    if (!proposed_date || !proposed_time_slot) {
-      return res.status(400).json({ error: "Thiếu ngày/giờ đề xuất" });
+    if (!proposed_date) {
+      return res.status(400).json({ error: "Thiếu ngày đề xuất" });
     }
     const requested_by = req.user?.role === "doctor" ? "doctor" : "patient";
-    await patientService.proposeReschedule(id, proposed_date, proposed_time_slot, reason, requested_by);
+    await patientService.proposeReschedule(id, proposed_date, reason, requested_by);
 
     // Send email to the opposite party about proposed change
     const appt = await appointmentService.getAppointmentById(id);
@@ -173,8 +173,8 @@ exports.proposeReschedule = async (req, res) => {
             `<h3>Bác sĩ đề xuất thay đổi lịch khám</h3>
              <b>Bác sĩ:</b> ${appt.dr_name} (${appt.specialty || 'Đang cập nhật'})<br/>
              <b>Bệnh viện:</b> ${appt.dr_h_name}<br/>
-             <b>Lịch cũ:</b> ${appt.appointment_date} - ${appt.time_slot}<br/>
-             <b>Lịch đề xuất:</b> ${proposed_date} - ${proposed_time_slot}<br/>
+             <b>Lịch cũ:</b> ${appt.appointment_date} - Số ${appt.queue_number}<br/>
+             <b>Lịch đề xuất:</b> ${proposed_date} (số thứ tự sẽ được cấp khi chấp nhận)<br/>
              <b>Lý do:</b> ${reason || 'Không cung cấp'}<br/>
              <p>Vui lòng vào trang Lịch khám để chấp nhận hoặc từ chối.</p>`
         };
@@ -189,8 +189,8 @@ exports.proposeReschedule = async (req, res) => {
           html:
             `<h3>Bệnh nhân đề xuất thay đổi lịch khám</h3>
              <b>Bệnh nhân:</b> ${appt.p_name}<br/>
-             <b>Lịch cũ:</b> ${appt.appointment_date} - ${appt.time_slot}<br/>
-             <b>Lịch đề xuất:</b> ${proposed_date} - ${proposed_time_slot}<br/>
+             <b>Lịch cũ:</b> ${appt.appointment_date} - Số ${appt.queue_number}<br/>
+             <b>Lịch đề xuất:</b> ${proposed_date} (số thứ tự sẽ được cấp khi chấp nhận)<br/>
              <b>Lý do:</b> ${reason || 'Không cung cấp'}<br/>
              <p>Vui lòng vào trang Lịch bác sĩ để chấp nhận hoặc từ chối.</p>`
         };

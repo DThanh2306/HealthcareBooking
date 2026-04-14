@@ -171,7 +171,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #437ef7;
+    background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: #fff;
   font-size: 1rem;
   font-weight: 500;
@@ -184,7 +184,7 @@ h2 {
   cursor: pointer;
 }
 .add-btn:hover {
-  background: #295dc1;
+    background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 .add-btn .icon {
   font-size: 18px;

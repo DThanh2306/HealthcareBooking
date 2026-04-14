@@ -432,7 +432,8 @@ const handleRegister = async () => {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
+
 }
 
 /* Background Animation */
@@ -514,7 +515,7 @@ const handleRegister = async () => {
 
 /* Left Side - Branding */
 .auth-branding {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
   display: flex;
   align-items: center;
   justify-content: center;

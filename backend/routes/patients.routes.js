@@ -75,7 +75,7 @@ router.get("/patients", patientController.getAllPatients);
  *               - phone
  *               - email
  *               - appointment_date
- *               - time_slot
+ *               - queue_number
  *             properties:
  *               id_u:
  *                 type: integer
@@ -106,8 +106,8 @@ router.get("/patients", patientController.getAllPatients);
  *               appointment_date:
  *                 type: string
  *                 format: date
- *               time_slot:
- *                 type: string
+ *               queue_number:
+ *                 type: integer
  *     responses:
  *       201:
  *         description: Tạo thành công

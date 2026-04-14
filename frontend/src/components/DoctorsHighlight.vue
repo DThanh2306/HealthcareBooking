@@ -124,7 +124,7 @@ onMounted(fetchDoctors);
 .header-icon {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -150,7 +150,7 @@ onMounted(fetchDoctors);
 }
 
 .view-more-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -228,7 +228,7 @@ onMounted(fetchDoctors);
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(255, 131, 226, 0.8) 0%, rgba(128, 195, 246, 0.8) 100%);
   display: flex;
   align-items: center;
   justify-content: center;

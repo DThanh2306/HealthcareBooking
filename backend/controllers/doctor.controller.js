@@ -271,14 +271,9 @@ exports.getAvailableSlots = async (req, res) => {
     // Lấy các time slots của bác sĩ áp dụng cho ngày đã chọn
     const applicableSlots = await scheduleService.getSchedulesByDoctorIdAndDate(dr_id, date);
     
-    // Lấy các slot đã được đặt trong ngày
-    const bookedSlots = await doctorService.getBookedSlots(dr_id, date);
-    
-    // Lọc ra các slot còn trống
-    const bookedTimeSlots = bookedSlots.map(slot => slot.time_slot);
-    const availableSlots = applicableSlots
-      .map(slot => slot.time_slot)
-      .filter(timeSlot => !bookedTimeSlots.includes(timeSlot));
+    // Với hệ thống queue, không cần lọc slot đã đặt, vì queue không giới hạn
+    // Chỉ cần trả về các time slots từ schedules
+    const availableSlots = applicableSlots.map(slot => slot.time_slot);
     
     // Sắp xếp theo giờ bắt đầu
     availableSlots.sort((a, b) => {

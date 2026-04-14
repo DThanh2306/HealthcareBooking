@@ -399,7 +399,7 @@ exports.getRevenueDetails = async (req, res) => {
         pp.phone,
         pp.email,
         a.appointment_date,
-        a.time_slot,
+        a.queue_number,
         a.reason,
         d.dr_id,
         d.dr_name,
@@ -410,7 +410,7 @@ exports.getRevenueDetails = async (req, res) => {
       FROM appointments a
       ${baseJoin}
       ${whereSql}
-      ORDER BY a.appointment_date DESC, a.time_slot DESC
+      ORDER BY a.appointment_date DESC, a.queue_number DESC
       LIMIT ? OFFSET ?`;
     const listParams = [...params, parseInt(limit), offset];
 

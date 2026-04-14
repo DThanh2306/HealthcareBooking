@@ -7,21 +7,19 @@ const db = require("../config/db");
 exports.proposeReschedule = async (
   id_appointment,
   proposed_date,
-  proposed_time_slot,
   reason,
   requested_by
 ) => {
   const sql = `
     INSERT INTO appointment_reschedules (
-      id_appointment, proposed_date, proposed_time_slot, 
+      id_appointment, proposed_date,
       reschedule_reason, reschedule_status, requested_by
-    ) VALUES (?, ?, ?, ?, 'requested', ?)
+    ) VALUES (?, ?, ?, 'requested', ?)
   `;
   
   await db.query(sql, [
     id_appointment,
     proposed_date,
-    proposed_time_slot,
     reason || null,
     requested_by
   ]);
@@ -45,7 +43,7 @@ exports.getActiveReschedule = async (id_appointment) => {
 
 /**
  * Accept a reschedule request
- * Updates the appointment with new date/time and marks reschedule as accepted
+ * Updates the appointment with new date and assigns new queue number
  */
 exports.acceptReschedule = async (id_appointment) => {
   // Get the active reschedule request
@@ -55,12 +53,19 @@ exports.acceptReschedule = async (id_appointment) => {
     throw new Error("No active reschedule request found");
   }
   
-  // Update appointment with new date/time
+  // Get appointment to find dr_id
+  const appointmentService = require("./appointment.service");
+  const appointment = await appointmentService.getAppointmentById(id_appointment);
+  
+  // Get next queue number for the new date
+  const newQueueNumber = await appointmentService.getNextQueueNumber(appointment.dr_id, reschedule.proposed_date);
+  
+  // Update appointment with new date and queue number
   await db.query(
     `UPDATE appointments 
-     SET appointment_date = ?, time_slot = ?
+     SET appointment_date = ?, queue_number = ?
      WHERE id_appointment = ?`,
-    [reschedule.proposed_date, reschedule.proposed_time_slot, id_appointment]
+    [reschedule.proposed_date, newQueueNumber, id_appointment]
   );
   
   // Mark reschedule as accepted

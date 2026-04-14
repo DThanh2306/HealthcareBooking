@@ -98,8 +98,8 @@ components:
         appointment_date:
           type: string
           format: date
-        time_slot:
-          type: string
+        queue_number:
+          type: integer
         status:
           type: string
           enum: [pending, approved, rejected]
@@ -107,8 +107,6 @@ components:
         proposed_appointment_date:
           type: string
           format: date
-        proposed_time_slot:
-          type: string
         reschedule_reason:
           type: string
         reschedule_status:

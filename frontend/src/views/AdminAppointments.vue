@@ -83,8 +83,8 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="Giờ khám"
-        prop="time_slot"
+        label="Số thứ tự"
+        prop="queue_number"
         width="100"
       />
       <el-table-column
@@ -158,22 +158,13 @@
           value-format="YYYY-MM-DD"
           style="width:100%"
         />
-        <div style="display:flex; gap:8px;">
-          <el-time-picker
-            v-model="rescheduleForm.start_time"
-            placeholder="Bắt đầu"
-            format="HH:mm"
-            value-format="HH:mm"
-            style="flex:1"
-          />
-          <el-time-picker
-            v-model="rescheduleForm.end_time"
-            placeholder="Kết thúc"
-            format="HH:mm"
-            value-format="HH:mm"
-            style="flex:1"
-          />
-        </div>
+        <el-alert
+          title="Lưu ý"
+          type="info"
+          description="Khi bệnh nhân chấp nhận đề xuất, họ sẽ được cấp số thứ tự mới cho ngày đã chọn."
+          show-icon
+          :closable="false"
+        />
         <el-input
           v-model="rescheduleForm.reason"
           type="textarea"
@@ -259,20 +250,15 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Ngày khám" required>
-          <el-date-picker v-model="createForm.appointment_date" type="date" placeholder="Chọn ngày" format="DD/MM/YYYY" value-format="YYYY-MM-DD" style="width:100%" :disabled-date="disablePastDate" @change="onCreateDoctorOrDateChange"/>
+          <el-date-picker v-model="createForm.appointment_date" type="date" placeholder="Chọn ngày" format="DD/MM/YYYY" value-format="YYYY-MM-DD" style="width:100%" :disabled-date="disablePastDate"/>
         </el-form-item>
-        <el-form-item label="Khung giờ" required>
-          <el-select
-            v-model="createForm.time_slot"
-            placeholder="Chọn khung giờ"
-            style="width:100%"
-            :disabled="!createForm.dr_id || !createForm.appointment_date || availableSlots.length === 0"
-          >
-            <el-option v-for="s in availableSlots" :key="s" :label="s" :value="s"/>
-          </el-select>
-          <div v-if="createSlotsLoading" style="margin-top:8px; color:#666;">Đang tải khung giờ...</div>
-          <div v-if="!createSlotsLoading && createForm.dr_id && createForm.appointment_date && availableSlots.length === 0" style="margin-top:8px; color:#d97706;">Không còn slot trống cho ngày này</div>
-        </el-form-item>
+        <el-alert
+          title="Lưu ý"
+          type="info"
+          description="Hệ thống sẽ tự động cấp số thứ tự cho bệnh nhân khi tạo lịch."
+          show-icon
+          :closable="false"
+        />
 
         <el-divider>Thông tin bệnh nhân</el-divider>
         <el-form-item label="Họ tên" required>
@@ -343,7 +329,6 @@ const createFormRef = ref();
 const createForm = ref({
   dr_id: null,
   appointment_date: '',
-  time_slot: '',
   p_name: '',
   gender: '',
   phone: '',
@@ -362,8 +347,6 @@ const filterDate = ref(null);
 const rescheduleDialogVisible = ref(false);
 const rescheduleForm = ref({
   proposed_date: '',
-  start_time: '',
-  end_time: '',
   reason: ''
 });
 let currentRescheduleId = null;
@@ -461,15 +444,13 @@ const openReschedule = (row) => {
 };
 
 const submitReschedule = async () => {
-  if (!currentRescheduleId || !rescheduleForm.value.proposed_date || !rescheduleForm.value.start_time || !rescheduleForm.value.end_time) {
-    ElMessage.error('Vui lòng chọn ngày và khung giờ đề xuất');
+  if (!currentRescheduleId || !rescheduleForm.value.proposed_date) {
+    ElMessage.error('Vui lòng chọn ngày đề xuất');
     return;
   }
   try {
-    const proposed_time_slot = `${rescheduleForm.value.start_time} - ${rescheduleForm.value.end_time}`;
     await axios.post(`http://localhost:3000/api/patients/${currentRescheduleId}/reschedule`, {
       proposed_date: rescheduleForm.value.proposed_date,
-      proposed_time_slot,
       reason: rescheduleForm.value.reason
     });
     ElMessage.success('Đã gửi đề xuất đổi lịch tới bệnh nhân');
@@ -521,7 +502,6 @@ const resetCreateForm = () => {
   createForm.value = {
     dr_id: null,
     appointment_date: '',
-    time_slot: '',
     p_name: '',
     gender: '',
     phone: '',
@@ -529,7 +509,6 @@ const resetCreateForm = () => {
     dob: '',
     reason: ''
   };
-  availableSlots.value = [];
 };
 
 const onCreateDoctorOrDateChange = async () => {
@@ -560,7 +539,6 @@ const onCreateDoctorOrDateChange = async () => {
 const createRules = {
   dr_id: [{ required: true, message: 'Vui lòng chọn bác sĩ', trigger: 'change' }],
   appointment_date: [{ required: true, message: 'Vui lòng chọn ngày khám', trigger: 'change' }],
-  time_slot: [{ required: true, message: 'Vui lòng chọn khung giờ', trigger: 'change' }],
   p_name: [
     { required: true, message: 'Vui lòng nhập họ tên bệnh nhân', trigger: 'blur' },
     { min: 2, message: 'Họ tên quá ngắn', trigger: 'blur' }
@@ -574,8 +552,8 @@ const createRules = {
 };
 
 const submitCreate = async () => {
-  if (!createForm.value.dr_id || !createForm.value.appointment_date || !createForm.value.time_slot || !createForm.value.p_name) {
-    ElMessage.error('Vui lòng nhập đủ: Bác sĩ, Ngày, Khung giờ, Họ tên');
+  if (!createForm.value.dr_id || !createForm.value.appointment_date || !createForm.value.p_name) {
+    ElMessage.error('Vui lòng nhập đủ: Bác sĩ, Ngày, Họ tên');
     return;
   }
   try {
@@ -590,8 +568,7 @@ const submitCreate = async () => {
       dob: createForm.value.dob || null,
       tinh: null, quan: null, xa: null, to: null,
       reason: createForm.value.reason || null,
-      appointment_date: createForm.value.appointment_date,
-      time_slot: createForm.value.time_slot
+      appointment_date: createForm.value.appointment_date
     };
     await axios.post('http://localhost:3000/api/patients', payload);
     ElMessage.success('Tạo lịch thành công');

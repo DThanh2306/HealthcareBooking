@@ -1,3 +1,4 @@
+
 <template>
   <div class="doctor-profile">
     <!-- Header Section -->
@@ -29,7 +30,15 @@
     <div class="doctor-content">
       <!-- Schedule -->
       <div class="schedule-area">
-        <div class="date-select">
+       
+        <div class="schedule-section">
+          <div class="schedule-label">
+            <svg class="label-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 2v2M17 2v2M3 8h18M5 22h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span> LỊCH KHÁM</span>
+          </div>
+           <div class="date-select">
           <select
             v-model="selectedDate"
             class="date-dropdown"
@@ -43,13 +52,7 @@
             </option>
           </select>
         </div>
-        <div class="schedule-section">
-          <div class="schedule-label">
-            <svg class="label-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M7 2v2M17 2v2M3 8h18M5 22h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z" fill="none" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <span> LỊCH KHÁM</span>
-          </div>
+          
           <!-- Show selected day info for new format doctors -->
           <div v-if="selectedDate && doctor?.schedulesByDay" class="selected-day-info">
             <p class="day-display">
@@ -100,20 +103,14 @@
               <span>{{ doctor.h_address }}</span>
             </div>
           </div>
-          <div class="promotion">
-            🎫 Chương trình khuyến mại
-            <span class="see-details">Xem chi tiết</span>
-          </div>
+          
           <div class="fee">
             GIÁ KHÁM:
             <span class="price">
               {{ doctor?.dr_price ? `${doctor.dr_price.toLocaleString()}₫ ` : 'Chưa cập nhật' }}
             </span>
-            <span class="see-details">Xem chi tiết</span>
           </div>
-          <div class="insurance">
-            LOẠI BẢO HIỂM ÁP DỤNG. <span class="see-details">Xem chi tiết</span>
-          </div>
+          
         </div>
       </div>
     </div>
@@ -559,7 +556,7 @@ body {
 
 .booking-btn {
   margin-top: 6px;
-  background: #297fff;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: #fff;
   border: none;
   border-radius: 7px;
@@ -570,7 +567,8 @@ body {
   width: 100px;
 }
 .booking-btn:hover {
-  background: #1551a1;
+    background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
+
 }
 .doctor-content {
   display: flex;
@@ -593,7 +591,7 @@ body {
   gap: 6px;
 }
 .date-link {
-  color: #297fff;
+  color: #082146;
   cursor: pointer;
 }
 .dropdown-icon {
@@ -615,6 +613,7 @@ body {
   color: #1e3a8a;
   margin-bottom: 10px;
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
 }
@@ -657,7 +656,7 @@ body {
   font-size: 1rem;
   border: none;
   background: transparent;
-  color: #297fff;
+  color: #1e3a8a;
   font-weight: 600;
   cursor: pointer;
 }
@@ -772,7 +771,7 @@ hr {
 }
 
 .rate-doctor-btn {
-  background: #3b82f6;
+   background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -783,7 +782,7 @@ hr {
 }
 
 .rate-doctor-btn:hover {
-  background: #2563eb;
+  color: #1e3a8a;
 }
 
 .rating-actions {

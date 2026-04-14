@@ -24,7 +24,7 @@ exports.findOrCreatePatientProfile = async (data) => {
         tinh: data.tinh,
         quan: data.quan,
         xa: data.xa,
-        to_thon: data.to
+        to_thon: data.to_thon
       };
       
       await db.query(
@@ -57,7 +57,7 @@ exports.findOrCreatePatientProfile = async (data) => {
     data.tinh,
     data.quan,
     data.xa,
-    data.to
+    data.to_thon
   ];
   
   const [result] = await db.query(sql, values);
@@ -83,6 +83,7 @@ exports.getPatientProfilesByUserId = async (id_u) => {
     "SELECT * FROM patient_profiles WHERE id_u = ?",
     [id_u]
   );
+  console.log("Patient profiles for user", id_u, rows);
   return rows;
 };
 

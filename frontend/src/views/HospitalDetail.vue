@@ -872,7 +872,7 @@ onMounted(async () => {
 
 .notification-icon-blue {
   flex-shrink: 0;
-  color: #3b82f6;
+  color: #b3d0fd;
   margin-top: 2px;
 }
 
@@ -897,15 +897,15 @@ onMounted(async () => {
 
 .time-slot.available {
   background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #3b82f6;
-  color: #1e40af;
+  border-color: #b3d0fd;
+  color: #3b82f6;
   transition: all 0.2s;
 }
 
 .time-slot.available:hover {
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(140, 166, 208, 0.3);
 }
 
 .section {
@@ -913,7 +913,7 @@ onMounted(async () => {
 }
 
 .section-title {
-  color: #2875bb;
+  color: #1e40af;
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 20px;
@@ -937,7 +937,7 @@ onMounted(async () => {
   font-weight: 600;
   margin-top: 24px;
   margin-bottom: 8px;
-  color: #1e40af;
+  color: #b3d0fd;
   display: flex;
   align-items: center;
   font-size: 1.1rem;
@@ -947,7 +947,7 @@ onMounted(async () => {
   background: #f8fafc;
   padding: 20px;
   border-radius: 8px;
-  border-left: 4px solid #2875bb;
+  border-left: 4px solid #b3d0fd;
   margin-top: 16px;
 }
 
@@ -996,14 +996,14 @@ onMounted(async () => {
 
 .specialty-card.active {
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border-color: #3b82f6;
+  border-color: #b3d0fd;
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
 }
 
 .specialty-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border-color: #3b82f6;
+  border-color: #b3d0fd;
   background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
 }
 
@@ -1017,7 +1017,7 @@ onMounted(async () => {
 .specialty-icon {
   width: 44px;
   height: 44px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, rgba(255, 131, 226, 0.8) 0%, rgba(128, 195, 246, 0.8) 100%);  
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -2169,7 +2169,7 @@ onMounted(async () => {
 }
 
 .rate-hospital-btn:hover {
-  background: #2563eb;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 
 .rating-actions {

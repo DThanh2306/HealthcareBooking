@@ -48,9 +48,13 @@
         </el-table-column>
 
         <el-table-column
-          label="Giờ khám"
-          prop="time_slot"
-        />
+          label="Số thứ tự"
+          prop="queue_number"
+        >
+          <template #default="scope">
+            {{ scope.row.queue_number }}
+          </template>
+        </el-table-column>
         <el-table-column
           label="Cơ sở y tế"
           prop="dr_h_name"
@@ -61,22 +65,51 @@
         >
           <template #default="scope">
             <div class="reschedule-content">
-              <div v-if="scope.row.reschedule_status === 'requested' && scope.row.reschedule_requested_by === 'doctor'">
+              <div
+                v-if="
+                  scope.row.reschedule_status === 'requested' &&
+                  scope.row.reschedule_requested_by === 'doctor'
+                "
+              >
                 <div style="margin-bottom: 8px">
                   <el-tag type="warning">Đề xuất đổi lịch đang chờ</el-tag>
                 </div>
-                <div class="reschedule-info" style="margin-bottom: 8px">
-                  <strong>Đề xuất:</strong> {{ formatDate(scope.row.proposed_appointment_date) }} - {{ scope.row.proposed_time_slot }}
+                <div
+                  class="reschedule-info"
+                  style="margin-bottom: 8px"
+                >
+                  <strong>Đề xuất:</strong>
+                  {{ formatDate(scope.row.proposed_appointment_date) }} (số thứ tự sẽ được cấp khi
+                  chấp nhận)
                 </div>
-                <div v-if="scope.row.reschedule_reason" class="reschedule-info" style="margin-bottom: 12px">
+                <div
+                  v-if="scope.row.reschedule_reason"
+                  class="reschedule-info"
+                  style="margin-bottom: 12px"
+                >
                   <strong>Lý do:</strong> {{ scope.row.reschedule_reason }}
                 </div>
                 <div class="reschedule-buttons">
-                  <el-button size="small" type="primary" @click="acceptReschedule(scope.row.id_appointment)">Đồng ý</el-button>
-                  <el-button size="small" type="danger" @click="declineReschedule(scope.row.id_appointment)">Từ chối</el-button>
+                  <el-button
+                    size="small"
+                    type="primary"
+                    @click="acceptReschedule(scope.row.id_appointment)"
+                    >Đồng ý</el-button
+                  >
+                  <el-button
+                    size="small"
+                    type="danger"
+                    @click="declineReschedule(scope.row.id_appointment)"
+                    >Từ chối</el-button
+                  >
                 </div>
               </div>
-              <div v-else-if="scope.row.reschedule_status === 'requested' && scope.row.reschedule_requested_by === 'patient'">
+              <div
+                v-else-if="
+                  scope.row.reschedule_status === 'requested' &&
+                  scope.row.reschedule_requested_by === 'patient'
+                "
+              >
                 <el-tag type="warning">Bạn đã gửi đề xuất - chờ bác sĩ</el-tag>
               </div>
               <div v-else-if="scope.row.reschedule_status === 'accepted'">
@@ -86,18 +119,25 @@
                 <el-tag type="info">Bạn đã từ chối đổi lịch</el-tag>
               </div>
               <div v-else>
-                <el-button 
-                  size="small" 
+                <el-button
+                  size="small"
                   @click="openReschedule(scope.row)"
                   :disabled="isAppointmentInPast(scope.row.appointment_date)"
                 >
-                  {{ isAppointmentInPast(scope.row.appointment_date) ? 'Không thể đổi' : 'Đề xuất đổi lịch' }}
+                  {{
+                    isAppointmentInPast(scope.row.appointment_date)
+                      ? 'Không thể đổi'
+                      : 'Đề xuất đổi lịch'
+                  }}
                 </el-button>
               </div>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Trạng thái" min-width="180">
+        <el-table-column
+          label="Trạng thái"
+          min-width="180"
+        >
           <template #default="scope">
             <div class="status-column">
               <div style="margin-bottom: 8px">
@@ -153,8 +193,9 @@
         <el-descriptions-item label="Ngày sinh">{{
           formatDate(selectedPatient?.dob)
         }}</el-descriptions-item>
-        <el-descriptions-item label="Ngày/giờ khám">
-          {{ formatDate(selectedPatient?.appointment_date) }} {{ selectedPatient?.time_slot }}
+        <el-descriptions-item label="Ngày/số thứ tự khám">
+          {{ formatDate(selectedPatient?.appointment_date) }} - Số
+          {{ selectedPatient?.queue_number }}
         </el-descriptions-item>
         <el-descriptions-item label="SĐT">{{ selectedPatient?.phone }}</el-descriptions-item>
         <el-descriptions-item label="Email">{{ selectedPatient?.email }}</el-descriptions-item>
@@ -162,23 +203,35 @@
           selectedPatient?.reason
         }}</el-descriptions-item>
         <el-descriptions-item label="Địa chỉ">
-          {{ selectedPatient?.to_thon }}, {{ selectedPatient?.xa }}, {{ selectedPatient?.quan }},
-          {{ selectedPatient?.tinh }}
+          {{
+            [
+              selectedPatient?.to_thon,
+              selectedPatient?.xa,
+              selectedPatient?.quan,
+              selectedPatient?.tinh
+            ]
+              .filter(Boolean)
+              .join(', ')
+          }}
         </el-descriptions-item>
         <el-descriptions-item label="Bác sĩ">{{
-          selectedPatient?.doctor_name
+          selectedPatient?.dr_name
         }}</el-descriptions-item>
         <el-descriptions-item label="Chuyên khoa">{{
           selectedPatient?.specialty
         }}</el-descriptions-item>
-        <el-descriptions-item label="Bệnh viện">{{ selectedPatient?.bv_bs }}</el-descriptions-item>
+        <el-descriptions-item label="Bệnh viện">{{ selectedPatient?.dr_h_name }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="dialogVisible = false">Đóng</el-button>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="rescheduleDialogVisible" title="📅 Đề xuất đổi lịch khám" width="480px">
+    <el-dialog
+      v-model="rescheduleDialogVisible"
+      title="📅 Đề xuất đổi lịch khám"
+      width="480px"
+    >
       <div class="reschedule-form">
         <div>
           <label class="form-label">Ngày đề xuất</label>
@@ -193,31 +246,17 @@
             :disabled-date="disabledDate"
           />
         </div>
-        
-        <div v-if="availableTimeSlots.length > 0">
-          <label class="form-label">Chọn khung giờ khám</label>
-          <div class="time-slots-container">
-            <div 
-              v-for="slot in availableTimeSlots" 
-              :key="slot"
-              :class="['time-slot', { 'selected': rescheduleForm.selected_time_slot === slot }]"
-              @click="selectTimeSlot(slot)"
-            >
-              {{ slot }}
-            </div>
-          </div>
-        </div>
-        
-        <div v-if="rescheduleForm.proposed_date && availableTimeSlots.length === 0">
+
+        <div v-if="rescheduleForm.proposed_date">
           <el-alert
-            title="Không có lịch trống"
-            type="warning"
-            description="Bác sĩ không có lịch trống trong ngày này. Vui lòng chọn ngày khác."
+            title="Lưu ý"
+            type="info"
+            description="Khi bác sĩ chấp nhận đề xuất, bạn sẽ được cấp số thứ tự mới cho ngày đã chọn."
             show-icon
             :closable="false"
           />
         </div>
-        
+
         <div>
           <label class="form-label">Lý do đổi lịch</label>
           <el-input
@@ -230,11 +269,16 @@
           />
         </div>
       </div>
-      
+
       <template #footer>
-        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <div style="display: flex; justify-content: flex-end; gap: 12px">
           <el-button @click="rescheduleDialogVisible = false">Hủy bỏ</el-button>
-          <el-button type="primary" @click="submitReschedule" :disabled="!rescheduleForm.selected_time_slot">Gửi đề xuất</el-button>
+          <el-button
+            type="primary"
+            @click="submitReschedule"
+            :disabled="!rescheduleForm.proposed_date"
+            >Gửi đề xuất</el-button
+          >
         </div>
       </template>
     </el-dialog>
@@ -252,12 +296,9 @@ const rescheduleDialogVisible = ref(false);
 const rescheduleForm = ref({
   id_appointment: null,
   proposed_date: '',
-  selected_time_slot: '',
   doctor_id: null,
   reason: ''
 });
-
-const availableTimeSlots = ref([]);
 
 const appointments = ref([]);
 const loading = ref(false);
@@ -340,9 +381,13 @@ const clearFilters = () => {
 const acceptReschedule = async (id) => {
   try {
     const token = localStorage.getItem('userToken');
-    await axios.post(`http://localhost:3000/api/patients/${id}/reschedule/accept`, {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    await axios.post(
+      `http://localhost:3000/api/patients/${id}/reschedule/accept`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
     ElMessage.success('Đã chấp nhận đổi lịch');
     fetchAppointments();
   } catch (err) {
@@ -354,9 +399,13 @@ const acceptReschedule = async (id) => {
 const declineReschedule = async (id) => {
   try {
     const token = localStorage.getItem('userToken');
-    await axios.post(`http://localhost:3000/api/patients/${id}/reschedule/decline`, {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    await axios.post(
+      `http://localhost:3000/api/patients/${id}/reschedule/decline`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
     ElMessage.success('Đã từ chối đổi lịch');
     fetchAppointments();
   } catch (err) {
@@ -371,85 +420,48 @@ const openReschedule = (row) => {
     ElMessage.warning('Không thể đổi lịch cho cuộc hẹn đã qua hoặc trong ngày hôm nay');
     return;
   }
-  
+
   rescheduleForm.value = {
     id_appointment: row.id_appointment,
     proposed_date: '',
-    selected_time_slot: '',
     doctor_id: row.dr_id,
     reason: ''
   };
-  availableTimeSlots.value = [];
   rescheduleDialogVisible.value = true;
 };
 
 const onRescheduleDateChange = async () => {
-  // Reset slot đã chọn khi đổi ngày và tải lại slot trống
-  rescheduleForm.value.selected_time_slot = '';
-  await fetchDoctorSchedules();
-};
-
-const fetchDoctorSchedules = async () => {
-  if (!rescheduleForm.value.proposed_date || !rescheduleForm.value.doctor_id) {
-    availableTimeSlots.value = [];
-    return;
-  }
-  
-  try {
-    const token = localStorage.getItem('userToken');
-    const response = await axios.get(
-      `http://localhost:3000/api/doctors/${rescheduleForm.value.doctor_id}/available-slots`,
-      {
-        params: { date: rescheduleForm.value.proposed_date },
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-    const slots = response.data?.availableSlots || [];
-    // Dedupe + sort theo giờ bắt đầu
-    const unique = Array.from(new Set(slots));
-    unique.sort((a, b) => (a?.split('-')[0] || '').trim().localeCompare((b?.split('-')[0] || '').trim()));
-    availableTimeSlots.value = unique;
-  } catch (err) {
-    console.error('Lỗi lấy lịch bác sĩ:', err);
-    availableTimeSlots.value = [];
-    ElMessage.error('Không thể tải lịch trống của bác sĩ');
-  }
-};
-
-const selectTimeSlot = (slot) => {
-  rescheduleForm.value.selected_time_slot = slot;
+  // Không cần tải slot trống vì hệ thống queue không giới hạn
 };
 
 const submitReschedule = async () => {
-  if (!rescheduleForm.value.proposed_date || !rescheduleForm.value.selected_time_slot) {
-    ElMessage.error('Vui lòng chọn ngày và khung giờ đề xuất');
+  if (!rescheduleForm.value.proposed_date) {
+    ElMessage.error('Vui lòng chọn ngày đề xuất');
     return;
   }
-  
+
   // Validate date is not in the past
   const selectedDate = new Date(rescheduleForm.value.proposed_date);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   if (selectedDate <= today) {
     ElMessage.error('Không thể đề xuất lịch khám trong quá khứ hoặc hôm nay');
-    return;
-  }
-  // đảm bảo slot được chọn vẫn nằm trong danh sách slot trống hiện tại
-  if (!availableTimeSlots.value.includes(rescheduleForm.value.selected_time_slot)) {
-    ElMessage.error('Khung giờ đã thay đổi hoặc không còn trống, vui lòng chọn lại');
     return;
   }
 
   try {
     const token = localStorage.getItem('userToken');
-    await axios.post(`http://localhost:3000/api/patients/${rescheduleForm.value.id_appointment}/reschedule`, {
-      proposed_date: rescheduleForm.value.proposed_date,
-      proposed_time_slot: rescheduleForm.value.selected_time_slot,
-      reason: rescheduleForm.value.reason
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    await axios.post(
+      `http://localhost:3000/api/patients/${rescheduleForm.value.id_appointment}/reschedule`,
+      {
+        proposed_date: rescheduleForm.value.proposed_date,
+        reason: rescheduleForm.value.reason
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
     ElMessage.success('Đã gửi đề xuất đổi lịch tới bác sĩ');
     rescheduleDialogVisible.value = false;
     fetchAppointments();
@@ -754,11 +766,11 @@ const submitReschedule = async () => {
   .appointments-container {
     padding: 16px 12px;
   }
-  
+
   .header-title {
     font-size: 24px;
   }
-  
+
   ::v-deep(.el-table th),
   ::v-deep(.el-table td) {
     padding: 12px 8px !important;
@@ -775,11 +787,11 @@ const submitReschedule = async () => {
   .filter-date {
     width: 100%;
   }
-  
+
   .reschedule-buttons {
     flex-direction: column;
   }
-  
+
   ::v-deep(.el-button--small) {
     width: 100%;
     margin-left: 0 !important;
@@ -791,7 +803,7 @@ const submitReschedule = async () => {
   ::v-deep(.el-table) {
     font-size: 12px;
   }
-  
+
   .reschedule-content {
     min-width: auto;
   }

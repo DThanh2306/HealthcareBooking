@@ -508,7 +508,7 @@ onMounted(() => {
 }
 
 .search-btn {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   border-radius: 10px;
@@ -557,7 +557,7 @@ onMounted(() => {
 }
 
 .filter-tag {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -619,7 +619,7 @@ onMounted(() => {
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 12px;
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  background: #426184;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -716,7 +716,7 @@ onMounted(() => {
 .doctor-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
-  border-color: #3b82f6;
+  border-color: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
 }
 
 .doctor-image-wrapper {
@@ -900,7 +900,7 @@ onMounted(() => {
 }
 
 .page-btn.active {
-  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: #ffffff;
   border-color: #2563eb;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);

@@ -1,0 +1,119 @@
+{
+  "id": "unknown_1775712994221",
+  "timestamp": "2026-04-09T05:36:34.221Z",
+  "input": {
+    "symptoms": "đau đầu, đau đầu",
+    "age": "20",
+    "gender": "nữ",
+    "duration": "3 ngày"
+  },
+  "systemOutput": {
+    "recommendations": {
+      "specialties": [
+        "Sản Phụ khoa",
+        "Nội tiết"
+      ],
+      "doctors": [
+        {
+          "dr_id": 10,
+          "id": 10,
+          "name": "Ths BS. Trần Thị Oanh",
+          "specialty": "Sản khoa",
+          "hospitalName": "Bệnh viện Phương Châu",
+          "hospitalAddress": "300 Nguyễn Văn Cừ nối dài, P. Tân An, Tp. Cần Thơ",
+          "price": "150000.00",
+          "matchScore": 0.466,
+          "image": "/uploads/1755211075971-191752372.png",
+          "description": "Thạc sĩ Bác Sĩ Trần Thị Oanh, hơn 5 năm kinh nghiệm Sản Phụ Khoa",
+          "distance": 4,
+          "distanceText": "4km",
+          "sameProvince": true,
+          "regionLevel": "same_province",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        }
+      ],
+      "hospitals": [
+        {
+          "h_id": 14,
+          "id": 14,
+          "name": "Bệnh viện Hoàn Mỹ Cửu Long",
+          "address": "Lô 20 Võ Nguyên Giáp, Phú Thứ, Cái Răng, Cần Thơ, Việt Nam",
+          "score": 0.681,
+          "phone": "0292 3917 3",
+          "description": "Bệnh viện Hoàn Mỹ Cửu Long được thành lập vào năm 2007, phục vụ nhu cầu chăm sóc sức khỏe cho cộng đồng dân cư khu vực Đồng bằng sông Cửu Long.",
+          "distance": 3.7,
+          "distanceText": "3.7km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 6,
+          "id": 6,
+          "name": "Bệnh viện Phương Châu",
+          "address": "300 Nguyễn Văn Cừ nối dài, P. Tân An, Tp. Cần Thơ",
+          "score": 0.68,
+          "phone": "1900 54 54 ",
+          "description": "Hệ thống chăm sóc sức khỏe của Tập đoàn Y tế Phương Châu bao gồm 4 Bệnh viện tại Việt Nam.",
+          "distance": 4,
+          "distanceText": "4km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 8,
+          "id": 8,
+          "name": "Bệnh viện Quân Y Cần Thơ",
+          "address": "Số 01, Đường 30/4, Phường Ninh Kiều, Thành phố Cần Thơ",
+          "score": 0.396,
+          "phone": "84-4-382636",
+          "description": "Bệnh viện Y học Cổ truyền Trung ương tiền thân là Viện Nghiên cứu Đông Y được chính thức thành lập năm 1957.",
+          "distance": 0.9,
+          "distanceText": "0.9km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 3,
+          "id": 3,
+          "name": "Bệnh viện Trường Đại Học Y Dược Cần Thơ",
+          "address": "179 Nguyễn Văn Cừ Nối Dài, phường Tân An, Ninh Kiều, Cần Thơ, Việt Nam",
+          "score": 0.383,
+          "phone": "023244234",
+          "description": "null",
+          "distance": 3.5,
+          "distanceText": "3.5km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 15,
+          "id": 15,
+          "name": "Bệnh viện Xuyên Á Vĩnh Long",
+          "address": "QL1A, Tân Ngãi, TP. Vĩnh Long",
+          "score": 0.249,
+          "phone": "(0270) 6250",
+          "description": "Bệnh viện đi vào hoạt động từ năm 2014, là một trong những cơ sở y tế chất lượng khu vực phía Tây Nam Bộ.",
+          "distance": 30.1,
+          "distanceText": "30.1km",
+          "locationMethod": "gps",
+          "sameProvince": false,
+          "regionLevel": "same_region"
+        }
+      ],
+      "noDoctorsFound": false,
+      "enhancedAnalysis": {}
+    },
+    "confidence": 0.8
+  },
+  "feedback": {
+    "helpful": null,
+    "accurate": null,
+    "rating": null
+  },
+  "groundTruth": null
+}
