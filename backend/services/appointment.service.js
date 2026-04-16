@@ -99,11 +99,16 @@ exports.getPaginatedAppointments = async (
       d.dr_name,
       sp.sp_name AS specialty,
       d.dr_h_name,
-      d.sp_id
+      d.sp_id,
+      r.reschedule_status,
+      r.reschedule_reason,
+      r.proposed_date AS proposed_appointment_date,
+      r.requested_by AS reschedule_requested_by
     FROM appointments a
     JOIN patient_profiles p ON a.id_patient = p.id_patient
     JOIN doctors d ON a.dr_id = d.dr_id
     LEFT JOIN specialties sp ON sp.sp_id = d.sp_id
+    LEFT JOIN appointment_reschedules r ON r.id_appointment = a.id_appointment AND r.reschedule_status = 'requested'
     WHERE 1=1
   `;
   const params = [];
@@ -204,12 +209,17 @@ exports.getAppointmentsByDoctorUserId = async (doctorUserId) => {
       d.dr_name,
       sp.sp_name AS specialty,
       d.dr_h_name,
-      d.sp_id
+      d.sp_id,
+      r.reschedule_status,
+      r.reschedule_reason,
+      r.proposed_date AS proposed_appointment_date,
+      r.requested_by AS reschedule_requested_by
     FROM appointments a
     JOIN patient_profiles p ON a.id_patient = p.id_patient
     JOIN doctors d ON a.dr_id = d.dr_id
     LEFT JOIN specialties sp ON sp.sp_id = d.sp_id
     LEFT JOIN users u ON p.id_u = u.id_u
+    LEFT JOIN appointment_reschedules r ON r.id_appointment = a.id_appointment AND r.reschedule_status = 'requested'
     WHERE d.id_u = ?
     ORDER BY a.appointment_date DESC, COALESCE(a.queue_number, 999999)
   `;

@@ -50,7 +50,7 @@ exports.getFeedbackStats = async (req, res) => {
 exports.getFeedbackAverages = async (req, res) => {
   try {
     const db = require('../config/db');
-    const [doctorRows] = await db.execute(
+    const [doctorRows] = await db.query(
       `SELECT 
          d.dr_id AS id,
          d.dr_name AS name,
@@ -64,7 +64,7 @@ exports.getFeedbackAverages = async (req, res) => {
        ORDER BY average_rating ASC`
     );
 
-    const [hospitalRows] = await db.execute(
+    const [hospitalRows] = await db.query(
       `SELECT 
          h.h_id AS id,
          h.h_name AS name,
@@ -447,27 +447,49 @@ exports.listUsers = async (req, res) => {
   try {
     const db = require('../config/db');
     const { page = 1, limit = 20, role = 'all', search = '' } = req.query;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    
+    const pageNum  = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset   = (pageNum - 1) * limitNum;
 
-    const where = [];
+    const where  = [];
     const params = [];
+
     if (role !== 'all') {
-      where.push('role = ?');
+      where.push('u.role = ?');
       params.push(role);
     }
     if (search) {
-      where.push('(name_u LIKE ? OR email_u LIKE ? OR sdt_u LIKE ?)');
+      where.push('(u.name_u LIKE ? OR u.email_u LIKE ? OR u.sdt_u LIKE ?)');
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-    const [rows] = await db.execute(
-      `SELECT u.id_u, u.name_u, u.email_u, u.sdt_u, u.role, d.dr_id\n       FROM users u\n       LEFT JOIN doctors d ON d.id_u = u.id_u\n       ${whereSql} ORDER BY u.id_u DESC LIMIT ? OFFSET ?`,
-      [...params, parseInt(limit), offset]
+    // ✅ Use db.query() instead of db.execute() for LIMIT/OFFSET
+    const [rows] = await db.query(
+      `SELECT u.id_u, u.name_u, u.email_u, u.sdt_u, u.role, d.dr_id
+       FROM users u
+       LEFT JOIN doctors d ON d.id_u = u.id_u
+       ${whereSql}
+       ORDER BY u.id_u DESC
+       LIMIT ? OFFSET ?`,
+      [...params, limitNum, offset]
     );
-    const [[{ total }]] = await db.query(`SELECT COUNT(*) AS total FROM users ${whereSql}`, params);
 
-    res.json({ users: rows, pagination: { page: parseInt(page), limit: parseInt(limit), total, totalPages: Math.ceil(total / parseInt(limit)) } });
+    const [[{ total }]] = await db.query(
+      `SELECT COUNT(*) AS total FROM users u ${whereSql}`,
+      params
+    );
+
+    res.json({
+      users: rows,
+      pagination: {
+        page:       pageNum,
+        limit:      limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
   } catch (e) {
     console.error('❌ listUsers error:', e);
     res.status(500).json({ error: 'Không thể lấy danh sách người dùng' });

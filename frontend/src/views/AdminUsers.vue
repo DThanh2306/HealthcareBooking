@@ -633,7 +633,7 @@ export default {
 
 /* Hero Section */
 .hero { 
-  background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%); 
+  background:linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 16px; 
   color: #fff; 
   padding: 28px 24px; 
@@ -676,7 +676,7 @@ export default {
 }
 .primary-btn { 
   padding: 10px 16px; 
-  background: #4f46e5; 
+  background:linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: #fff; 
   border: none; 
   border-radius: 8px; 
@@ -685,7 +685,7 @@ export default {
   transition: background-color 0.2s;
 }
 .primary-btn:hover {
-  background: #4338ca;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 
 /* Table */

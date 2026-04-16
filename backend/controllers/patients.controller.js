@@ -4,8 +4,19 @@ const appointmentService = require("../services/appointment.service");
 const rescheduleService = require("../services/appointmentReschedule.service");
 
 require('dotenv').config();
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USERNAME, // apikey
+    pass: process.env.SMTP_PASSWORD,
+  },
+    debug: true, 
+    logger: true
+});
 
 
 exports.createPatient = async (req, res) => {
@@ -46,32 +57,37 @@ exports.updateStatus = async (req, res) => {
     await patientService.updateStatus(id, status);
     
     // Send email notification if approved
-    if(status === "approved") {
+    if (status === "approved") {
       const appt = await appointmentService.getAppointmentById(id);
-      
+
+        console.log("📧 EMAIL:", appt?.email);
+        console.log("📦 APPT:", appt);
+
+
       if (appt && appt.email) {
-        const msg = {
-          to: appt.email,
-          from: {
-            email: 'thachotaodi711@gmail.com',
-            name: 'Booking Medical'
-          },
-          subject: 'Thông báo xác nhận đặt lịch khám',
-          html:
-            `<h3>Đặt lịch khám thành công!</h3>
-            <b>Tên bệnh nhân:</b> ${appt.p_name}<br/>
-            <b>Bác sĩ:</b> ${appt.dr_name}<br/>
-            <b>Chuyên khoa:</b> ${appt.specialty || 'Đang cập nhật'}<br/>
-            <b>Bệnh viện:</b> ${appt.dr_h_name}<br/>
-            <b>Ngày khám:</b> ${appt.appointment_date}<br/>
-            <b>Số thứ tự:</b> ${appt.queue_number}<br/>
-            <b>Lý do khám:</b> ${appt.reason || ''}`
-        };
         try {
-          await sgMail.send(msg);
+          await transporter.sendMail({
+            from: {
+              name: process.env.SMTP_FROM_NAME,
+              address: process.env.SMTP_FROM_EMAIL,
+            },
+            to: appt.email,
+            subject: "Thông báo xác nhận đặt lịch khám",
+            html: `
+              <h3>Đặt lịch khám thành công!</h3>
+              <b>Tên bệnh nhân:</b> ${appt.p_name}<br/>
+              <b>Bác sĩ:</b> ${appt.dr_name}<br/>
+              <b>Chuyên khoa:</b> ${appt.specialty || 'Đang cập nhật'}<br/>
+              <b>Bệnh viện:</b> ${appt.dr_h_name}<br/>
+              <b>Ngày khám:</b> ${appt.appointment_date}<br/>
+              <b>Số thứ tự:</b> ${appt.queue_number}<br/>
+              <b>Lý do khám:</b> ${appt.reason || ''}
+            `,
+          });
+
+          console.log("✅ Email sent (approved)");
         } catch (e) {
-          console.error("❌ SendGrid send mail error:", 
-            e.response?.body?.errors || e.response?.body || e);
+          console.error("❌ Brevo send mail error:", e);
         }
       }
     }
@@ -154,11 +170,29 @@ exports.proposeReschedule = async (req, res) => {
     const requested_by = req.user?.role === "doctor" ? "doctor" : "patient";
     await patientService.proposeReschedule(id, proposed_date, reason, requested_by);
 
-    // Send email to the opposite party about proposed change
+    // Get appointment details for notification
     const appt = await appointmentService.getAppointmentById(id);
     if (!appt) {
       return res.json({ success: true });
     }
+
+    // Create notification for doctor about reschedule request
+    if (appt.dr_id) {
+      const notificationService = require("../services/notification.service");
+      try {
+        const message = `Bệnh nhân ${appt.p_name} đề xuất đổi lịch khám từ ${appt.appointment_date} sang ${proposed_date}. ${reason ? `Lý do: ${reason}` : ''}`;
+        await notificationService.createDoctorNotification({
+          doctorId: appt.dr_id,
+          message: message,
+          type: "general" // Using general type for reschedule requests
+        });
+      } catch (notifError) {
+        console.error("❌ Failed to create doctor notification:", notifError);
+        // Don't fail the whole request if notification fails
+      }
+    }
+
+    // Send email to the opposite party about proposed change
     
     const requesterRole = req.user?.role;
 
@@ -217,11 +251,11 @@ exports.acceptReschedule = async (req, res) => {
     }
     
     const role = req.user?.role;
-    if (reschedule.requested_by === 'patient' && role !== 'doctor') {
-      return res.status(403).json({ error: "Chỉ bác sĩ được chấp nhận đề xuất của bệnh nhân" });
+    if (reschedule.requested_by === 'patient' && role !== 'doctor' && role !== 'admin') {
+      return res.status(403).json({ error: "Chỉ bác sĩ hoặc admin được chấp nhận đề xuất của bệnh nhân" });
     }
-    if (reschedule.requested_by === 'doctor' && role !== 'patient' && role !== 'user') {
-      return res.status(403).json({ error: "Chỉ bệnh nhân được chấp nhận đề xuất của bác sĩ" });
+    if (reschedule.requested_by === 'doctor' && role !== 'patient' && role !== 'user' && role !== 'admin') {
+      return res.status(403).json({ error: "Chỉ bệnh nhân hoặc admin được chấp nhận đề xuất của bác sĩ" });
     }
 
     await patientService.acceptReschedule(id);
@@ -244,11 +278,11 @@ exports.declineReschedule = async (req, res) => {
     }
     
     const role = req.user?.role;
-    if (reschedule.requested_by === 'patient' && role !== 'doctor') {
-      return res.status(403).json({ error: "Chỉ bác sĩ được từ chối đề xuất của bệnh nhân" });
+    if (reschedule.requested_by === 'patient' && role !== 'doctor' && role !== 'admin') {
+      return res.status(403).json({ error: "Chỉ bác sĩ hoặc admin được từ chối đề xuất của bệnh nhân" });
     }
-    if (reschedule.requested_by === 'doctor' && role !== 'patient' && role !== 'user') {
-      return res.status(403).json({ error: "Chỉ bệnh nhân được từ chối đề xuất của bác sĩ" });
+    if (reschedule.requested_by === 'doctor' && role !== 'patient' && role !== 'user' && role !== 'admin') {
+      return res.status(403).json({ error: "Chỉ bệnh nhân hoặc admin được từ chối đề xuất của bác sĩ" });
     }
 
     await patientService.declineReschedule(id);

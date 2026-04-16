@@ -1336,7 +1336,7 @@ onMounted(async () => {
 }
 
 .ask-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2875bb 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border: none;
   outline: none;
   cursor: pointer;
@@ -1587,7 +1587,7 @@ onMounted(async () => {
 
 .form-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -1896,7 +1896,7 @@ onMounted(async () => {
 .doctor-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  border-color: #3b82f6;
+  border-color: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
 }
 
 .doctor-image {
@@ -1927,7 +1927,7 @@ onMounted(async () => {
 }
 
 .doctor-specialty {
-  color: #3b82f6;
+  color: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
   font-weight: 600;
   margin: 4px 0;
   font-size: 0.95rem;
@@ -1947,7 +1947,7 @@ onMounted(async () => {
 }
 
 .book-doctor-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2875bb 100%);
+  color: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -1960,7 +1960,7 @@ onMounted(async () => {
 }
 
 .book-doctor-btn:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  color: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }

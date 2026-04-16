@@ -109,6 +109,57 @@
         </template>
       </el-table-column>
       <el-table-column
+        label="Đổi lịch"
+        min-width="200"
+      >
+        <template #default="scope">
+          <div class="reschedule-content">
+            <div
+              v-if="
+                scope.row.reschedule_status === 'requested' &&
+                scope.row.reschedule_requested_by === 'patient'
+              "
+            >
+              <div style="margin-bottom: 8px">
+                <el-tag type="warning">Bệnh nhân đề xuất đổi lịch</el-tag>
+              </div>
+              <div
+                class="reschedule-info"
+                style="margin-bottom: 8px"
+              >
+                <strong>Đề xuất:</strong>
+                {{ formatDate(scope.row.proposed_appointment_date) }} (số thứ tự sẽ được cấp khi
+                bác sĩ chấp nhận)
+              </div>
+              <div
+                v-if="scope.row.reschedule_reason"
+                class="reschedule-info"
+                style="margin-bottom: 12px"
+              >
+                <strong>Lý do:</strong> {{ scope.row.reschedule_reason }}
+              </div>
+            </div>
+            <div
+              v-else-if="
+                scope.row.reschedule_status === 'requested' &&
+                scope.row.reschedule_requested_by === 'doctor'
+              "
+            >
+              <el-tag type="warning">Bác sĩ đề xuất - chờ bệnh nhân</el-tag>
+            </div>
+            <div v-else-if="scope.row.reschedule_status === 'accepted'">
+              <el-tag type="success">Đã chấp nhận đổi lịch</el-tag>
+            </div>
+            <div v-else-if="scope.row.reschedule_status === 'declined'">
+              <el-tag type="info">Đã từ chối đổi lịch</el-tag>
+            </div>
+            <div v-else>
+              <span class="no-reschedule">Không có đề xuất</span>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
         label="Hành động"
         width="280"
       >
@@ -608,7 +659,33 @@ const disablePastDate = (date) => {
   max-width: 1100px;
   margin: auto;
 }
-.hero { background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%); border-radius: 16px; color: #fff; padding: 28px 24px; margin: 12px 0 20px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); }
+.hero { 
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%); 
+  border-radius: 16px; 
+  color: #fff; padding: 28px 24px; 
+  margin: 12px 0 20px; 
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); 
+}
 .hero-content h1 { margin: 0 0 6px 0; font-size: 1.8rem; font-weight: 700; }
 .hero-content p { margin: 0; opacity: 0.95; }
+
+/* Reschedule column styling */
+.reschedule-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.reschedule-info {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.no-reschedule {
+  font-size: 13px;
+  color: #9ca3af;
+  font-style: italic;
+}
 </style>

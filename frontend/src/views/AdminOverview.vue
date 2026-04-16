@@ -1487,7 +1487,7 @@ export default {
 
 /* Enhanced Button Styling */
 .target-dialog .el-dialog__footer .el-button--primary {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border: none;
 }
 

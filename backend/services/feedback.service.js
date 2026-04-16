@@ -634,7 +634,7 @@ class FeedbackService {
           : "";
 
       // Get doctor ratings
-      const [doctorRatings] = await db.execute(
+      const [doctorRatings] = await db.query(
         `SELECT 
           dr.id_fb,
           dr.dr_id,
@@ -658,7 +658,7 @@ class FeedbackService {
       console.log("doctorRatings:", doctorRatings);
 
       // Get hospital ratings
-      const [hospitalRatings] = await db.execute(
+      const [hospitalRatings] = await db.query(
         `SELECT 
           hr.id_fb_hos,
           hr.h_id,

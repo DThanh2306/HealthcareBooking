@@ -388,7 +388,7 @@ body {
   background: #f5f6fa;
   min-height: 100vh;
 }
-.hero { background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%); border-radius: 16px; color: #fff; padding: 28px 24px; margin: 12px 0 20px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); }
+.hero { background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%); border-radius: 16px; color: #fff; padding: 28px 24px; margin: 12px 0 20px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); }
 .hero-content h1 { margin: 0 0 6px 0; font-size: 1.8rem; font-weight: 700; }
 .hero-content p { margin: 0; opacity: 0.95; }
 .header-row {
@@ -405,7 +405,7 @@ h2 { margin: 0; font-size: 2rem; font-weight: 700; color: #000000; }
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #437ef7;
+  background:linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: #fff;
   font-size: 1rem;
   font-weight: 500;
@@ -418,7 +418,7 @@ h2 { margin: 0; font-size: 2rem; font-weight: 700; color: #000000; }
   cursor: pointer;
 }
 .add-btn:hover {
-  background: #295dc1;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 .add-btn .icon {
   font-size: 18px;
