@@ -3,7 +3,7 @@
     <div class="header">
       <div class="header-content">
         <h1>Thông Tin Cá Nhân ({{ role === 'doctor' ? 'Bác sĩ' : 'Bệnh nhân' }})</h1>
-
+        <h1 class="thanh">{{ profile.name || profile.dr_name }}</h1>
         <button
           v-if="!isEditing"
           @click="startEdit"
@@ -1073,8 +1073,6 @@ export default {
       const changes = {};
 
       for (const key in this.profile) {
-        // Bỏ qua các trường không cần thiết
-        if (['id_u', 'role', 'email_u', 'specialty'].includes(key)) continue;
 
         if (this.profile[key] !== this.originalProfile[key]) {
           changes[key] = this.profile[key];

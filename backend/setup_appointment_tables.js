@@ -31,17 +31,16 @@ CREATE TABLE IF NOT EXISTS doctor_queue (
 
 -- ================= APPOINTMENTS (Updated) =================
 -- Modify existing appointments table to use queue_number instead of time_slot
-ALTER TABLE appointments
-ADD COLUMN IF NOT EXISTS queue_number INT NULL,
-CHANGE COLUMN queue_number queue_number INT NULL,
-ADD UNIQUE KEY IF NOT EXISTS unique_queue (dr_id, appointment_date, queue_number),
-DROP COLUMN IF EXISTS time_slot;
+ALTER TABLE appointments ADD COLUMN queue_number INT NULL;
+ALTER TABLE appointments ADD UNIQUE KEY unique_queue (dr_id, appointment_date, queue_number);
+ALTER TABLE appointments DROP COLUMN time_slot;
 
 -- Update status enum to include new statuses
 ALTER TABLE appointments
 MODIFY COLUMN status ENUM(
   'pending',
   'approved',
+  'rejected',
   'in_progress',
   'done',
   'skipped',

@@ -48,7 +48,8 @@ exports.getActiveReschedule = async (id_appointment) => {
 exports.acceptReschedule = async (id_appointment) => {
   // Get the active reschedule request
   const reschedule = await exports.getActiveReschedule(id_appointment);
-  
+  console.log("reschedule:", reschedule);
+
   if (!reschedule) {
     throw new Error("No active reschedule request found");
   }
@@ -59,7 +60,6 @@ exports.acceptReschedule = async (id_appointment) => {
   
   // Get next queue number for the new date
   const newQueueNumber = await appointmentService.getNextQueueNumber(appointment.dr_id, reschedule.proposed_date);
-  
   // Update appointment with new date and queue number
   await db.query(
     `UPDATE appointments 

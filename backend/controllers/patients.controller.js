@@ -251,6 +251,9 @@ exports.acceptReschedule = async (req, res) => {
     }
     
     const role = req.user?.role;
+    const requested_by = role === "doctor" ? "doctor" 
+                   : role === "admin"  ? "admin" 
+                   : "patient";
     if (reschedule.requested_by === 'patient' && role !== 'doctor' && role !== 'admin') {
       return res.status(403).json({ error: "Chỉ bác sĩ hoặc admin được chấp nhận đề xuất của bệnh nhân" });
     }
