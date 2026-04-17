@@ -1,9 +1,4 @@
-const axios = require("axios");
-
-// Load environment variables if not already loaded
-if (!process.env.GROQ_API_KEY) {
-  require("dotenv").config();
-}
+const llmService = require("./llm.service");
 
 /**
  * ConversationIntelligence Service
@@ -11,10 +6,6 @@ if (!process.env.GROQ_API_KEY) {
  */
 class ConversationIntelligenceService {
   constructor() {
-    this.groqApiKey = process.env.GROQ_API_KEY || "";
-    this.groqModel = process.env.GROQ_MODEL || "llama-3.1-70b-versatile";
-    this.groqApiUrl = "https://api.groq.com/openai/v1/chat/completions";
-    
     // Configuration
     this.config = {
       temperature: 0.3, // Low temperature for consistent responses
@@ -30,13 +21,14 @@ class ConversationIntelligenceService {
     const prompt = this.buildIntentAnalysisPrompt(userMessage, currentStep, conversationState);
     
     try {
-      const response = await this.callLLM(prompt, {
-        temperature: 0.2, // Very low for structured output
-        maxTokens: 500
+      const responseText = await llmService.callChatCompletion({
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.2,
+        max_tokens: 500,
       });
-      
+
       // Parse JSON response
-      const result = this.parseJSONResponse(response);
+      const result = llmService.parseJSONResponse(responseText);
       return result;
     } catch (error) {
       console.error("❌ Intent analysis failed:", error.message);
@@ -239,11 +231,12 @@ Now, to help with your health concerns, could you please tell me your age?"
 WRITE RESPONSE (warm, conversational, 2-3 sentences):`;
 
       try {
-        const response = await this.callLLM(prompt, {
-          temperature: 0.7, // Higher temperature for more natural responses
-          maxTokens: 250
+        const responseText = await llmService.callChatCompletion({
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+          max_tokens: 250,
         });
-        return response.trim();
+        return responseText ? responseText.trim() : `Cảm ơn bạn đã hỏi! Tuy nhiên, để tư vấn sức khỏe tốt nhất cho bạn, ${currentStep.question}`;
       } catch (error) {
         console.error("❌ OFF_TOPIC response generation failed:", error.message);
         return `Cảm ơn bạn đã hỏi! Tuy nhiên, để tư vấn sức khỏe tốt nhất cho bạn, ${currentStep.question}`;
@@ -282,11 +275,16 @@ Mục đích cuộc trò chuyện này là giúp bạn:
 VIẾT CÂU TRẢ LỜI (ngắn gọn, thân thiện, chuyên nghiệp):`;
 
     try {
-      const response = await this.callLLM(prompt, {
+      const responseText = await llmService.callChatCompletion({
+        messages: [{ role: "user", content: prompt }],
         temperature: 0.5,
-        maxTokens: 300
+        max_tokens: 300,
       });
-      return response.trim();
+      return responseText ? responseText.trim() : `Cảm ơn bạn đã hỏi. Tôi sẽ ghi nhận câu hỏi của bạn.
+
+Mục đích cuộc trò chuyện này là giúp bạn tìm bác sĩ và bệnh viện phù hợp với tình trạng sức khỏe.
+
+Để tiếp tục, ${currentStep.question}`;
     } catch (error) {
       console.error("❌ Redirect response generation failed:", error.message);
       // Fallback
@@ -331,11 +329,12 @@ Triệu chứng: "sốt cao"
 VIẾT CÂU TRẢ LỜI (2-3 câu, kết thúc bằng câu hỏi):`;
 
     try {
-      const response = await this.callLLM(prompt, {
+      const responseText = await llmService.callChatCompletion({
+        messages: [{ role: "user", content: prompt }],
         temperature: 0.5,
-        maxTokens: 200
+        max_tokens: 200,
       });
-      return response.trim();
+      return responseText ? responseText.trim() : `Tôi hiểu bạn đang gặp vấn đề về ${symptom}. Tôi sẽ ghi nhận điều này.\n\nĐể tư vấn chính xác, ${currentStep.question}`;
     } catch (error) {
       console.error("❌ Symptom acknowledgement generation failed:", error.message);
       // Fallback
@@ -382,11 +381,12 @@ VÍ DỤ:
 VIẾT CÂU XÁC NHẬN (1 câu ngắn):`;
 
     try {
-      const response = await this.callLLM(prompt, {
+      const responseText = await llmService.callChatCompletion({
+        messages: [{ role: "user", content: prompt }],
         temperature: 0.4,
-        maxTokens: 100
+        max_tokens: 100,
       });
-      return response.trim();
+      return responseText ? responseText.trim() : (typeof currentStep.acknowledgement === 'function' ? currentStep.acknowledgement(extractedValue) : `Đã ghi nhận: ${extractedValue}`);
     } catch (error) {
       console.error("❌ Acknowledgement generation failed:", error.message);
       // Fallback to default
@@ -416,11 +416,12 @@ QUY TẮC:
 TRẢ VỀ ĐÚNG GIÁ TRỊ TRÍCH XUẤT (không có text khác):`;
 
     try {
-      const response = await this.callLLM(prompt, {
+      const responseText = await llmService.callChatCompletion({
+        messages: [{ role: "user", content: prompt }],
         temperature: 0.1,
-        maxTokens: 200
+        max_tokens: 200,
       });
-      return response.trim();
+      return responseText ? responseText.trim() : userMessage.trim();
     } catch (error) {
       console.error("❌ Info extraction failed:", error.message);
       return userMessage.trim();
@@ -465,99 +466,13 @@ TRẢ VỀ ĐÚNG GIÁ TRỊ TRÍCH XUẤT (không có text khác):`;
    * Parse JSON response from LLM
    */
   parseJSONResponse(response) {
-    try {
-      // Remove markdown code blocks if present
-      let cleaned = response.trim();
-      cleaned = cleaned.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-      
-      // Parse JSON
-      const parsed = JSON.parse(cleaned);
-      return parsed;
-    } catch (error) {
-      console.error("❌ JSON parsing failed:", error.message);
-      console.error("Response:", response);
-      throw new Error("Failed to parse LLM response as JSON");
-    }
+    return llmService.parseJSONResponse(response);
   }
-
-  /**
-   * Call GROQ LLM API with retry logic for rate limits
-   */
-  async callLLM(prompt, options = {}) {
-    if (!this.groqApiKey) {
-      throw new Error("GROQ_API_KEY not configured");
-    }
-
-    const config = {
-      temperature: options.temperature ?? this.config.temperature,
-      max_tokens: options.maxTokens ?? this.config.maxTokens,
-      top_p: options.topP ?? this.config.topP
-    };
-
-    const maxRetries = options.retries ?? 2;
-
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        const response = await axios.post(
-          this.groqApiUrl,
-          {
-            model: this.groqModel,
-            messages: [
-              {
-                role: "user",
-                content: prompt
-              }
-            ],
-            temperature: config.temperature,
-            max_tokens: config.max_tokens,
-            top_p: config.top_p
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${this.groqApiKey}`,
-              "Content-Type": "application/json"
-            },
-            timeout: 30000 // 30s timeout
-          }
-        );
-
-        const content = response.data?.choices?.[0]?.message?.content;
-        if (!content) {
-          throw new Error("No content in LLM response");
-        }
-
-        return content;
-      } catch (error) {
-        const isRateLimit = error.response?.status === 429;
-        const isLastAttempt = attempt === maxRetries;
-
-        if (error.response) {
-          console.error(`❌ GROQ API error (attempt ${attempt + 1}/${maxRetries + 1}):`, error.response.data);
-          
-          // If rate limit and not last attempt, wait and retry
-          if (isRateLimit && !isLastAttempt) {
-            const waitTime = Math.min(2000 * Math.pow(2, attempt), 10000); // Exponential backoff: 2s, 4s, max 10s
-            console.log(`⏳ Rate limit hit, waiting ${waitTime}ms before retry...`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-            continue; // Retry
-          }
-          
-          throw new Error(`GROQ API error: ${error.response.status}`);
-        } else if (error.request) {
-          console.error("❌ GROQ API no response");
-          throw new Error("GROQ API timeout or network error");
-        } else {
-          throw error;
-        }
-      }
-    }
-  }
-
   /**
    * Validate LLM configuration
    */
   isConfigured() {
-    return !!(this.groqApiKey && this.groqModel);
+    return llmService.isConfigured();
   }
 }
 

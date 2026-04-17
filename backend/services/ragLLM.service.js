@@ -1,13 +1,15 @@
 const aiDoctorKnowledge = require("./aiDoctorKnowledge.service");
 const medicalLibrary = require("./medicalLibrary.service");
-const axios = require("axios");
+const llmService = require("./llm.service");
+
+function normalizeNameForOutput(s) {
+  if (!s) return '';
+  return String(s).normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+}
 
 class RagLLMService {
   constructor() {
     this.contextLimit = Number(process.env.RAG_CONTEXT_DOCS ?? 6);
-    this.groqApiKey = process.env.GROQ_API_KEY || "";
-    this.groqModel =
-      process.env.GROQ_MODEL_NAME || process.env.GROQ_MODEL || "";
   }
 
   buildPatientQuery(state, recommendations) {
@@ -162,12 +164,9 @@ class RagLLMService {
   }
 
   async callGroqLLM(payload) {
-    const { stateSummary, recommendationSummary, contextText, medicalInsights, safetyNotice } =
-      payload;
+    const { stateSummary, recommendationSummary, contextText, medicalInsights, safetyNotice } = payload;
 
-    if (!this.groqApiKey || !this.groqModel) {
-      return null;
-    }
+    if (!llmService.isConfigured()) return null;
 
     const promptParts = [
       "Bạn là bác sĩ chuyên khoa đang tư vấn online cho bệnh nhân. Hãy trả lời bằng tiếng Việt, giọng chuyên nghiệp nhưng dễ hiểu.",
@@ -195,38 +194,21 @@ class RagLLMService {
       "- Không tự ý kê đơn thuốc cụ thể.",
     ].join("\n");
 
-    const body = {
-      model: this.groqModel,
-      messages: [
-        {
-          role: "system",
-          content:
-            "Bạn là bác sĩ nội khoa tổng quát, hỗ trợ định hướng chuyên khoa và mức độ ưu tiên khám cho bệnh nhân tại Việt Nam.",
-        },
-        { role: "user", content: promptParts },
-      ],
+    const messages = [
+      {
+        role: "system",
+        content:
+          "Bạn là bác sĩ nội khoa tổng quát, hỗ trợ định hướng chuyên khoa và mức độ ưu tiên khám cho bệnh nhân tại Việt Nam.",
+      },
+      { role: "user", content: promptParts },
+    ];
+
+    const text = await llmService.callChatCompletion({
+      messages,
       temperature: 0.3,
       max_tokens: 700,
-    };
-
-    // Build Groq URL robustly:
-    // - Nếu GROQ_BASE_URL chỉ là host (vd: https://api.groq.com) → tự append đường dẫn chuẩn
-    // - Nếu không set → dùng host mặc định
-    const base =
-      process.env.GROQ_BASE_URL?.trim() || "https://api.groq.com";
-    const normalizedBase = base.replace(/\/+$/, "");
-    const url = `${normalizedBase}/openai/v1/chat/completions`;
-
-    const response = await axios.post(url, body, {
-      headers: {
-        Authorization: `Bearer ${this.groqApiKey}`,
-        "Content-Type": "application/json",
-      },
-      timeout: Number(process.env.GROQ_TIMEOUT_MS ?? 15000),
     });
 
-    const text =
-      response.data?.choices?.[0]?.message?.content?.trim() || null;
     return text;
   }
 
@@ -244,7 +226,6 @@ class RagLLMService {
 
     const safetyNotice = this.buildSafetyNotice(urgencyLevel);
 
-    // Ưu tiên gọi LLM Groq + Gemma (RAG) nếu đã cấu hình API key & model
     try {
       const llmResult = await this.callGroqLLM({
         stateSummary,
@@ -261,7 +242,7 @@ class RagLLMService {
       console.error("❌ Groq LLM error:", error.message || error);
     }
 
-    // Fallback: dùng summary rule-based cũ nếu LLM không khả dụng
+    // Fallback: rule-based summary
     return this.composeAdvice({
       stateSummary,
       recommendationSummary,
@@ -273,6 +254,3 @@ class RagLLMService {
 }
 
 module.exports = new RagLLMService();
-
-
-

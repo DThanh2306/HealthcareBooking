@@ -1,14 +1,13 @@
 const aiDoctorKnowledge = require("./aiDoctorKnowledge.service");
-const enhancedMedicalKnowledge = require("./enhancedMedicalKnowledge.service");
+const medicalKnowledge = require("./medicalKnowledge.service");
 const medicalLibrary = require("./medicalLibrary.service");
-const enhancedFallbackLLM = require("./enhancedFallbackLLM.service");
-const axios = require("axios");
+const fallbackLLM = require("./fallbackLLM.service");
+const llmService = require("./llm.service");
 
 class ImprovedRagLLMService {
   constructor() {
     this.contextLimit = Number(process.env.RAG_CONTEXT_DOCS ?? 8); // Tăng số lượng context
-    this.groqApiKey = process.env.GROQ_API_KEY || "";
-    this.groqModel = process.env.GROQ_MODEL_NAME || process.env.GROQ_MODEL || "";
+    // GROQ API configuration is handled by llm.service
     
     // Cải thiện cấu hình LLM
     this.llmConfig = {
@@ -212,7 +211,7 @@ QUY TẮC QUAN TRỌNG:
     }
 
     // Sử dụng enhanced medical knowledge
-    const analysis = enhancedMedicalKnowledge.comprehensiveAnalysis(patientData);
+    const analysis = medicalKnowledge.comprehensiveAnalysis(patientData);
     
     // Tìm kiếm trong medical library
     const libraryMatches = medicalLibrary.searchBySymptoms(primaryConcern, {
@@ -380,7 +379,7 @@ QUY TẮC QUAN TRỌNG:
 
   // Gọi Groq LLM với cải thiện và error handling
   async callAdvancedGroqLLM(payload) {
-    if (!this.groqApiKey || !this.groqModel) {
+    if (!llmService.isConfigured()) {
       console.warn("⚠️ Groq API not configured, using fallback response");
       return null;
     }
@@ -393,53 +392,26 @@ QUY TẮC QUAN TRỌNG:
 
     const promptContent = this.buildAdvancedPrompt(payload);
 
-    const requestBody = {
-      model: this.groqModel,
-      messages: [
-        {
-          role: "system",
-          content: this.systemPrompt
-        },
-        { 
-          role: "user", 
-          content: promptContent 
-        }
-      ],
-      temperature: this.llmConfig.temperature,
-      max_tokens: this.llmConfig.maxTokens,
-      top_p: this.llmConfig.topP,
-      frequency_penalty: this.llmConfig.frequencyPenalty,
-      presence_penalty: this.llmConfig.presencePenalty,
-      stop: ["Human:", "Assistant:"] // Ngăn model tiếp tục tự hỏi đáp
-    };
+    const messages = [
+      { role: "system", content: this.systemPrompt },
+      { role: "user", content: promptContent },
+    ];
 
     try {
-      const baseUrl = process.env.GROQ_BASE_URL?.trim() || "https://api.groq.com";
-      const normalizedBase = baseUrl.replace(/\/+$/, "");
-      const url = `${normalizedBase}/openai/v1/chat/completions`;
-
-      const response = await axios.post(url, requestBody, {
-        headers: {
-          Authorization: `Bearer ${this.groqApiKey}`,
-          "Content-Type": "application/json",
-        },
-        timeout: Number(process.env.GROQ_TIMEOUT_MS ?? 20000), // Tăng timeout
+      const content = await llmService.callChatCompletion({
+        messages,
+        temperature: this.llmConfig.temperature,
+        max_tokens: this.llmConfig.maxTokens,
+        top_p: this.llmConfig.topP,
+        frequency_penalty: this.llmConfig.frequencyPenalty,
+        presence_penalty: this.llmConfig.presencePenalty,
+        stop: ["Human:", "Assistant:"],
+        timeout: Number(process.env.GROQ_TIMEOUT_MS ?? 20000),
       });
 
-      const content = response.data?.choices?.[0]?.message?.content?.trim();
-      
       if (!content) {
         console.warn("⚠️ Empty response from Groq LLM");
         return null;
-      }
-
-      // Log usage statistics
-      if (response.data?.usage) {
-        console.log("📊 LLM Usage:", {
-          prompt_tokens: response.data.usage.prompt_tokens,
-          completion_tokens: response.data.usage.completion_tokens,
-          total_tokens: response.data.usage.total_tokens
-        });
       }
 
       return content;
@@ -548,11 +520,11 @@ QUY TẮC QUAN TRỌNG:
     }
 
     // 6. Enhanced fallback response nếu LLM không khả dụng
-    console.log("🔄 Using enhanced fallback response");
+    console.log("🔄 Using fallback response");
     try {
-      return enhancedFallbackLLM.generateAdvancedMedicalResponse(state, recommendations, helpers);
+      return fallbackLLM.generateAdvancedMedicalResponse(state, recommendations, helpers);
     } catch (fallbackError) {
-      console.error("❌ Enhanced fallback failed:", fallbackError.message);
+      console.error("❌ Fallback failed:", fallbackError.message);
       return this.createAdvancedFallbackResponse(payload);
     }
   }

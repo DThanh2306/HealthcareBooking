@@ -1,7 +1,7 @@
 // AI Doctor Training Service - Cải thiện độ chính xác thông qua training data
 const fs = require('fs');
 const path = require('path');
-const enhancedMedicalKnowledge = require('./enhancedMedicalKnowledge.service');
+const medicalKnowledge = require('./medicalKnowledge.service');
 
 class AiDoctorTrainingService {
   constructor() {

@@ -1,6 +1,6 @@
 const { randomUUID } = require("crypto");
 const aiDoctorRecommendationService = require("./aiDoctorRecommendation.service");
-const enhancedMedicalKnowledge = require("./enhancedMedicalKnowledge.service");
+const medicalKnowledge = require("./medicalKnowledge.service");
 const improvedRagLLM = require("./improvedRagLLM.service");
 const aiDoctorTraining = require("./aiDoctorTraining.service");
 const ragLLMService = require("./ragLLM.service");
@@ -283,7 +283,7 @@ class AiDoctorConversationService {
       
       // Add medical context if it's a symptom step
       if (currentStep.key === 'primaryConcern' && extractedValue) {
-        const symptomAnalysis = enhancedMedicalKnowledge.analyzeSymptoms(extractedValue);
+        const symptomAnalysis = medicalKnowledge.analyzeSymptoms(extractedValue);
         conversation.state._symptomAnalysis = symptomAnalysis;
       }
       
@@ -346,7 +346,7 @@ class AiDoctorConversationService {
       }
       
       // Use enhanced medical knowledge for better analysis
-      const enhancedAnalysis = enhancedMedicalKnowledge.comprehensiveAnalysis(conversation.state);
+      const enhancedAnalysis = medicalKnowledge.comprehensiveAnalysis(conversation.state);
       
       if (options && typeof options.radiusKm === 'number') {
         conversation.state.radiusKm = options.radiusKm;
