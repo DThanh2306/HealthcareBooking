@@ -17,7 +17,7 @@ const options = {
     servers: [{ url: "http://localhost:3000/api" }],
     ...externalComponents,
   },
-  apis: ["./routes/*.js"],
+  apis: ["./routes/*.js", './chatbot/*.js'],
 };
 
 const specs = swaggerJsdoc(options);

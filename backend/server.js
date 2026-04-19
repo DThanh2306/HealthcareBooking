@@ -54,6 +54,10 @@ app.use("/api", notificationRoutes);
 const adminNotificationRoutes = require("./routes/admin.notification.routes");
 app.use("/api", adminNotificationRoutes);
 
+const chatbotRoutes = require('./chatbot/chatbot.routes')
+
+app.use('/api', chatbotRoutes)
+
 const aiDoctorKnowledge = require("./services/aiDoctorKnowledge.service");
 aiDoctorKnowledge
   .initialize()
