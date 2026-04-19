@@ -43,9 +43,6 @@ app.use("/api/admin", adminRoutes);
 const revenueTargetRoutes = require("./routes/revenueTarget.routes");
 app.use("/api/admin/revenue-targets", revenueTargetRoutes);
 
-const aiDoctorRoutes = require("./routes/aiDoctor.routes");
-app.use("/api/ai-doctor", aiDoctorRoutes);
-
 const specialtyRoutes = require("./routes/specialty.routes");
 app.use("/api", specialtyRoutes);
 
@@ -57,13 +54,8 @@ app.use("/api", notificationRoutes);
 const adminNotificationRoutes = require("./routes/admin.notification.routes");
 app.use("/api", adminNotificationRoutes);
 
-const aiDoctorKnowledge = require("./services/aiDoctorKnowledge.service");
-aiDoctorKnowledge
-  .initialize()
-  .then(() => console.log("✅ AI Doctor knowledge base sẵn sàng"))
-  .catch((error) =>
-    console.error("❌ Không thể khởi tạo AI Doctor knowledge base:", error)
-  );
+const botpressRoutes = require("./routes/botpress.routes");
+app.use("/api/bot", botpressRoutes);
 
 // Ensure DB columns for rescheduling exist using async/await (promise pool)
 const db = require("./config/db");

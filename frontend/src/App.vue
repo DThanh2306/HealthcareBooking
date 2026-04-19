@@ -4,7 +4,16 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { onMounted } from 'vue'
+import { useBotpress } from '@/useBotpress'
+
+const { loadBotpress } = useBotpress()
+
+onMounted(() => {
+  loadBotpress()
+})
+</script>
 
 <style scoped>
 .app {
