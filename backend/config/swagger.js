@@ -15,7 +15,17 @@ const options = {
       description: "API cho quản lý bệnh viện và bác sĩ",
     },
     servers: [{ url: "http://localhost:3000/api" }],
-    ...externalComponents,
+    components: {
+      ...externalComponents.components,
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Nhập JWT token: Bearer <token>",
+        },
+      },
+    },
   },
   apis: ["./routes/*.js"],
 };
@@ -23,7 +33,15 @@ const options = {
 const specs = swaggerJsdoc(options);
 
 function setupSwagger(app) {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+  app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(specs, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    })
+  );
 }
 
 module.exports = setupSwagger;

@@ -443,13 +443,13 @@ export default {
 }
 
 .btn-primary {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   position: relative;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #2563eb;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 
 .btn-primary:disabled {

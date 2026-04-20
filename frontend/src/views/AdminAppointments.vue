@@ -147,14 +147,6 @@
             >
               <el-tag type="warning">Bác sĩ đề xuất - chờ bệnh nhân</el-tag>
             </div>
-            <div
-              v-else-if="
-                scope.row.reschedule_status === 'requested' &&
-                scope.row.reschedule_requested_by === 'admin'
-              "
-            >
-              <el-tag type="warning">Admin đề xuất đổi lịch</el-tag>
-            </div>
             <div v-else-if="scope.row.reschedule_status === 'accepted'">
               <el-tag type="success">Đã chấp nhận đổi lịch</el-tag>
             </div>
@@ -510,8 +502,7 @@ const submitReschedule = async () => {
   try {
     await axios.post(`http://localhost:3000/api/patients/${currentRescheduleId}/reschedule`, {
       proposed_date: rescheduleForm.value.proposed_date,
-      reason: rescheduleForm.value.reason,
-      requested_by: 'admin'
+      reason: rescheduleForm.value.reason
     });
     ElMessage.success('Đã gửi đề xuất đổi lịch tới bệnh nhân');
     rescheduleDialogVisible.value = false;

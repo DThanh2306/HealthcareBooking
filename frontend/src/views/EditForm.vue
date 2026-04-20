@@ -310,7 +310,7 @@ onMounted(async () => {
   padding: 7px 26px;
   font-size: 1.07rem;
   font-weight: 500;
-  background: #648bfd;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border: none;
   border-radius: 6px;
   color: #fff;
@@ -318,7 +318,7 @@ onMounted(async () => {
   transition: background 0.16s;
 }
 .submit-btn:hover {
-  background: #4866c8;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 @media (max-width: 950px) {
   .row {

@@ -544,7 +544,7 @@ h2 { margin: 0; font-size: 2rem; font-weight: 700; color: #000000; }
 }
 
 .modern-modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   padding: 24px 28px;
   display: flex;
@@ -752,7 +752,7 @@ h2 { margin: 0; font-size: 2rem; font-weight: 700; color: #000000; }
 }
 
 .save-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: 2px solid transparent;
   min-width: 120px;

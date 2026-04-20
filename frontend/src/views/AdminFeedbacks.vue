@@ -106,9 +106,6 @@
       <div class="table-header">
         <h3>Danh sách đánh giá</h3>
         <div class="table-actions">
-          <button @click="exportFeedbacks" class="export-btn">
-            Xuất Excel
-          </button>
         </div>
       </div>
 
@@ -1627,9 +1624,8 @@ td {
 }
 
 .average-tab-btn.active {
-  background: #4f46e5;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
-  border-color: #4338ca;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 

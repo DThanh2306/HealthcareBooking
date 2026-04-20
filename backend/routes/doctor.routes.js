@@ -163,25 +163,23 @@ router.get("/doctors/hospital/:hospitalName/specialty/:specialtyId", controller.
  * @swagger
  * /doctors/{dr_id}/available-slots:
  *   get:
- *     summary: Lấy lịch trống của bác sĩ theo ngày
+ *     summary: Lấy lịch trống kèm thông tin max_slot/current_slot theo ngày
  *     tags: [Doctors]
  *     parameters:
  *       - in: path
  *         name: dr_id
+ *         required: true
  *         schema:
  *           type: integer
- *         required: true
- *         description: ID bác sĩ
  *       - in: query
  *         name: date
+ *         required: true
  *         schema:
  *           type: string
  *           format: date
- *         required: true
- *         description: Ngày cần kiểm tra (YYYY-MM-DD)
  *     responses:
  *       200:
- *         description: Danh sách lịch trống
+ *         description: Danh sách slot kèm trạng thái
  *         content:
  *           application/json:
  *             schema:
@@ -190,12 +188,21 @@ router.get("/doctors/hospital/:hospitalName/specialty/:specialtyId", controller.
  *                 availableSlots:
  *                   type: array
  *                   items:
- *                     type: string
- *                   example: ["08:00 - 09:00", "09:00 - 10:00", "14:00 - 15:00"]
- *       400:
- *         description: Thiếu tham số date
- *       500:
- *         $ref: '#/components/responses/500InternalServerError'
+ *                     type: object
+ *                     properties:
+ *                       time_slot:
+ *                         type: string
+ *                         example: "08:00 - 09:00"
+ *                       max_slot:
+ *                         type: integer
+ *                         nullable: true
+ *                         example: 5
+ *                       current_slot:
+ *                         type: integer
+ *                         example: 2
+ *                       is_full:
+ *                         type: boolean
+ *                         example: false
  */
 router.get("/doctors/:dr_id/available-slots", controller.getAvailableSlots);
 
@@ -340,5 +347,86 @@ router.put("/doctors/profile/schedules-with-days",
   authMiddleware.requireDoctor, 
   controller.updateDoctorSchedulesWithDays
 );
+
+/**
+ * @swagger
+ * /doctors/{dr_id}/schedules/{schedule_id}/max-slot:
+ *   patch:
+ *     summary: Cập nhật max_slot cho một khung giờ cụ thể
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: path
+ *         name: dr_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: schedule_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               max_slot:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 5
+ *                 description: Số lượng tối đa, null = không giới hạn
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ *       404:
+ *         description: Không tìm thấy schedule
+ */
+router.patch("/doctors/:dr_id/schedules/:schedule_id/max-slot",
+  authMiddleware.verifyToken,
+  controller.updateScheduleMaxSlot
+);
+
+/**
+ * @swagger
+ * /doctors/{dr_id}/slot-usage:
+ *   get:
+ *     summary: Xem toàn bộ slot usage của bác sĩ theo ngày (để debug/admin)
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: path
+ *         name: dr_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Danh sách slot usage
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   time_slot:
+ *                     type: string
+ *                   max_slot:
+ *                     type: integer
+ *                     nullable: true
+ *                   current_slot:
+ *                     type: integer
+ *                   available:
+ *                     type: integer
+ *                     description: max_slot - current_slot, null nếu không giới hạn
+ */
+router.get("/doctors/:dr_id/slot-usage", controller.getDoctorSlotUsage);
 
 module.exports = router;

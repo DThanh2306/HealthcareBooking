@@ -46,34 +46,56 @@ exports.getActiveReschedule = async (id_appointment) => {
  * Updates the appointment with new date and assigns new queue number
  */
 exports.acceptReschedule = async (id_appointment) => {
-  // Get the active reschedule request
   const reschedule = await exports.getActiveReschedule(id_appointment);
-  console.log("reschedule:", reschedule);
+  if (!reschedule) throw new Error("No active reschedule request found");
 
-  if (!reschedule) {
-    throw new Error("No active reschedule request found");
-  }
-  
-  // Get appointment to find dr_id
   const appointmentService = require("./appointment.service");
+  const scheduleService    = require("./schedule.service");
   const appointment = await appointmentService.getAppointmentById(id_appointment);
-  
-  // Get next queue number for the new date
-  const newQueueNumber = await appointmentService.getNextQueueNumber(appointment.dr_id, reschedule.proposed_date);
-  // Update appointment with new date and queue number
+
+  const newDate     = reschedule.proposed_date;
+  const newTimeSlot = reschedule.proposed_time_slot || appointment.time_slot;
+
+  // Kiểm tra slot mới còn chỗ không
+  if (newTimeSlot) {
+    const availability = await scheduleService.checkSlotAvailability(
+      appointment.dr_id, newTimeSlot, newDate
+    );
+    if (!availability.available) {
+      const err = new Error(availability.reason || 'Khung giờ đề xuất đã đầy');
+      err.code = 'SLOT_FULL';
+      err.statusCode = 409;
+      throw err;
+    }
+
+    // Giảm slot cũ, tăng slot mới
+    const oldSchedule = await scheduleService.getScheduleForSlot(
+      appointment.dr_id, appointment.time_slot, appointment.appointment_date
+    );
+    if (oldSchedule?.max_slot !== null && oldSchedule?.max_slot !== undefined) {
+      await scheduleService.decrementSlotUsage(
+        appointment.dr_id, appointment.time_slot, appointment.appointment_date
+      );
+    }
+    if (availability.max_slot !== null) {
+      await scheduleService.incrementSlotUsage(appointment.dr_id, newTimeSlot, newDate);
+    }
+  }
+
+  const newQueueNumber = await appointmentService.getNextQueueNumber(appointment.dr_id, newDate);
+
   await db.query(
-    `UPDATE appointments 
-     SET appointment_date = ?, queue_number = ?
+    `UPDATE appointments
+     SET appointment_date = ?, time_slot = ?, queue_number = ?
      WHERE id_appointment = ?`,
-    [reschedule.proposed_date, newQueueNumber, id_appointment]
+    [newDate, newTimeSlot || null, newQueueNumber, id_appointment]
   );
-  
-  // Mark reschedule as accepted
+
   await db.query(
     "UPDATE appointment_reschedules SET reschedule_status = 'accepted' WHERE id = ?",
     [reschedule.id]
   );
-  
+
   return { success: true };
 };
 

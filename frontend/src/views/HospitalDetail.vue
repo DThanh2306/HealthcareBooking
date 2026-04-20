@@ -1947,7 +1947,7 @@ onMounted(async () => {
 }
 
 .book-doctor-btn {
-  color: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -1960,7 +1960,7 @@ onMounted(async () => {
 }
 
 .book-doctor-btn:hover {
-  color: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
@@ -2158,7 +2158,7 @@ onMounted(async () => {
 }
 
 .rate-hospital-btn {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   border-radius: 8px;

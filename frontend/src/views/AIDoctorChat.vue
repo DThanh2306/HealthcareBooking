@@ -672,7 +672,7 @@ watch(isDarkMode, (newValue) => {
 }
 
 .dark-mode .chat-message.user .bubble {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
 }
 
 .dark-mode .input-wrapper textarea {
@@ -720,7 +720,7 @@ watch(isDarkMode, (newValue) => {
   margin: 0;
   font-size: 1.75rem;
   color: #1e293b;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  background: #175457;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -785,7 +785,7 @@ watch(isDarkMode, (newValue) => {
 }
 
 .restart-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
 }
 
@@ -801,7 +801,7 @@ watch(isDarkMode, (newValue) => {
 
 .chat-body {
   min-height: 400px;
-  max-height: 400px;
+  max-height: 2000px;
   flex: 1;
   padding: 24px;
   overflow-y: auto;
@@ -893,7 +893,7 @@ watch(isDarkMode, (newValue) => {
 }
 
 .chat-message.user .bubble {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border-color: rgba(255, 255, 255, 0.2);
 }
@@ -1040,7 +1040,7 @@ watch(isDarkMode, (newValue) => {
   padding: 16px 24px;
   border-radius: 16px;
   border: none;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   font-weight: 600;
   cursor: pointer;
