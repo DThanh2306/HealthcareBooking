@@ -103,10 +103,6 @@
           @change="loadRevenue" 
           style="width: 280px"
         />
-        
-        <el-button @click="exportRevenue" type="primary" :icon="Download">
-          Xuất Excel
-        </el-button>
       </div>
 
       <!-- Chart and Table Layout -->
@@ -1114,7 +1110,7 @@ export default {
 }
 
 .hero {
-  background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+    background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 16px;
   color: #fff;
   padding: 28px 24px;
@@ -1170,7 +1166,7 @@ export default {
 }
 
 .card-info .value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #111827;
   line-height: 1;
@@ -1202,10 +1198,26 @@ export default {
 }
 
 /* Themed cards */
-.card.approved .card-icon { background: #ecfeff; color: #0891b2; border: 1px solid #cffafe; }
-.card.doctors .card-icon { background: #eef2ff; color: #4f46e5; border: 1px solid #e0e7ff; }
-.card.hospitals .card-icon { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
-.card.revenue .card-icon { background: #fff7ed; color: #f97316; border: 1px solid #ffedd5; }
+.card.approved .card-icon { 
+  background: #ecfeff; 
+  color: #0891b2; 
+  border: 1px solid #cffafe; 
+}
+.card.doctors .card-icon { 
+  background: #eef2ff; 
+  color: #4f46e5; 
+  border: 1px solid #e0e7ff; 
+}
+.card.hospitals .card-icon { 
+  background: #f0fdf4; 
+  color: #16a34a; 
+  border: 1px solid #dcfce7; 
+}
+.card.revenue .card-icon { 
+  background: #fff7ed; 
+  color: #f97316; 
+  border: 1px solid #ffedd5; 
+}
 
 .revenue-controls { 
   display: flex; 
@@ -1231,7 +1243,7 @@ export default {
 }
 
 .summary-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   padding: 20px;
   border-radius: 12px;
@@ -1364,7 +1376,7 @@ export default {
 }
 
 .current-info {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   padding: 20px;
   border-radius: 12px;
@@ -1468,7 +1480,7 @@ export default {
 
 /* Target Progress Colors */
 ::v-deep(.target-progress .el-progress-bar__outer) {
-  background-color: #e5e7eb;
+  background-color: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
 }
 
 ::v-deep(.target-progress .el-progress-bar__inner) {
@@ -1487,7 +1499,7 @@ export default {
 
 /* Enhanced Button Styling */
 .target-dialog .el-dialog__footer .el-button--primary {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border: none;
 }
 
@@ -1532,7 +1544,7 @@ export default {
 }
 
 ::v-deep(.el-progress-bar__inner) {
-  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 4px;
 }
 

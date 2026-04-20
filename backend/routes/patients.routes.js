@@ -59,33 +59,20 @@ router.get("/patients", patientController.getAllPatients);
  *   post:
  *     summary: Tạo lịch hẹn mới
  *     tags: [Patients]
- *     consumes:
- *       - multipart/form-data
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - id_u
- *               - dr_id
- *               - name
- *               - gender
- *               - phone
- *               - email
- *               - appointment_date
- *               - time_slot
+ *             required: [dr_id, p_name, gender, phone, email, appointment_date]
  *             properties:
- *               id_u:
- *                 type: integer
  *               dr_id:
  *                 type: integer
- *               name:
+ *               p_name:
  *                 type: string
  *               gender:
  *                 type: string
- *                 enum: [Nam, Nữ, Khác]
  *               phone:
  *                 type: string
  *               email:
@@ -108,9 +95,21 @@ router.get("/patients", patientController.getAllPatients);
  *                 format: date
  *               time_slot:
  *                 type: string
+ *                 example: "08:00 - 09:00"
+ *                 description: Khung giờ khám, nếu có max_slot sẽ kiểm tra giới hạn
  *     responses:
  *       201:
  *         description: Tạo thành công
+ *       409:
+ *         description: Khung giờ đã đầy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Khung giờ đã đầy
  *       500:
  *         $ref: '#/components/responses/500InternalServerError'
  */
@@ -200,10 +199,138 @@ router.get("/patients/my", verifyToken, patientController.getUserAppointments);
 
 router.get("/patients/booked/:dr_id/:date", patientController.getBookedSlots);
 
+/**
+ * @swagger
+ * /patients/{id}/slot-usage:
+ *   get:
+ *     summary: Kiểm tra số slot đã dùng của một khung giờ theo ngày
+ *     tags: [Patients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: dr_id của bác sĩ
+ *       - in: query
+ *         name: time_slot
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "08:00 - 09:00"
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Thông tin slot usage
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 dr_id:
+ *                   type: integer
+ *                 time_slot:
+ *                   type: string
+ *                 date:
+ *                   type: string
+ *                 current_slot:
+ *                   type: integer
+ *                 max_slot:
+ *                   type: integer
+ *                   nullable: true
+ *                 available:
+ *                   type: boolean
+ */
+router.get("/patients/:id/slot-usage", patientController.getSlotUsage);
+
 // Rescheduling endpoints
+/**
+ * @swagger
+ * /patients/{id}/reschedule:
+ *   post:
+ *     summary: Đề xuất đổi lịch khám
+ *     tags: [Patients]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID appointment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [proposed_date]
+ *             properties:
+ *               proposed_date:
+ *                 type: string
+ *                 format: date
+ *                 example: "2026-05-01"
+ *               proposed_time_slot:
+ *                 type: string
+ *                 example: "09:00 - 09:30"
+ *                 description: Khung giờ mới đề xuất (nếu muốn đổi khung giờ)
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Đề xuất thành công
+ *       400:
+ *         description: Thiếu ngày đề xuất
+ */
 router.post("/patients/:id/reschedule", verifyToken, patientController.proposeReschedule);
+/**
+ * @swagger
+ * /patients/{id}/reschedule/accept:
+ *   post:
+ *     summary: Chấp nhận đề xuất đổi lịch
+ *     tags: [Patients]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Chấp nhận thành công
+ *       409:
+ *         description: Khung giờ đề xuất đã đầy
+ */
 router.post("/patients/:id/reschedule/accept", verifyToken, patientController.acceptReschedule);
+
+/**
+ * @swagger
+ * /patients/{id}/reschedule/decline:
+ *   post:
+ *     summary: Từ chối đề xuất đổi lịch
+ *     tags: [Patients]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Từ chối thành công
+ */
 router.post("/patients/:id/reschedule/decline", verifyToken, patientController.declineReschedule);
+
 
 // Doctor self appointments
 const { requireDoctor } = require("../middlewares/auth.middleware");

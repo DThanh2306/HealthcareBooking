@@ -117,7 +117,7 @@ onMounted(async () => {
 .header-icon {
   width: 64px;
   height: 64px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -170,7 +170,7 @@ onMounted(async () => {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
@@ -355,7 +355,7 @@ onMounted(async () => {
 
 /* View More Button */
 .view-more-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   border-radius: 12px;

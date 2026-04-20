@@ -1,0 +1,100 @@
+{
+  "id": "unknown_1775475545081",
+  "timestamp": "2026-04-06T11:39:05.081Z",
+  "input": {
+    "symptoms": "nhức đầu",
+    "age": "20",
+    "gender": "nữ",
+    "duration": "1 tuần"
+  },
+  "systemOutput": {
+    "recommendations": {
+      "specialties": [
+        "Sản Phụ khoa",
+        "Nội tiết"
+      ],
+      "doctors": [],
+      "hospitals": [
+        {
+          "h_id": 11,
+          "id": 11,
+          "name": "Bệnh viện Mắt TP.HCM",
+          "address": "Số 280 Điện Biên Phủ, phường 7, quận 3, TP.HCM",
+          "score": 0.917,
+          "phone": "19002115",
+          "description": "Được thành lập vào năm 1978, Bệnh viện Mắt TP. HCM là bệnh viện chuyên khoa hạng nhất tại khu vực miền Nam.",
+          "distance": 16.5,
+          "distanceText": "16.5km",
+          "locationMethod": "gps",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        },
+        {
+          "h_id": 16,
+          "id": 16,
+          "name": "Bệnh viện Bệnh Nhiệt đới",
+          "address": "764 Võ Văn Kiệt, Phường Chợ Quán, TP. Hồ Chí Minh",
+          "score": 0.652,
+          "phone": "675756",
+          "description": "Bệnh viện Nhiệt đới là cơ sở y tế chuyên khoa đầu ngành trong lĩnh vực phòng ngừa, chẩn đoán và điều trị các bệnh truyền nhiễm.",
+          "distance": 9.5,
+          "distanceText": "9.5km",
+          "locationMethod": "gps",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        },
+        {
+          "h_id": 12,
+          "id": 12,
+          "name": "Bệnh viện Nhi Đồng 1",
+          "address": "341 Sư Vạn Hạnh, Phường Vườn Lài, TP.Hồ Chí Minh",
+          "score": 0.4,
+          "phone": "19002115",
+          "description": "Bệnh viện Nhi Đồng 1 là địa chỉ đáng tin cậy cho việc khám và điều trị bệnh cho trẻ em.",
+          "distance": 0,
+          "distanceText": "0km",
+          "locationMethod": "gps",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        },
+        {
+          "h_id": 1,
+          "id": 1,
+          "name": "Bệnh viện Chợ Rẫy",
+          "address": "201B Nguyễn Chí Thanh, Quận 5, TP.HCM",
+          "score": 0.36,
+          "phone": "0949843322",
+          "description": "Bệnh viện Chợ Rẫy với lịch sử thành lập trên 100 năm, là bệnh viện hạng đặc biệt tuyến Trung ương lớn nhất cả nước với trên 1.800 giường và trên 3.000 kỹ thuật y tế được thực hiện.",
+          "distance": 7.9,
+          "distanceText": "7.9km",
+          "locationMethod": "gps",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        },
+        {
+          "h_id": 13,
+          "id": 13,
+          "name": "Bệnh viện Da Liễu TP.HCM",
+          "address": "02 Nguyễn Thông, Phường Xuân Hòa, TP.Hồ Chí Minh",
+          "score": 0.359,
+          "phone": "19002115",
+          "description": "Bệnh viện Da Liễu TP.HCM chuyên tư vấn và điều trị nhiều bệnh lý da phổ biến.",
+          "distance": 8.1,
+          "distanceText": "8.1km",
+          "locationMethod": "gps",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        }
+      ],
+      "noDoctorsFound": true,
+      "enhancedAnalysis": {}
+    },
+    "confidence": 0.8
+  },
+  "feedback": {
+    "helpful": null,
+    "accurate": null,
+    "rating": null
+  },
+  "groundTruth": null
+}

@@ -1,6 +1,6 @@
 <template>
   <div class="doctor-profile">
-    <!-- Header Section -->
+    <!-- Header -->
     <div class="profile-header">
       <div class="avatar-section">
         <img
@@ -10,6 +10,7 @@
           @error="usePlaceholderImage"
         />
       </div>
+
       <div class="main-info">
         <h1 class="title">{{ doctor?.dr_name }}</h1>
         <div class="description">
@@ -25,94 +26,72 @@
       </div>
     </div>
 
-    <!-- Booking Section -->
+    <!-- Booking -->
     <div class="doctor-content">
-      <!-- Schedule -->
       <div class="schedule-area">
-        <div class="date-select">
-          <select
-            v-model="selectedDate"
-            class="date-dropdown"
-          >
-            <option
-              v-for="(day, index) in daysList"
-              :key="index"
-              :value="day.value"
-            >
-              {{ day.label }}
-            </option>
-          </select>
-        </div>
         <div class="schedule-section">
           <div class="schedule-label">
-            <svg class="label-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M7 2v2M17 2v2M3 8h18M5 22h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z" fill="none" stroke="currentColor" stroke-width="2"/>
-            </svg>
             <span> LỊCH KHÁM</span>
           </div>
-          <!-- Show selected day info for new format doctors -->
-          <div v-if="selectedDate && doctor?.schedulesByDay" class="selected-day-info">
-            <p class="day-display">
-              <strong>{{ getVietnameseDayName(selectedDate) }}</strong> - {{ formatDisplayDate(selectedDate) }}
-            </p>
+
+          <!-- Select date -->
+          <div class="date-select">
+            <select
+              v-model="selectedDate"
+              class="date-dropdown"
+            >
+              <option
+                v-for="d in daysList"
+                :key="d.value"
+                :value="d.value"
+              >
+                {{ d.label }}
+              </option>
+            </select>
           </div>
 
+          <!-- Slots -->
           <div class="slots-list">
-            <template v-if="availableSlots?.length">
+            <template v-if="availableSlots.length">
               <div
-                v-for="(slot, index) in availableSlots"
-                :key="index"
+                v-for="slot in availableSlots"
+                :key="slot.time_slot"
                 class="time-slot"
-                :class="{ booked: bookedSlots.includes(slot), disabled: isPastSlot(slot) }"
+                :class="{
+                  booked: slot.is_full,
+                  disabled: isPastSlot(slot.time_slot) || slot.is_full
+                }"
                 @click="goToBookingForm(slot)"
               >
-                {{ slot }}
+                {{ slot.time_slot }}
               </div>
             </template>
 
             <p
               v-else
-              class="text-gray-500 text-sm italic"
+              class="text-gray-500 italic"
             >
-              {{ doctor?.schedulesByDay ? 'Bác sĩ không làm việc vào ngày này' : 'Chưa cập nhật lịch khám' }}
+              Không có lịch khám
             </p>
           </div>
-          <div class="note">Chọn và đặt (Phí đặt lịch 0đ)</div>
+
+          <div class="note">Chọn và đặt (Phí 0đ)</div>
         </div>
       </div>
 
-      <!-- Price and Clinic Info -->
+      <!-- Info -->
       <div class="info-area">
         <div class="clinic-info">
-          <div class="clinic-title">
-            <svg class="label-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M3 3h18v18H3z" fill="none" stroke="currentColor" stroke-width="2"/>
-              <path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <strong>ĐỊA CHỈ KHÁM</strong>
-          </div>
-          <div class="clinic-location">
-            <span class="clinic-name">{{ doctor?.dr_h_name }}</span>
-            <div v-if="doctor?.h_address" class="clinic-address">
-              <svg class="address-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 11.5A2.5 2.5 0 1 1 12 8a2.5 2.5 0 0 1 0 5.5Z"/>
-              </svg>
-              <span>{{ doctor.h_address }}</span>
-            </div>
-          </div>
-          <div class="promotion">
-            🎫 Chương trình khuyến mại
-            <span class="see-details">Xem chi tiết</span>
-          </div>
+          <strong>ĐỊA CHỈ KHÁM</strong>
+
+          <div>{{ doctor?.dr_h_name }}</div>
+          <div v-if="doctor?.h_address">{{ doctor.h_address }}</div>
+
           <div class="fee">
             GIÁ KHÁM:
-            <span class="price">
-              {{ doctor?.dr_price ? `${doctor.dr_price.toLocaleString()}₫ ` : 'Chưa cập nhật' }}
+            <span>
+              {{ doctor?.dr_price ? doctor.dr_price + '₫' : 'Chưa cập nhật' }}
             </span>
-            <span class="see-details">Xem chi tiết</span>
-          </div>
-          <div class="insurance">
-            LOẠI BẢO HIỂM ÁP DỤNG. <span class="see-details">Xem chi tiết</span>
           </div>
         </div>
       </div>
@@ -136,7 +115,7 @@
     <div class="section">
       <div class="rating-section-header">
         <h2>Đánh giá từ bệnh nhân</h2>
-        <button 
+        <button
           @click="showRatingModal = true"
           class="rate-doctor-btn"
           v-if="!hasUserRated"
@@ -144,33 +123,55 @@
           Đánh giá bác sĩ
         </button>
       </div>
-      
+
       <RatingDisplay
-  :ratings="ratings"
-  :summary="ratingSummary"
-  :pagination="ratingPagination"
-  :loading="loadingRatings"
-  :context="'doctor'"
-  :currentUserId="currentUserId"
-  @load-page="loadRatings"
->
-  <template #owner-actions="{ rating }">
-    <div class="rating-actions">
-      <button @click="editRating(rating)" class="edit-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;">
-          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-        </svg>
-        Sửa
-      </button>
-      <button @click="deleteRating(rating)" class="delete-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;">
-          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-        </svg>
-        Xóa
-      </button>
-    </div>
-  </template>
-</RatingDisplay>
+        :ratings="ratings"
+        :summary="ratingSummary"
+        :pagination="ratingPagination"
+        :loading="loadingRatings"
+        :context="'doctor'"
+        :currentUserId="currentUserId"
+        @load-page="loadRatings"
+      >
+        <template #owner-actions="{ rating }">
+          <div class="rating-actions">
+            <button
+              @click="editRating(rating)"
+              class="edit-btn"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style="margin-right: 4px"
+              >
+                <path
+                  d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                />
+              </svg>
+              Sửa
+            </button>
+            <button
+              @click="deleteRating(rating)"
+              class="delete-btn"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style="margin-right: 4px"
+              >
+                <path
+                  d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                />
+              </svg>
+              Xóa
+            </button>
+          </div>
+        </template>
+      </RatingDisplay>
     </div>
 
     <!-- Rating Modal -->
@@ -185,313 +186,157 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import axios from '@/axios';
-import router from '@/router';
-import DoctorRatingModal from '@/components/DoctorRatingModal.vue';
-import RatingDisplay from '@/components/RatingDisplay.vue';
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from '@/axios'
+import router from '@/router'
 
-//
+// ================= STATE =================
+const route = useRoute()
 
-const selectedDate = ref(''); // ngày đang chọn
-const daysList = ref([]);
-const bookedSlots = ref([]); // ✅ danh sách slot đã được đặt
-const availableSlots = ref([]); // Available slots for selected date
+const doctor = ref(null)
+const selectedDate = ref('')
+const daysList = ref([])
+const availableSlots = ref([]) 
+// [{ time_slot, max_slot, current_slot, is_full }]
 
-// Rating related
-const showRatingModal = ref(false);
-const ratings = ref([]);
-const ratingSummary = ref(null);
-const ratingPagination = ref(null);
-const loadingRatings = ref(false);
-const hasUserRated = ref(false);
-const currentUserId = ref(null);
+// ================= CONFIG =================
+const baseURL = 'http://localhost:3000'
 
-// 🟩 Hàm sửa đánh giá
-function editRating(rating) {
-  // Mở modal sửa, hoặc gọi lại modal cũ với dữ liệu có sẵn
-  showRatingModal.value = true;
-
-  // Bạn có thể truyền dữ liệu rating này vào modal (nếu modal hỗ trợ)
-  // Ví dụ: modal.value.setEditData(rating)
-  console.log("Sửa đánh giá:", rating);
-}
-
-// 🟥 Hàm xóa đánh giá
-async function deleteRating(rating) {
-  if (!confirm("Bạn có chắc muốn xóa đánh giá này không?")) return;
-
-  try {
-    await axios.delete(`/feedback/doctor-rating/${rating.id_fb}`);
-
-    alert("Đã xóa đánh giá!");
-    await loadRatings(); // Reload lại danh sách đánh giá
-  } catch (err) {
-    console.error("Lỗi xóa đánh giá:", err);
-    alert("Không thể xóa đánh giá. Vui lòng thử lại!");
-  }
-}
-
-
-
-
+// ================= DATE =================
 function getUpcomingDays() {
-  const today = new Date();
-  const result = [];
+  const result = []
+  const today = new Date()
 
   for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
+    const d = new Date(today)
+    d.setDate(today.getDate() + i)
 
-    const label = d.toLocaleDateString('vi-VN', {
-      weekday: 'short',
-      day: '2-digit',
-      month: '2-digit'
-    }); // Thứ 3 - 02/07
-    
-    // Use local date instead of UTC to avoid timezone issues
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const value = `${year}-${month}-${day}`; // YYYY-MM-DD
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
 
-    result.push({ label, value });
+    result.push({
+      value: `${year}-${month}-${day}`,
+      label: d.toLocaleDateString('vi-VN', {
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit'
+      })
+    })
   }
 
-  return result;
+  return result
 }
 
-const route = useRoute();
-const doctor = ref(null);
-const baseURL = 'http://localhost:3000';
-const placeholderImage = 'https://placehold.co/128x128/c0c0c0/585858/png?text=Doctor+Image';
-
-const usePlaceholderImage = (e) => {
-  e.target.src = placeholderImage;
-};
-
-const shareProfile = () => {
-  if (!doctor.value) return;
-  const title = `Thông tin bác sĩ ${doctor.value.dr_name}`;
-  const url = window.location.href;
-
-  if (navigator.share) {
-    navigator.share({ title, url }).catch(() => alert('Chia sẻ thất bại'));
-  } else {
-    navigator.clipboard.writeText(url);
-    alert('Đã sao chép liên kết');
+// ================= LOAD DOCTOR =================
+async function loadDoctor() {
+  try {
+    const res = await axios.get(`${baseURL}/api/doctors/${route.params.dr_id}`)
+    doctor.value = res.data
+  } catch (err) {
+    console.error(err)
+    alert('Không thể tải bác sĩ')
   }
-};
+}
 
-// ✅ Hàm tải slot đã đặt (gọi API backend)
-async function loadBookedSlots() {
-  if (!doctor.value?.dr_id || !selectedDate.value) return;
+// ================= LOAD SLOT =================
+async function loadAvailableSlots() {
+  if (!doctor.value?.dr_id || !selectedDate.value) return
+
   try {
     const res = await axios.get(
-      `${baseURL}/api/patients/booked/${doctor.value.dr_id}/${selectedDate.value}`
-    );
-    bookedSlots.value = res.data || [];
-  } catch (err) {
-    console.error('Lỗi tải slot đã đặt:', err);
-  }
-}
-
-// Load available slots for selected date
-async function loadAvailableSlots() {
-  if (!doctor.value?.dr_id || !selectedDate.value) {
-    availableSlots.value = [];
-    return;
-  }
-
-  try {
-    // Check if doctor has schedulesByDay (new format)
-    if (doctor.value.schedulesByDay && Object.keys(doctor.value.schedulesByDay).length > 0) {
-      // New format: get slots for specific day of week
-      const selectedDateObj = new Date(selectedDate.value);
-      let dayOfWeek = selectedDateObj.getDay(); // 0 = Sunday, 1 = Monday, ...
-      dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek; // Convert Sunday from 0 to 7
-      
-      // Get slots for this day of week
-      const slotsForDay = doctor.value.schedulesByDay[dayOfWeek] || [];
-      availableSlots.value = slotsForDay;
-      
-      console.log(`📅 Selected date: ${selectedDate.value}, Day of week: ${dayOfWeek}, Slots:`, slotsForDay);
-    } else {
-      // Old format: try API call or use all schedules
-      try {
-        const response = await axios.get(`${baseURL}/api/doctors/${doctor.value.dr_id}/schedules/date/${selectedDate.value}`);
-        
-        if (response.data.success && response.data.schedules?.length) {
-          availableSlots.value = response.data.schedules;
-        } else {
-          // Fallback: use all schedules
-          availableSlots.value = Array.isArray(doctor.value.schedules) 
-            ? doctor.value.schedules.map(s => typeof s === 'string' ? s : s.time_slot)
-            : [];
-        }
-      } catch (apiError) {
-        console.error('❌ Lỗi API, dùng schedules gốc:', apiError);
-        availableSlots.value = Array.isArray(doctor.value.schedules) 
-          ? doctor.value.schedules.map(s => typeof s === 'string' ? s : s.time_slot)
-          : [];
+      `${baseURL}/api/doctors/${doctor.value.dr_id}/available-slots`,
+      {
+        params: { date: selectedDate.value }
       }
-    }
-  } catch (error) {
-    console.error('❌ Lỗi khi lấy lịch khám theo ngày:', error);
-    // Final fallback
-    availableSlots.value = [];
+    )
+
+    // normalize data
+    availableSlots.value = (res.data.availableSlots || []).map(s => ({
+      time_slot: s.time_slot,
+      max_slot: s.max_slot,
+      current_slot: s.current_slot,
+      is_full: s.is_full
+    }))
+
+    console.log('Slots:', availableSlots.value)
+
+  } catch (err) {
+    console.error('❌ loadAvailableSlots:', err)
+    availableSlots.value = []
   }
 }
 
+// ================= CHECK =================
 function isPastSlot(slot) {
-  try {
-    if (!selectedDate.value) return false;
-    const today = new Date();
-    const sel = new Date(selectedDate.value);
+  if (!selectedDate.value) return false
 
-    // Nếu ngày chọn sau hôm nay => luôn hợp lệ
-    const selY = sel.getFullYear(), selM = sel.getMonth(), selD = sel.getDate();
-    const nowY = today.getFullYear(), nowM = today.getMonth(), nowD = today.getDate();
-    const isSameDay = selY === nowY && selM === nowM && selD === nowD;
+  const today = new Date()
+  const selected = new Date(selectedDate.value)
 
-    if (!isSameDay) {
-      // Nếu ngày trong quá khứ => coi là past
-      if (sel < new Date(nowY, nowM, nowD)) return true;
-      // Nếu tương lai => không past
-      return false;
-    }
+  const isSameDay = today.toDateString() === selected.toDateString()
 
-    // Cùng ngày: cần so với giờ hiện tại
-    // Lấy giờ bắt đầu từ slot, hỗ trợ các định dạng: "HH:mm", "HH:mm - HH:mm", "HH:mm~HH:mm"
-    const match = String(slot).match(/(\d{1,2}):(\d{2})/);
-    if (!match) return false;
-    const h = parseInt(match[1], 10);
-    const m = parseInt(match[2], 10);
+  if (!isSameDay) return selected < today
 
-    const slotStart = new Date(selY, selM, selD, h, m, 0, 0);
+  const match = slot.time_slot.match(/(\d{1,2}):(\d{2})/)
+  if (!match) return false
 
-    return slotStart.getTime() <= today.getTime();
-  } catch (e) {
-    return false;
-  }
+  const h = parseInt(match[1])
+  const m = parseInt(match[2])
+
+  const slotTime = new Date(
+    selected.getFullYear(),
+    selected.getMonth(),
+    selected.getDate(),
+    h,
+    m
+  )
+
+  return slotTime <= today
 }
 
+// ================= NAVIGATE =================
 function goToBookingForm(slot) {
-  // Nếu slot đã được đặt thì không cho click
-  if (bookedSlots.value.includes(slot)) return alert('Khung giờ này đã có người đặt!');
-  // Nếu slot trong quá khứ (cùng ngày) thì chặn
-  if (isPastSlot(slot)) return alert('Không thể đặt khung giờ đã qua!');
+  if (slot.is_full) return alert('Khung giờ đã đầy')
+  if (isPastSlot(slot)) return alert('Khung giờ đã qua')
 
-  const targetRoute = {
+  const target = {
     name: 'bookingform',
     query: {
       dr_id: doctor.value.dr_id,
       date: selectedDate.value,
-      time: slot
+      time: slot.time_slot
     }
-  };
+  }
 
-  // Kiểm tra đăng nhập: nếu chưa đăng nhập => chuyển tới trang đăng nhập,
-  // sau đó quay lại BookingForm với đầy đủ dữ liệu (dr_id, date, time)
-  const token = localStorage.getItem('userToken') || localStorage.getItem('token');
+  const token = localStorage.getItem('token')
+
   if (!token) {
-    alert('Bạn cần đăng nhập để đặt lịch');
-    const href = router.resolve(targetRoute).href;
-    return router.push({ name: 'auth', query: { redirect: encodeURIComponent(href) } });
+    const href = router.resolve(target).href
+    return router.push({
+      name: 'auth',
+      query: { redirect: encodeURIComponent(href) }
+    })
   }
 
-  router.push(targetRoute);
+  router.push(target)
 }
 
+// ================= INIT =================
 onMounted(async () => {
-  try {
-    const dr_id = route.params.dr_id;
-    const res = await axios.get(`${baseURL}/api/doctors/${dr_id}`);
-    doctor.value = res.data;
-  } catch (err) {
-    alert('Không thể tải dữ liệu bác sĩ');
-    console.error(err);
-  }
+  await loadDoctor()
 
-  daysList.value = getUpcomingDays();
-  selectedDate.value = daysList.value[0]?.value || '';
+  daysList.value = getUpcomingDays()
+  selectedDate.value = daysList.value[0]?.value || ''
 
-  // Lấy current user id an toàn ở client
-  try {
-    currentUserId.value = typeof window !== 'undefined' && window.localStorage
-      ? window.localStorage.getItem('userId')
-      : null;
-  } catch {
-    currentUserId.value = null;
-  }
+  await loadAvailableSlots()
+})
 
-  await loadAvailableSlots();
-  await loadBookedSlots();
-  await loadRatings();
-});
-
-// Helper functions for day display
-function getVietnameseDayName(dateStr) {
-  const date = new Date(dateStr);
-  const dayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-  return dayNames[date.getDay()];
-}
-
-function formatDisplayDate(dateStr) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('vi-VN', { 
-    day: '2-digit', 
-    month: '2-digit', 
-    year: 'numeric' 
-  });
-}
-
-// ✅ Gọi lại khi đổi ngày
+// ================= WATCH =================
 watch(selectedDate, async () => {
-  await loadAvailableSlots();
-  await loadBookedSlots();
-});
-
-// Rating methods
-async function loadRatings(page = 1) {
-  if (!doctor.value?.dr_id) return;
-  
-  loadingRatings.value = true;
-  try {
-    const res = await axios.get(`/feedback/doctor/${doctor.value.dr_id}`, {
-      params: { page, limit: 10 }
-    });
-    const payload = res.data?.data || {};
-    ratings.value = payload.ratings || [];
-    ratingSummary.value = {
-      averageRating: payload.averageRating ? parseFloat(payload.averageRating) : 0,
-      totalRatings: payload.pagination?.total || 0
-    };
-    ratingPagination.value = payload.pagination;
-    // Cập nhật currentUserId và trạng thái đã đánh giá
-    if (payload.currentUserId && !currentUserId.value) {
-      currentUserId.value = payload.currentUserId;
-    }
-    hasUserRated.value = !!(payload.myRating || ratings.value.some(r => r.isOwner));
-  } catch (err) {
-    console.error('Lỗi tải đánh giá:', err);
-  } finally {
-    loadingRatings.value = false;
-  }
-}
-
-function handleRatingSubmitted() {
-  // Reload ratings after submission
-  loadRatings();
-  hasUserRated.value = true;
-}
-
-function showMessage(message) {
-  alert(message.text);
-}
-
-
+  await loadAvailableSlots()
+})
 </script>
 
 <style scoped>
@@ -559,7 +404,7 @@ body {
 
 .booking-btn {
   margin-top: 6px;
-  background: #297fff;
+  background: linear-gradient(135deg, #eeaeca 0%, #94bbe9 100%);
   color: #fff;
   border: none;
   border-radius: 7px;
@@ -570,7 +415,7 @@ body {
   width: 100px;
 }
 .booking-btn:hover {
-  background: #1551a1;
+  background: linear-gradient(135deg, #ff599e 0%, #2f64a1 100%);
 }
 .doctor-content {
   display: flex;
@@ -593,7 +438,7 @@ body {
   gap: 6px;
 }
 .date-link {
-  color: #297fff;
+  color: #082146;
   cursor: pointer;
 }
 .dropdown-icon {
@@ -615,10 +460,13 @@ body {
   color: #1e3a8a;
   margin-bottom: 10px;
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
 }
-.label-icon { color: #3b82f6; }
+.label-icon {
+  color: #3b82f6;
+}
 .slots-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -657,7 +505,7 @@ body {
   font-size: 1rem;
   border: none;
   background: transparent;
-  color: #297fff;
+  color: #1e3a8a;
   font-weight: 600;
   cursor: pointer;
 }
@@ -672,7 +520,13 @@ body {
   padding: 18px 18px 18px 18px;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
 }
-.clinic-title { display: flex; align-items: center; gap: 8px; color: #1e3a8a; margin-bottom: 6px; }
+.clinic-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1e3a8a;
+  margin-bottom: 6px;
+}
 .clinic-location {
   margin: 7px 0 7px 0;
   color: #475569;
@@ -681,8 +535,17 @@ body {
   color: #0f172a;
   font-weight: 700;
 }
-.clinic-address { display: flex; align-items: center; gap: 6px; margin-top: 6px; color: #64748b; font-size: 0.95rem; }
-.address-icon { color: #3b82f6; }
+.clinic-address {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+.address-icon {
+  color: #3b82f6;
+}
 .promotion {
   color: #f59e0b;
   font-size: 1.02rem;
@@ -772,7 +635,7 @@ hr {
 }
 
 .rate-doctor-btn {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #eeaeca 0%, #94bbe9 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -783,7 +646,7 @@ hr {
 }
 
 .rate-doctor-btn:hover {
-  background: #2563eb;
+  color: #1e3a8a;
 }
 
 .rating-actions {
@@ -792,7 +655,8 @@ hr {
   gap: 10px;
 }
 
-.edit-btn, .delete-btn {
+.edit-btn,
+.delete-btn {
   border: none;
   padding: 8px 14px;
   border-radius: 6px;
@@ -843,5 +707,4 @@ hr {
 .day-display strong {
   color: #0a4c57;
 }
-
 </style>

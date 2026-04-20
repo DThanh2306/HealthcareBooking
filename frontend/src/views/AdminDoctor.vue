@@ -259,7 +259,7 @@ onMounted(async () => {
   min-height: 100vh;
 }
 .hero {
-  background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 16px;
   color: #fff;
   padding: 28px 24px;
@@ -323,7 +323,7 @@ h2 {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #437ef7;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: #fff;
   font-size: 1rem;
   font-weight: 500;
@@ -336,7 +336,7 @@ h2 {
   cursor: pointer;
 }
 .add-btn:hover {
-  background: #295dc1;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 .add-btn .icon {
   font-size: 18px;
@@ -344,7 +344,7 @@ h2 {
 .pagination { display: flex; gap: 12px; align-items: center; justify-content: flex-end; padding: 14px 24px; }
 .pg-btn { color: #4b5563; padding: 8px 14px; border: 1px solid #e5e7eb; background: #fff; border-radius: 6px; cursor: pointer; }
 .pg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.pg-info { color: #6b7280; }
+.pg-info { color: #000000; }
 
 .content-card {
   background: #fff;

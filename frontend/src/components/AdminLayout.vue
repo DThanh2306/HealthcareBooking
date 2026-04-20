@@ -2,7 +2,7 @@
   <div class="layout">
     <aside class="sidebar">
       <div class="logo">
-        <span style="font-size: 30px">😊</span>
+        <span style="font-size: 30px"></span>
         <h2>DOCTORS<br />CARE</h2>
       </div>
       <nav class="menu">
@@ -32,10 +32,6 @@
             
             <li>
               <router-link to="/admin/users">👨🏻‍💻 Quản lý người dùng</router-link>
-            </li>
-
-             <li>
-              <router-link to="/admin/workflow">QUY TRINH DONG</router-link>
             </li>
           </ul>
         </div>
@@ -98,8 +94,8 @@ export default {
 }
 .sidebar {
   width: 240px;
-  background: linear-gradient(180deg, #3b8cff, #2a60e4);
-  color: white;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
+  color: rgb(240, 239, 239);
   padding: 20px;
 }
 .logo {
@@ -185,7 +181,7 @@ export default {
 .admin-avatar {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;

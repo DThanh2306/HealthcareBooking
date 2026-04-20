@@ -82,6 +82,13 @@ async function loadUserProfile() {
     // 🔄 Cập nhật localStorage để đồng bộ
     localStorage.setItem('userName', user.value.name_u);
     localStorage.setItem('userRole', user.value.role);
+    
+    // 🆕 Start notification polling after profile is loaded
+    if (isDoctor.value && isLoggedIn.value) {
+      fetchNotifications();
+      if (notificationInterval) clearInterval(notificationInterval);
+      notificationInterval = setInterval(fetchNotifications, 30000);
+    }
   } catch (error) {
     console.error('Lỗi khi load profile:', error);
     syncUserFromLocalStorage(); // Fallback
@@ -115,11 +122,7 @@ onMounted(() => {
     syncUserFromLocalStorage();
   }
   
-  // Start notification polling for doctors
-  if (isDoctor.value && isLoggedIn.value) {
-    fetchNotifications();
-    notificationInterval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
-  }
+  // 🆕 Notification polling is now started in loadUserProfile after role is determined
   
   // 🆕 Listen for profile update events và auth change
   window.addEventListener('profileUpdated', handleProfileUpdate);
@@ -1185,7 +1188,7 @@ async function logout() {
 .logo-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -1204,14 +1207,14 @@ async function logout() {
 }
 
 .logo-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .logo-secondary {
-  color: #10b981;
+  color: #175457;
 }
 
 .nav-links {
@@ -1248,7 +1251,7 @@ async function logout() {
 }
 
 .nav-item-ai {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
   display: flex;
@@ -1257,7 +1260,7 @@ async function logout() {
 }
 
 .nav-item-ai:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(88, 80, 236, 0.45);
 }
@@ -1284,7 +1287,7 @@ async function logout() {
 }
 
 .searchbox:focus-within {
-  border-color: #667eea;
+  border-color: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -1368,7 +1371,7 @@ async function logout() {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1529,7 +1532,7 @@ async function logout() {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -1544,7 +1547,7 @@ async function logout() {
 .login-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
 }
 
 /* Notification Bell Styles */
@@ -1833,7 +1836,7 @@ async function logout() {
 .dialog-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -2025,7 +2028,7 @@ async function logout() {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }

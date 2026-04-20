@@ -662,7 +662,7 @@ onMounted(async () => {
   cursor: pointer;
 }
 .add-btn {
-  background: #297fff;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   padding: 6px 14px;
@@ -670,7 +670,7 @@ onMounted(async () => {
   cursor: pointer;
 }
 .add-btn:hover {
-  background: #1551a1;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 .slot-list {
   list-style: none;
@@ -752,7 +752,7 @@ onMounted(async () => {
   padding: 7px 26px;
   font-size: 1.07rem;
   font-weight: 500;
-  background: #648bfd;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   border: none;
   border-radius: 6px;
   color: #fff;
@@ -760,7 +760,7 @@ onMounted(async () => {
   transition: background 0.16s;
 }
 .submit-btn:hover {
-  background: #4866c8;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 .price-input {
   max-width: 200px;

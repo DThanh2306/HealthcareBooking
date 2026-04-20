@@ -1,0 +1,205 @@
+{
+  "id": "unknown_1775452245119",
+  "timestamp": "2026-04-06T05:10:45.119Z",
+  "input": {
+    "symptoms": "Hà Nội",
+    "age": "Nam",
+    "gender": "Khám ở đây có đắt không?",
+    "duration": "Ho khan, sốt nhẹ"
+  },
+  "systemOutput": {
+    "recommendations": {
+      "specialties": [
+        "Thần Kinh",
+        "Nội Khoa – Gan, Thận, Bao Tử",
+        "Tim mạch",
+        "Mắt"
+      ],
+      "doctors": [
+        {
+          "dr_id": 1,
+          "id": 1,
+          "name": "Tiến sĩ, Bác sĩ Trần Anh Duy",
+          "specialty": "Tim mạch",
+          "hospitalName": "Bệnh viện Phương Châu",
+          "hospitalAddress": "300 Nguyễn Văn Cừ nối dài, P. Tân An, Tp. Cần Thơ",
+          "price": "150000.00",
+          "matchScore": 1,
+          "image": "/uploads/1751442980642-327599679.jpg",
+          "description": "Chuyên gia hàng đầu về Tim mạch với gần 40 năm kinh nghiệm",
+          "sameProvince": false,
+          "regionLevel": "unknown",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        },
+        {
+          "dr_id": 2,
+          "id": 2,
+          "name": "TS-BS Nguyễn Văn Doanh",
+          "specialty": "Thần Kinh",
+          "hospitalName": "Bệnh viện Hoàn Mỹ Cửu Long",
+          "hospitalAddress": "Lô 20 Võ Nguyên Giáp, Phú Thứ, Cái Răng, Cần Thơ, Việt Nam",
+          "price": "250000.00",
+          "matchScore": 0.952,
+          "image": "/uploads/1762933073720-392896406.png",
+          "description": "Tiến sĩ, Bác sĩ Nguyễn Văn Doanh, 40 năm kinh nghiệm chuyên khoa Nội Thần kinh",
+          "sameProvince": false,
+          "regionLevel": "unknown",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        },
+        {
+          "dr_id": 8,
+          "id": 8,
+          "name": "Thạc sĩ, Bác sĩ Trần Thị Mai Thy",
+          "specialty": "Thần Kinh",
+          "hospitalName": "Bệnh viện Trường Đại Học Y Dược Cần Thơ",
+          "hospitalAddress": "179 Nguyễn Văn Cừ Nối Dài, phường Tân An, Ninh Kiều, Cần Thơ, Việt Nam",
+          "price": "250000.00",
+          "matchScore": 0.896,
+          "image": "/uploads/1754641659820-627906332.jpg",
+          "description": "Thạc sĩ, Bác sĩ Trần Thị Mai Thy, 20 năm kinh nghiệm Nội Thần kinh",
+          "sameProvince": false,
+          "regionLevel": "unknown",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        },
+        {
+          "dr_id": 16,
+          "id": 16,
+          "name": "BS CKII Lê Hồng Anh",
+          "specialty": "Tim mạch",
+          "hospitalName": "Bệnh viện Chợ Rẫy",
+          "hospitalAddress": "201B Nguyễn Chí Thanh, Quận 5, TP.HCM",
+          "price": "150000.00",
+          "matchScore": 0.877,
+          "image": "/uploads/1766478321652-939840414.png",
+          "description": "Chuyên gia hơn 20 năm nổi bật trong lĩnh vực Hô hấp (Phổi)",
+          "sameProvince": false,
+          "regionLevel": "unknown",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        },
+        {
+          "dr_id": 23,
+          "id": 23,
+          "name": "ThS.BS.CKII. VŨ THỊ THU GIANG",
+          "specialty": "Mắt",
+          "hospitalName": "Bệnh viện Phương Châu",
+          "hospitalAddress": "300 Nguyễn Văn Cừ nối dài, P. Tân An, Tp. Cần Thơ",
+          "price": "150000.00",
+          "matchScore": 0.859,
+          "image": "/uploads/1766481787207-314488260.jfif",
+          "description": "vxcvxcvxc",
+          "sameProvince": false,
+          "regionLevel": "unknown",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        },
+        {
+          "dr_id": 11,
+          "id": 11,
+          "name": "BS CKI. Vũ Thị Hà",
+          "specialty": "Mắt",
+          "hospitalName": "Bệnh viện Mắt TP.HCM",
+          "hospitalAddress": "Số 280 Điện Biên Phủ, phường 7, quận 3, TP.HCM",
+          "price": "150000.00",
+          "matchScore": 0.817,
+          "image": "/uploads/1755211185787-507126188.jpg",
+          "description": "BS.CKI Vũ Thị Hà đã có 7 năm kinh nghiệm làm việc tại bệnh viện hạng I.",
+          "sameProvince": false,
+          "regionLevel": "unknown",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        },
+        {
+          "dr_id": 6,
+          "id": 6,
+          "name": "Phó giáo sư, Tiến sĩ, Bác sĩ Nguyễn Xuân Thành",
+          "specialty": "Nội Khoa - Gan, Thận, Bao Tử",
+          "hospitalName": "Bệnh viện Y học cổ truyền Trung ương",
+          "hospitalAddress": "Số 29 Nguyễn Bỉnh Khiêm, Hai Bà Trưng, Hà Nội",
+          "price": "300000.00",
+          "matchScore": 0.53,
+          "image": "/uploads/1754641544952-233160283.png",
+          "description": "Chuyên gia đầu ngành về chuyên khoa gan mật",
+          "sameProvince": false,
+          "regionLevel": "unknown",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        }
+      ],
+      "hospitals": [
+        {
+          "h_id": 6,
+          "id": 6,
+          "name": "Bệnh viện Phương Châu",
+          "address": "300 Nguyễn Văn Cừ nối dài, P. Tân An, Tp. Cần Thơ",
+          "score": 2.385,
+          "phone": "1900 54 54 ",
+          "description": "Hệ thống chăm sóc sức khỏe của Tập đoàn Y tế Phương Châu bao gồm 4 Bệnh viện tại Việt Nam.",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        },
+        {
+          "h_id": 7,
+          "id": 7,
+          "name": "Bệnh viện Y học cổ truyền Trung ương",
+          "address": "Số 29 Nguyễn Bỉnh Khiêm, Hai Bà Trưng, Hà Nội",
+          "score": 0.404,
+          "phone": "844382636",
+          "description": "Bệnh viện Y học Cổ truyền Trung ương tiền thân là Viện Nghiên cứu Đông Y được chính thức thành lập năm 1957.",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        },
+        {
+          "h_id": 14,
+          "id": 14,
+          "name": "Bệnh viện Hoàn Mỹ Cửu Long",
+          "address": "Lô 20 Võ Nguyên Giáp, Phú Thứ, Cái Răng, Cần Thơ, Việt Nam",
+          "score": 0.318,
+          "phone": "0292 3917 3",
+          "description": "Bệnh viện Hoàn Mỹ Cửu Long được thành lập vào năm 2007, phục vụ nhu cầu chăm sóc sức khỏe cho cộng đồng dân cư khu vực Đồng bằng sông Cửu Long.",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        },
+        {
+          "h_id": 3,
+          "id": 3,
+          "name": "Bệnh viện Trường Đại Học Y Dược Cần Thơ",
+          "address": "179 Nguyễn Văn Cừ Nối Dài, phường Tân An, Ninh Kiều, Cần Thơ, Việt Nam",
+          "score": 0.292,
+          "phone": "023244234",
+          "description": "null",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        },
+        {
+          "h_id": 1,
+          "id": 1,
+          "name": "Bệnh viện Chợ Rẫy",
+          "address": "201B Nguyễn Chí Thanh, Quận 5, TP.HCM",
+          "score": 0.225,
+          "phone": "0949843322",
+          "description": "Bệnh viện Chợ Rẫy với lịch sử thành lập trên 100 năm, là bệnh viện hạng đặc biệt tuyến Trung ương lớn nhất cả nước với trên 1.800 giường và trên 3.000 kỹ thuật y tế được thực hiện.",
+          "locationMethod": "text",
+          "sameProvince": false,
+          "regionLevel": "unknown"
+        }
+      ],
+      "noDoctorsFound": false,
+      "enhancedAnalysis": {}
+    },
+    "confidence": 0.8
+  },
+  "feedback": {
+    "helpful": null,
+    "accurate": null,
+    "rating": null
+  },
+  "groundTruth": null
+}

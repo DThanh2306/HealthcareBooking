@@ -158,7 +158,7 @@ onMounted(() => {
   text-align: center;
   margin-bottom: 40px;
   padding: 40px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);  
   border-radius: 20px;
   color: white;
   margin-bottom: 50px;
@@ -229,7 +229,7 @@ onMounted(() => {
   left: 0;
   width: 4px;
   height: 100%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   transform: scaleY(0);
   transition: transform 0.3s ease;
 }
@@ -244,7 +244,7 @@ onMounted(() => {
 }
 
 .specialty-icon {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   width: 60px;
   height: 60px;
@@ -350,12 +350,12 @@ onMounted(() => {
 
 .search-input:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .search-btn {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   border-radius: 10px;

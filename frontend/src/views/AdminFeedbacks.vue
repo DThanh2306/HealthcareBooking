@@ -106,9 +106,6 @@
       <div class="table-header">
         <h3>Danh sách đánh giá</h3>
         <div class="table-actions">
-          <button @click="exportFeedbacks" class="export-btn">
-            Xuất Excel
-          </button>
         </div>
       </div>
 
@@ -982,7 +979,13 @@ Gửi thông báo nhắc nhở?`
   max-width: 1400px;
   margin: 0 auto;
 }
-.hero { background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%); border-radius: 16px; color: #fff; padding: 28px 24px; margin: 12px 0 20px; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); }
+.hero { 
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
+  border-radius: 16px; 
+  color: #fff; padding: 28px 24px; 
+  margin: 12px 0 20px; 
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25); 
+}
 .hero-content h1 { margin: 0 0 6px 0; font-size: 1.8rem; font-weight: 700; }
 .hero-content p { margin: 0; opacity: 0.95; }
 
@@ -996,7 +999,7 @@ Gửi thông báo nhắc nhở?`
 /* Heading now in hero */
 
 .refresh-btn {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -1007,7 +1010,7 @@ Gửi thông báo nhắc nhở?`
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #2563eb;
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
 }
 
 .refresh-btn:disabled {
@@ -1621,9 +1624,8 @@ td {
 }
 
 .average-tab-btn.active {
-  background: #4f46e5;
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: white;
-  border-color: #4338ca;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 

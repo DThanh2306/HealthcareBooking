@@ -176,7 +176,7 @@ onMounted(() => {
 .hero-header {
   position: relative;
   height: 500px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6ec1e4 100%);
+  background: linear-gradient(135deg, #EEAECA 00%, #94BBE9 100%, #6ec1e4 50%);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -200,7 +200,7 @@ onMounted(() => {
   width: 100%;
   padding: 0 2rem;
   text-align: center;
-  color: white;
+  color: rgb(255, 222, 222);
   animation: fadeInUp 0.8s ease-out;
 }
 
@@ -437,7 +437,7 @@ onMounted(() => {
 
 /* CTA Section */
 .cta-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   padding: 80px 0;
   margin-top: 60px;
   position: relative;

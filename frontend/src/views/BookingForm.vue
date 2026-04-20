@@ -493,6 +493,7 @@ export default {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #e6f0ff;
+  margin-top: 40px;
   box-shadow: 0 6px 18px rgba(59, 130, 246, 0.18);
 }
 .info-block {
@@ -501,13 +502,14 @@ export default {
 .title {
   font-weight: 800;
   color: #1e3a8a;
-  font-size: 13px;
+  font-size: 30px;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  background: linear-gradient(135deg, #1176eb 0%, #3b82f6 100%);
+  background: #1e3a8a;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+   text-align: center;
 }
 .doctor-name {
   color: #0f172a;
@@ -599,7 +601,7 @@ textarea {
 }
 input:focus,
 textarea:focus {
-  border-color: #3b82f6;
+  border-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 .gender-group {
@@ -667,7 +669,7 @@ textarea:focus {
 }
 .btn-confirm {
   width: 100%;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
   color: #fff;
   font-weight: 700;
   font-size: 16px;
@@ -681,8 +683,8 @@ textarea:focus {
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
 }
 .btn-confirm:hover {
+  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
 }
 @media (max-width: 600px) {
   .booking-container {

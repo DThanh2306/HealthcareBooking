@@ -416,8 +416,8 @@ exports.getDoctorFeedbacks = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
     const feedbacks = await feedbackService.getDoctorFeedbacks(
       doctorId,
-      parseInt(page),
-      parseInt(limit)
+      parseInt(page) || 1,
+      parseInt(limit) || 10
     );
 
     // Đánh dấu đánh giá thuộc về người dùng hiện tại
@@ -460,8 +460,8 @@ exports.getHospitalFeedbacks = async (req, res) => {
 
     const feedbacks = await feedbackService.getHospitalFeedbacks(
       hospitalId,
-      parseInt(page),
-      parseInt(limit)
+      parseInt(page) || 1,
+      parseInt(limit) || 10
     );
 
     // Đánh dấu đánh giá thuộc về người dùng hiện tại

@@ -4,6 +4,7 @@ const enhancedMedicalKnowledge = require("./enhancedMedicalKnowledge.service");
 const improvedRagLLM = require("./improvedRagLLM.service");
 const aiDoctorTraining = require("./aiDoctorTraining.service");
 const ragLLMService = require("./ragLLM.service");
+const conversationIntelligence = require("./conversationIntelligence.service");
 
 const CONVERSATION_TTL_MS = 30 * 60 * 1000;
 
@@ -48,6 +49,35 @@ class AiDoctorConversationService {
     setInterval(() => this.cleanUpExpiredConversations(), 10 * 60 * 1000).unref();
   }
 
+  /**
+   * Detect user's preferred language from their message
+   */
+  detectLanguage(message) {
+    // Check for English patterns
+    const englishPatterns = [
+      /\b(i am|i'm|my|me|can you|could you|please|thank you|yes|no)\b/i,
+      /\b(what|when|where|who|why|how)\b/i,
+      /\b(headache|fever|cough|pain|symptom)\b/i,
+      /^[a-zA-Z\s\d.,!?'-]+$/ // Mostly English characters
+    ];
+    
+    const hasEnglish = englishPatterns.some(pattern => pattern.test(message));
+    
+    // Check for Vietnamese patterns
+    const vietnamesePatterns = [
+      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i,
+      /\b(tôi|bạn|của|là|có|không|gì|như|thế|nào)\b/i
+    ];
+    
+    const hasVietnamese = vietnamesePatterns.some(pattern => pattern.test(message));
+    
+    if (hasEnglish && !hasVietnamese) {
+      return 'en';
+    }
+    
+    return 'vi'; // Default to Vietnamese
+  }
+
   startConversation(userId = null) {
     const conversationId = randomUUID();
     const now = Date.now();
@@ -84,6 +114,17 @@ class AiDoctorConversationService {
     }
 
     conversation.updatedAt = Date.now();
+    
+    // Detect and store user's preferred language
+    const detectedLang = this.detectLanguage(userMessage);
+    if (!conversation.language) {
+      conversation.language = detectedLang;
+      console.log(`🌐 Detected language: ${detectedLang}`);
+    } else if (detectedLang !== conversation.language && userMessage.toLowerCase().includes('english')) {
+      // User explicitly requested English
+      conversation.language = 'en';
+      console.log(`🌐 Language switched to: en`);
+    }
 
     if (conversation.status === "completed") {
       return {
@@ -99,17 +140,175 @@ class AiDoctorConversationService {
     conversation.history.push({ role: "user", content: userMessage });
 
     if (currentStep) {
-      // Validate and enhance user input
-      const validatedInput = this.validateAndEnhanceInput(currentStep.key, userMessage.trim());
-      conversation.state[currentStep.key] = validatedInput.value;
+      // 🆕 STEP 1: Analyze user intent with LLM
+      let intent = null;
+      try {
+        if (conversationIntelligence.isConfigured()) {
+          intent = await conversationIntelligence.analyzeUserIntent(
+            userMessage,
+            currentStep,
+            conversation.state
+          );
+          console.log(`💡 Intent detected: ${intent.intent} (confidence: ${intent.confidence})`);
+        }
+      } catch (error) {
+        console.error("⚠️ Intent analysis failed, using fallback:", error.message);
+        // Continue with fallback logic
+      }
+
+      // 🆕 STEP 2: Handle emergency immediately
+      if (intent && intent.is_emergency) {
+        const emergencyResponse = conversationIntelligence.generateEmergencyResponse(intent);
+        conversation.history.push({ role: "assistant", content: emergencyResponse });
+        
+        // Mark conversation for emergency tracking
+        conversation.state._emergency = {
+          detected: true,
+          details: intent.emergency_details,
+          timestamp: Date.now()
+        };
+        
+        return {
+          message: emergencyResponse,
+          followUp: true,
+          state: conversation.state,
+          intent: "EMERGENCY",
+          urgency: "critical"
+        };
+      }
+
+      // 🆕 STEP 3: Handle symptom mentioned early (before asking for it)
+      if (intent && intent.intent === 'SYMPTOM_MENTIONED') {
+        // Special case: If we're already asking about primaryConcern, treat it as an answer
+        if (currentStep.key === 'primaryConcern') {
+          console.log("💡 Symptom mentioned while asking for primaryConcern - treating as answer");
+          // Change intent to ANSWER_QUESTION so it gets processed normally
+          intent.intent = 'ANSWER_QUESTION';
+          // Continue to normal processing flow below
+        } else {
+          // User mentioned symptoms before we asked for them - smart!
+          // Store the symptom for later use
+          if (!conversation.state.earlySymptoms) {
+            conversation.state.earlySymptoms = [];
+          }
+          conversation.state.earlySymptoms.push(intent.extracted_value);
+          
+          // Generate empathetic response that acknowledges symptom and continues flow
+          try {
+            const symptomResponse = await conversationIntelligence.generateSymptomAcknowledgement(
+              intent.extracted_value,
+              currentStep,
+              conversation.state
+            );
+            
+            conversation.history.push({ role: "assistant", content: symptomResponse });
+            
+            return {
+              message: symptomResponse,
+              followUp: true,
+              state: conversation.state,
+              intent: "SYMPTOM_MENTIONED",
+              earlySymptom: intent.extracted_value
+            };
+          } catch (error) {
+            console.error("⚠️ Symptom acknowledgement generation failed:", error.message);
+            // Fallback to simple acknowledgement
+            const fallbackResponse = `Tôi hiểu bạn đang gặp vấn đề về ${intent.extracted_value}. Tôi sẽ ghi nhận điều này.\n\nĐể tư vấn chính xác, tôi cần thêm một số thông tin. ${currentStep.question}`;
+            conversation.history.push({ role: "assistant", content: fallbackResponse });
+            
+            return {
+              message: fallbackResponse,
+              followUp: true,
+              state: conversation.state,
+              intent: "SYMPTOM_MENTIONED"
+            };
+          }
+        }
+      }
+
+      // 🆕 STEP 4: Handle off-topic questions (redirect)
+      if (intent && intent.needs_redirect) {
+        try {
+          const redirectResponse = await conversationIntelligence.generateFlexibleResponse(
+            intent,
+            currentStep,
+            conversation.state
+          );
+          
+          conversation.history.push({ role: "assistant", content: redirectResponse });
+          
+          return {
+            message: redirectResponse,
+            followUp: true,
+            state: conversation.state,
+            intent: intent.intent,
+            needsRedirect: true
+          };
+        } catch (error) {
+          console.error("⚠️ Redirect response generation failed:", error.message);
+          // Fallback - still be friendly
+          let fallbackMessage = "";
+          
+          if (intent.intent === 'OFF_TOPIC') {
+            fallbackMessage = `Cảm ơn bạn đã chia sẻ! Tuy nhiên, để tư vấn sức khỏe tốt nhất cho bạn, tôi cần biết thêm thông tin. ${currentStep.question}`;
+          } else {
+            fallbackMessage = `Cảm ơn bạn đã hỏi. Để tiếp tục, ${currentStep.question}`;
+          }
+          
+          conversation.history.push({ role: "assistant", content: fallbackMessage });
+          
+          return {
+            message: fallbackMessage,
+            followUp: true,
+            state: conversation.state,
+            intent: intent.intent,
+            needsRedirect: true
+          };
+        }
+      }
+
+      // 🆕 STEP 5: Extract value with LLM or fallback to validation
+      let extractedValue = userMessage.trim();
+      
+      if (intent && intent.extracted_value) {
+        // Use LLM-extracted value
+        extractedValue = intent.extracted_value;
+      } else {
+        // Fallback to rule-based validation
+        const validatedInput = this.validateAndEnhanceInput(currentStep.key, userMessage.trim());
+        extractedValue = validatedInput.value;
+      }
+      
+      conversation.state[currentStep.key] = extractedValue;
       
       // Add medical context if it's a symptom step
-      if (currentStep.key === 'primaryConcern' && validatedInput.value) {
-        const symptomAnalysis = enhancedMedicalKnowledge.analyzeSymptoms(validatedInput.value);
+      if (currentStep.key === 'primaryConcern' && extractedValue) {
+        const symptomAnalysis = enhancedMedicalKnowledge.analyzeSymptoms(extractedValue);
         conversation.state._symptomAnalysis = symptomAnalysis;
       }
       
-      let acknowledgement = currentStep.acknowledgement(validatedInput.value);
+      // 🆕 STEP 6: Generate natural acknowledgement with LLM
+      let acknowledgement;
+      try {
+        if (conversationIntelligence.isConfigured() && intent && intent.intent === 'ANSWER_QUESTION') {
+          acknowledgement = await conversationIntelligence.generateAcknowledgement(
+            currentStep,
+            extractedValue,
+            conversation.state,
+            conversation.language || 'vi'
+          );
+        } else {
+          // Fallback to template
+          acknowledgement = typeof currentStep.acknowledgement === 'function'
+            ? currentStep.acknowledgement(extractedValue)
+            : `Đã ghi nhận: ${extractedValue}`;
+        }
+      } catch (error) {
+        console.error("⚠️ Acknowledgement generation failed:", error.message);
+        acknowledgement = typeof currentStep.acknowledgement === 'function'
+          ? currentStep.acknowledgement(extractedValue)
+          : `Đã ghi nhận: ${extractedValue}`;
+      }
       
       // Add medical insights for symptom analysis
       if (currentStep.key === 'primaryConcern' && conversation.state._symptomAnalysis) {
@@ -135,6 +334,17 @@ class AiDoctorConversationService {
       }
 
       conversation.status = "processing";
+      
+      // Merge early symptoms into primaryConcern if available
+      if (conversation.state.earlySymptoms && conversation.state.earlySymptoms.length > 0) {
+        const earlySymptomText = conversation.state.earlySymptoms.join(", ");
+        if (conversation.state.primaryConcern) {
+          conversation.state.primaryConcern = `${earlySymptomText}, ${conversation.state.primaryConcern}`;
+        } else {
+          conversation.state.primaryConcern = earlySymptomText;
+        }
+      }
+      
       // Use enhanced medical knowledge for better analysis
       const enhancedAnalysis = enhancedMedicalKnowledge.comprehensiveAnalysis(conversation.state);
       
@@ -290,14 +500,14 @@ class AiDoctorConversationService {
     
     switch (stepKey) {
       case 'age':
-        // Extract and validate age
+        // Extract and validate age (support both Vietnamese and English)
         const ageMatch = input.match(/(\d+)/);
         if (ageMatch) {
           const age = parseInt(ageMatch[1]);
           if (age > 0 && age <= 120) {
             enhancedValue = age.toString();
           } else {
-            warnings.push('Tuổi không hợp lệ');
+            warnings.push('Tuổi không hợp lệ (phải từ 0-120)');
           }
         } else {
           warnings.push('Vui lòng cung cấp tuổi dưới dạng số');
@@ -305,7 +515,7 @@ class AiDoctorConversationService {
         break;
         
       case 'gender':
-        // Normalize gender input
+        // Normalize gender input (support both Vietnamese and English)
         const genderLower = input.toLowerCase();
         if (genderLower.includes('nam') && !genderLower.includes('nữ')) {
           enhancedValue = 'Nam';
@@ -313,13 +523,40 @@ class AiDoctorConversationService {
           enhancedValue = 'Nữ';
         } else if (genderLower.includes('khác')) {
           enhancedValue = 'Khác';
+        } else if (genderLower.includes('male') && !genderLower.includes('female')) {
+          enhancedValue = 'Nam';
+        } else if (genderLower.includes('female')) {
+          enhancedValue = 'Nữ';
+        } else if (genderLower.includes('other')) {
+          enhancedValue = 'Khác';
         }
         break;
         
       case 'primaryConcern':
-        // Basic medical term validation
-        if (input.length < 10) {
+        // Basic medical term validation (minimum 3 characters for flexibility)
+        if (input.length < 3) {
           warnings.push('Vui lòng mô tả chi tiết hơn về triệu chứng');
+        }
+        // Translate common English symptoms to Vietnamese for consistency
+        const symptomTranslations = {
+          'headache': 'đau đầu',
+          'fever': 'sốt',
+          'cough': 'ho',
+          'pain': 'đau',
+          'cold': 'cảm lạnh',
+          'flu': 'cảm cúm'
+        };
+        
+        let translatedSymptom = input;
+        Object.keys(symptomTranslations).forEach(eng => {
+          const regex = new RegExp(`\\b${eng}\\b`, 'gi');
+          if (regex.test(translatedSymptom)) {
+            translatedSymptom = translatedSymptom.replace(regex, symptomTranslations[eng]);
+          }
+        });
+        
+        if (translatedSymptom !== input) {
+          enhancedValue = translatedSymptom;
         }
         break;
         

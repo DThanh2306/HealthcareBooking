@@ -86,7 +86,7 @@
               <!-- Thông tin đề xuất từ bệnh nhân -->
               <template v-if="scope.row.reschedule_status === 'requested' && scope.row.reschedule_requested_by === 'patient'">
                 <div class="proposal-info">
-                  <strong>Đề xuất:</strong> {{ formatDate(scope.row.proposed_appointment_date) }} - {{ scope.row.proposed_time_slot }}
+                  <strong>Đề xuất:</strong> {{ formatDate(scope.row.proposed_appointment_date) }} (số thứ tự sẽ được cấp khi chấp nhận)
                 </div>
                 <div class="proposal-info" v-if="scope.row.reschedule_reason">
                   <strong>Lý do:</strong> {{ scope.row.reschedule_reason }}
@@ -126,29 +126,15 @@
               format="DD/MM/YYYY"
               value-format="YYYY-MM-DD"
               :disabled-date="disabledDate"
-              @change="onRescheduleDateChange"
               style="width: 100%"
             />
           </div>
           
-          <div v-if="availableTimeSlots.length > 0">
-            <label class="form-label">Chọn khung giờ khám</label>
-            <div class="time-slots-container">
-              <div 
-                v-for="slot in availableTimeSlots" 
-                :key="slot"
-                :class="['time-slot', { 'selected': selectedTimeSlot === slot }]"
-                @click="selectTimeSlot(slot)"
-              >
-                {{ slot }}
-              </div>
-            </div>
-          </div>
-          <div v-else-if="form.proposed_date && availableTimeSlots.length === 0">
+          <div v-if="form.proposed_date">
             <el-alert
-              title="Không có lịch trống"
-              type="warning"
-              description="Bác sĩ không có lịch trống trong ngày này. Vui lòng chọn ngày khác."
+              title="Lưu ý"
+              type="info"
+              description="Khi bệnh nhân chấp nhận đề xuất, họ sẽ được cấp số thứ tự mới cho ngày đã chọn."
               show-icon
               :closable="false"
             />
@@ -170,7 +156,7 @@
         <template #footer>
           <div style="display: flex; justify-content: flex-end; gap: 12px;">
             <el-button @click="dialogVisible = false">Hủy bỏ</el-button>
-            <el-button type="primary" @click="submitReschedule">Gửi đề xuất</el-button>
+            <el-button type="primary" @click="submitReschedule" :disabled="!form.proposed_date">Gửi đề xuất</el-button>
           </div>
         </template>
       </el-dialog>
@@ -190,8 +176,6 @@
   const dialogVisible = ref(false);
   const currentAppointmentId = ref(null);
   const currentDoctorId = ref(null);
-  const availableTimeSlots = ref([]);
-  const selectedTimeSlot = ref('');
   const form = ref({
     proposed_date: '',
     reason: ''
@@ -239,44 +223,12 @@
     currentAppointmentId.value = row.id_appointment;
     currentDoctorId.value = row.dr_id || row.doctor_id || row.id_doctor || null;
     form.value = { proposed_date: '', reason: '' };
-    availableTimeSlots.value = [];
-    selectedTimeSlot.value = '';
     dialogVisible.value = true;
-  };
-  
-  const selectTimeSlot = (slot) => {
-    selectedTimeSlot.value = slot;
-  };
-
-  const onRescheduleDateChange = async () => {
-    selectedTimeSlot.value = '';
-    await fetchDoctorSchedules();
-  };
-
-  const fetchDoctorSchedules = async () => {
-    if (!form.value.proposed_date || !currentDoctorId.value) {
-      availableTimeSlots.value = [];
-      return;
-    }
-    try {
-      const token = localStorage.getItem('userToken');
-      const response = await axios.get(`http://localhost:3000/api/doctors/${currentDoctorId.value}/available-slots`, {
-        params: { date: form.value.proposed_date },
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const slots = response.data?.availableSlots || [];
-      const unique = Array.from(new Set(slots));
-      unique.sort((a,b) => (a?.split('-')[0]||'').trim().localeCompare((b?.split('-')[0]||'').trim()));
-      availableTimeSlots.value = unique;
-    } catch (e) {
-      availableTimeSlots.value = [];
-      ElMessage.error('Không thể tải lịch trống');
-    }
   };
 
   const submitReschedule = async () => {
-    if (!form.value.proposed_date || !selectedTimeSlot.value) {
-      ElMessage.error('Vui lòng chọn ngày và khung giờ đề xuất');
+    if (!form.value.proposed_date) {
+      ElMessage.error('Vui lòng chọn ngày đề xuất');
       return;
     }
     // Validate date not in past/today
@@ -287,15 +239,10 @@
       ElMessage.error('Không thể đề xuất ngày trong quá khứ hoặc hôm nay');
       return;
     }
-    if (!availableTimeSlots.value.includes(selectedTimeSlot.value)) {
-      ElMessage.error('Khung giờ đã thay đổi hoặc không còn trống, vui lòng chọn lại');
-      return;
-    }
     try {
       const token = localStorage.getItem('userToken');
       await axios.post(`http://localhost:3000/api/patients/${currentAppointmentId.value}/reschedule`, {
         proposed_date: form.value.proposed_date,
-        proposed_time_slot: selectedTimeSlot.value,
         reason: form.value.reason
       }, { headers: { Authorization: `Bearer ${token}` } });
       ElMessage.success('Đã gửi đề xuất đổi lịch tới bệnh nhân');
