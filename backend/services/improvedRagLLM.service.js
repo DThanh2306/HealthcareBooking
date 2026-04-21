@@ -386,9 +386,16 @@ QUY TẮC QUAN TRỌNG:
     }
 
     // Check if organization is restricted (cached check)
+    // Reset sau 5 phút để retry
     if (this._organizationRestricted) {
-      console.warn("⚠️ Groq organization restricted, using fallback response");
-      return null;
+      const now = Date.now();
+      if (now - this._restrictedAt < 5 * 60 * 1000) {
+        console.warn("⚠️ Groq restricted (cooling down), using fallback");
+        return null;
+      }
+      // Hết cooldown → thử lại
+      this._organizationRestricted = false;
+      console.log("🔄 Groq cooldown expired, retrying...");
     }
 
     const promptContent = this.buildAdvancedPrompt(payload);
@@ -455,6 +462,7 @@ QUY TẮC QUAN TRỌNG:
           error.response?.data?.error?.message?.includes('organization_restricted')) {
         console.warn("🔒 Groq organization restricted - caching this state");
         this._organizationRestricted = true;
+        this._restrictedAt = Date.now();
       }
 
       return null;

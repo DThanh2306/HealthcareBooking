@@ -7,13 +7,34 @@ const ragLLMService = require("./ragLLM.service");
 const conversationIntelligence = require("./conversationIntelligence.service");
 
 const CONVERSATION_TTL_MS = 30 * 60 * 1000;
+const GROQ_CONVERSATION_PROMPT = `Bạn là Bác sĩ AI của BookingCare - trợ lý y tế thân thiện tại Việt Nam.
 
+NHIỆM VỤ: Thu thập đủ 5 thông tin sau một cách TỰ NHIÊN, không hỏi theo thứ tự cứng nhắc:
+- gender: giới tính (Nam/Nữ/Khác)
+- age: tuổi
+- location: địa chỉ/khu vực muốn khám
+- primaryConcern: triệu chứng chính
+- symptomDuration: triệu chứng kéo dài bao lâu
+
+THÔNG TIN ĐÃ CÓ: {COLLECTED}
+
+QUY TẮC:
+- Nếu user đã cung cấp thông tin nào → ghi nhận và hỏi thông tin còn thiếu
+- Nếu user hỏi lạc đề → trả lời ngắn rồi redirect
+- Nếu có dấu hiệu KHẨN CẤP (khó thở, đau ngực dữ dội, bất tỉnh) → cảnh báo gọi 115 NGAY
+- Hỏi tự nhiên, có thể gộp 2 câu hỏi ngắn vào 1 tin nhắn
+- Trả lời bằng tiếng Việt
+
+KHI ĐÃ ĐỦ CẢ 5 THÔNG TIN → chỉ trả về đúng format này, không thêm gì khác:
+<READY>{"gender":"...","age":"...","location":"...","primaryConcern":"...","symptomDuration":"..."}</READY>`;
 const STEPS = [
+  
   {
     key: "gender",
     question:
       "Đầu tiên, bạn vui lòng cho bác sĩ biết giới tính của bạn (nam, nữ hoặc khác)?",
-    acknowledgement: (answer) => `Đã ghi nhận giới tính của bạn là "${answer}".`,
+    acknowledgement: (answer) =>
+      `Đã ghi nhận giới tính của bạn là "${answer}".`,
   },
   {
     key: "age",
@@ -42,42 +63,201 @@ const STEPS = [
       `Đã ghi nhận thời gian diễn ra triệu chứng: "${answer}".`,
   },
 ];
-
+const INPUT_CONFIGS = {
+  gender: {
+    type: "single",
+    options: ["Nam", "Nữ", "Khác"],
+    allowFreetext: false,
+  },
+  age: {
+    type: "single",
+    options: ["Dưới 18", "18–35", "36–60", "Trên 60"],
+    allowFreetext: true,
+    freetextPlaceholder: "Hoặc nhập tuổi cụ thể, vd: 42",
+  },
+  location: {
+    type: "location",
+    options: [],
+    allowFreetext: true,
+    freetextPlaceholder: "Nhập địa chỉ, vd: 123 Lê Lợi, Quận 1, TP.HCM",
+    allowGPS: true,
+  },
+  primaryConcern: {
+    type: "multi",
+    options: [
+      "Đau đầu / chóng mặt",
+      "Sốt",
+      "Ho / khó thở",
+      "Đau ngực",
+      "Đau bụng / tiêu hóa",
+      "Đau lưng / xương khớp",
+      "Mệt mỏi kéo dài",
+      "Da liễu (mụn, ngứa, phát ban)",
+      "Mắt / tai / mũi / họng",
+      "Tâm lý / mất ngủ",
+      "Khác...",
+    ],
+    allowFreetext: true,
+    freetextPlaceholder: "Mô tả thêm triệu chứng nếu muốn...",
+  },
+  symptomDuration: {
+    type: "single",
+    options: ["Hôm nay", "2–3 ngày", "Khoảng 1 tuần", "Hơn 2 tuần", "Hơn 1 tháng"],
+    allowFreetext: true,
+    freetextPlaceholder: "Hoặc nhập cụ thể...",
+  },
+};
 class AiDoctorConversationService {
   constructor() {
     this.conversations = new Map();
-    setInterval(() => this.cleanUpExpiredConversations(), 10 * 60 * 1000).unref();
+    setInterval(
+      () => this.cleanUpExpiredConversations(),
+      10 * 60 * 1000,
+    ).unref();
   }
-
+  getInputConfig(stepKey) {
+    return INPUT_CONFIGS[stepKey] || { type: "freetext", allowFreetext: true };
+  }
   /**
    * Detect user's preferred language from their message
    */
-  detectLanguage(message) {
-    // Check for English patterns
-    const englishPatterns = [
-      /\b(i am|i'm|my|me|can you|could you|please|thank you|yes|no)\b/i,
-      /\b(what|when|where|who|why|how)\b/i,
-      /\b(headache|fever|cough|pain|symptom)\b/i,
-      /^[a-zA-Z\s\d.,!?'-]+$/ // Mostly English characters
-    ];
-    
-    const hasEnglish = englishPatterns.some(pattern => pattern.test(message));
-    
-    // Check for Vietnamese patterns
-    const vietnamesePatterns = [
-      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i,
-      /\b(tôi|bạn|của|là|có|không|gì|như|thế|nào)\b/i
-    ];
-    
-    const hasVietnamese = vietnamesePatterns.some(pattern => pattern.test(message));
-    
-    if (hasEnglish && !hasVietnamese) {
-      return 'en';
+  async callGroqConversation(conversation) {
+    const groqApiKey = process.env.GROQ_API_KEY || "";
+    const groqModel =
+      process.env.GROQ_MODEL_NAME || process.env.GROQ_MODEL || "";
+
+    if (!groqApiKey || !groqModel) {
+      return null;
     }
-    
-    return 'vi'; // Default to Vietnamese
+
+    // Tóm tắt thông tin đã thu thập
+    const collected =
+      Object.entries(conversation.state)
+        .filter(([k]) =>
+          [
+            "gender",
+            "age",
+            "location",
+            "primaryConcern",
+            "symptomDuration",
+          ].includes(k),
+        )
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(", ") || "Chưa có";
+
+    const systemPrompt = GROQ_CONVERSATION_PROMPT.replace(
+      "{COLLECTED}",
+      collected,
+    );
+
+    // Chỉ lấy 10 tin nhắn gần nhất để tiết kiệm token
+    const recentHistory = conversation.history.slice(-10);
+
+    try {
+      const baseUrl = (
+        process.env.GROQ_BASE_URL || "https://api.groq.com"
+      ).replace(/\/+$/, "");
+      const response = await axios.post(
+        `${baseUrl}/openai/v1/chat/completions`,
+        {
+          model: groqModel,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...recentHistory,
+          ],
+          temperature: 0.4,
+          max_tokens: 500,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${groqApiKey}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 15000,
+        },
+      );
+
+      const content = response.data?.choices?.[0]?.message?.content?.trim();
+      return content || null;
+    } catch (error) {
+      // KHÔNG cache lỗi, để retry lần sau
+      console.error(
+        "⚠️ Groq conversation error:",
+        error.response?.status,
+        error.message,
+      );
+      return null;
+    }
   }
 
+  async callGroqConversation(conversation) {
+    const groqApiKey = process.env.GROQ_API_KEY || "";
+    const groqModel =
+      process.env.GROQ_MODEL_NAME || process.env.GROQ_MODEL || "";
+
+    if (!groqApiKey || !groqModel) {
+      return null;
+    }
+
+    // Tóm tắt thông tin đã thu thập
+    const collected =
+      Object.entries(conversation.state)
+        .filter(([k]) =>
+          [
+            "gender",
+            "age",
+            "location",
+            "primaryConcern",
+            "symptomDuration",
+          ].includes(k),
+        )
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(", ") || "Chưa có";
+
+    const systemPrompt = GROQ_CONVERSATION_PROMPT.replace(
+      "{COLLECTED}",
+      collected,
+    );
+
+    // Chỉ lấy 10 tin nhắn gần nhất để tiết kiệm token
+    const recentHistory = conversation.history.slice(-10);
+
+    try {
+      const baseUrl = (
+        process.env.GROQ_BASE_URL || "https://api.groq.com"
+      ).replace(/\/+$/, "");
+      const response = await axios.post(
+        `${baseUrl}/openai/v1/chat/completions`,
+        {
+          model: groqModel,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...recentHistory,
+          ],
+          temperature: 0.4,
+          max_tokens: 500,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${groqApiKey}`,
+            "Content-Type": "application/json",
+          },
+          timeout: 15000,
+        },
+      );
+
+      const content = response.data?.choices?.[0]?.message?.content?.trim();
+      return content || null;
+    } catch (error) {
+      // KHÔNG cache lỗi, để retry lần sau
+      console.error(
+        "⚠️ Groq conversation error:",
+        error.response?.status,
+        error.message,
+      );
+      return null;
+    }
+  }
   startConversation(userId = null) {
     const conversationId = randomUUID();
     const now = Date.now();
@@ -104,6 +284,7 @@ class AiDoctorConversationService {
     return {
       conversationId,
       message: greeting,
+      inputConfig: this.getInputConfig(STEPS[0].key),  // gender
     };
   }
 
@@ -114,293 +295,68 @@ class AiDoctorConversationService {
     }
 
     conversation.updatedAt = Date.now();
-    
-    // Detect and store user's preferred language
-    const detectedLang = this.detectLanguage(userMessage);
-    if (!conversation.language) {
-      conversation.language = detectedLang;
-      console.log(`🌐 Detected language: ${detectedLang}`);
-    } else if (detectedLang !== conversation.language && userMessage.toLowerCase().includes('english')) {
-      // User explicitly requested English
-      conversation.language = 'en';
-      console.log(`🌐 Language switched to: en`);
-    }
 
     if (conversation.status === "completed") {
       return {
         message:
-          "Cuộc trò chuyện đã hoàn tất. Nếu bạn cần hỗ trợ thêm, hãy bắt đầu cuộc trò chuyện mới nhé.",
+          "Cuộc trò chuyện đã hoàn tất. Nếu cần hỗ trợ thêm, hãy bắt đầu cuộc trò chuyện mới.",
         followUp: false,
         state: conversation.state,
         recommendations: conversation.recommendations,
       };
     }
 
-    const currentStep = STEPS[conversation.stepIndex];
+    // Thêm tin nhắn user vào history
     conversation.history.push({ role: "user", content: userMessage });
 
-    if (currentStep) {
-      // 🆕 STEP 1: Analyze user intent with LLM
-      let intent = null;
-      try {
-        if (conversationIntelligence.isConfigured()) {
-          intent = await conversationIntelligence.analyzeUserIntent(
-            userMessage,
-            currentStep,
-            conversation.state
-          );
-          console.log(`💡 Intent detected: ${intent.intent} (confidence: ${intent.confidence})`);
-        }
-      } catch (error) {
-        console.error("⚠️ Intent analysis failed, using fallback:", error.message);
-        // Continue with fallback logic
-      }
+    // Gọi Groq để xử lý hội thoại tự nhiên
+    const groqReply = await this.callGroqConversation(conversation);
 
-      // 🆕 STEP 2: Handle emergency immediately
-      if (intent && intent.is_emergency) {
-        const emergencyResponse = conversationIntelligence.generateEmergencyResponse(intent);
-        conversation.history.push({ role: "assistant", content: emergencyResponse });
-        
-        // Mark conversation for emergency tracking
-        conversation.state._emergency = {
-          detected: true,
-          details: intent.emergency_details,
-          timestamp: Date.now()
-        };
-        
-        return {
-          message: emergencyResponse,
-          followUp: true,
-          state: conversation.state,
-          intent: "EMERGENCY",
-          urgency: "critical"
-        };
-      }
+    if (groqReply) {
+      // Kiểm tra xem đã đủ thông tin chưa
+      const readyMatch = groqReply.match(/<READY>([\s\S]*?)<\/READY>/);
 
-      // 🆕 STEP 3: Handle symptom mentioned early (before asking for it)
-      if (intent && intent.intent === 'SYMPTOM_MENTIONED') {
-        // Special case: If we're already asking about primaryConcern, treat it as an answer
-        if (currentStep.key === 'primaryConcern') {
-          console.log("💡 Symptom mentioned while asking for primaryConcern - treating as answer");
-          // Change intent to ANSWER_QUESTION so it gets processed normally
-          intent.intent = 'ANSWER_QUESTION';
-          // Continue to normal processing flow below
-        } else {
-          // User mentioned symptoms before we asked for them - smart!
-          // Store the symptom for later use
-          if (!conversation.state.earlySymptoms) {
-            conversation.state.earlySymptoms = [];
-          }
-          conversation.state.earlySymptoms.push(intent.extracted_value);
-          
-          // Generate empathetic response that acknowledges symptom and continues flow
-          try {
-            const symptomResponse = await conversationIntelligence.generateSymptomAcknowledgement(
-              intent.extracted_value,
-              currentStep,
-              conversation.state
-            );
-            
-            conversation.history.push({ role: "assistant", content: symptomResponse });
-            
-            return {
-              message: symptomResponse,
-              followUp: true,
-              state: conversation.state,
-              intent: "SYMPTOM_MENTIONED",
-              earlySymptom: intent.extracted_value
-            };
-          } catch (error) {
-            console.error("⚠️ Symptom acknowledgement generation failed:", error.message);
-            // Fallback to simple acknowledgement
-            const fallbackResponse = `Tôi hiểu bạn đang gặp vấn đề về ${intent.extracted_value}. Tôi sẽ ghi nhận điều này.\n\nĐể tư vấn chính xác, tôi cần thêm một số thông tin. ${currentStep.question}`;
-            conversation.history.push({ role: "assistant", content: fallbackResponse });
-            
-            return {
-              message: fallbackResponse,
-              followUp: true,
-              state: conversation.state,
-              intent: "SYMPTOM_MENTIONED"
-            };
-          }
-        }
-      }
-
-      // 🆕 STEP 4: Handle off-topic questions (redirect)
-      if (intent && intent.needs_redirect) {
+      if (readyMatch) {
+        // Parse state từ Groq
         try {
-          const redirectResponse = await conversationIntelligence.generateFlexibleResponse(
-            intent,
-            currentStep,
-            conversation.state
-          );
-          
-          conversation.history.push({ role: "assistant", content: redirectResponse });
-          
-          return {
-            message: redirectResponse,
-            followUp: true,
-            state: conversation.state,
-            intent: intent.intent,
-            needsRedirect: true
-          };
-        } catch (error) {
-          console.error("⚠️ Redirect response generation failed:", error.message);
-          // Fallback - still be friendly
-          let fallbackMessage = "";
-          
-          if (intent.intent === 'OFF_TOPIC') {
-            fallbackMessage = `Cảm ơn bạn đã chia sẻ! Tuy nhiên, để tư vấn sức khỏe tốt nhất cho bạn, tôi cần biết thêm thông tin. ${currentStep.question}`;
-          } else {
-            fallbackMessage = `Cảm ơn bạn đã hỏi. Để tiếp tục, ${currentStep.question}`;
-          }
-          
-          conversation.history.push({ role: "assistant", content: fallbackMessage });
-          
-          return {
-            message: fallbackMessage,
-            followUp: true,
-            state: conversation.state,
-            intent: intent.intent,
-            needsRedirect: true
-          };
+          const extracted = JSON.parse(readyMatch[1].trim());
+          conversation.state = { ...conversation.state, ...extracted };
+          console.log("✅ Đủ thông tin:", conversation.state);
+        } catch (e) {
+          console.error("❌ Parse state lỗi:", e.message);
         }
+
+        // Chạy recommendation như cũ
+        return await this.runRecommendation(conversation, options);
       }
 
-      // 🆕 STEP 5: Extract value with LLM or fallback to validation
-      let extractedValue = userMessage.trim();
-      
-      if (intent && intent.extracted_value) {
-        // Use LLM-extracted value
-        extractedValue = intent.extracted_value;
-      } else {
-        // Fallback to rule-based validation
-        const validatedInput = this.validateAndEnhanceInput(currentStep.key, userMessage.trim());
-        extractedValue = validatedInput.value;
-      }
-      
-      conversation.state[currentStep.key] = extractedValue;
-      
-      // Add medical context if it's a symptom step
-      if (currentStep.key === 'primaryConcern' && extractedValue) {
-        const symptomAnalysis = enhancedMedicalKnowledge.analyzeSymptoms(extractedValue);
-        conversation.state._symptomAnalysis = symptomAnalysis;
-      }
-      
-      // 🆕 STEP 6: Generate natural acknowledgement with LLM
-      let acknowledgement;
-      try {
-        if (conversationIntelligence.isConfigured() && intent && intent.intent === 'ANSWER_QUESTION') {
-          acknowledgement = await conversationIntelligence.generateAcknowledgement(
-            currentStep,
-            extractedValue,
-            conversation.state,
-            conversation.language || 'vi'
-          );
-        } else {
-          // Fallback to template
-          acknowledgement = typeof currentStep.acknowledgement === 'function'
-            ? currentStep.acknowledgement(extractedValue)
-            : `Đã ghi nhận: ${extractedValue}`;
-        }
-      } catch (error) {
-        console.error("⚠️ Acknowledgement generation failed:", error.message);
-        acknowledgement = typeof currentStep.acknowledgement === 'function'
-          ? currentStep.acknowledgement(extractedValue)
-          : `Đã ghi nhận: ${extractedValue}`;
-      }
-      
-      // Add medical insights for symptom analysis
-      if (currentStep.key === 'primaryConcern' && conversation.state._symptomAnalysis) {
-        const analysis = conversation.state._symptomAnalysis;
-        if (analysis.urgencyLevel === 'khẩn cấp') {
-          acknowledgement += "\n\n⚠️ Tôi nhận thấy triệu chứng của bạn có thể cần được chú ý ngay. Nếu tình trạng nặng, hãy liên hệ cấp cứu 115.";
-        } else if (analysis.matchedSymptoms && Array.isArray(analysis.matchedSymptoms) && analysis.matchedSymptoms.length > 0) {
-          acknowledgement += `\n\nTôi hiểu bạn đang gặp vấn đề về: ${analysis.matchedSymptoms.slice(0, 2).join(", ")}. Điều này sẽ giúp tôi đề xuất chuyên khoa phù hợp.`;
-        }
-      }
-      
-      conversation.stepIndex += 1;
-
-      if (conversation.stepIndex < STEPS.length) {
-        const nextQuestion = STEPS[conversation.stepIndex].question;
-        const assistantMessage = `${acknowledgement}\n\n${nextQuestion}`;
-        conversation.history.push({ role: "assistant", content: assistantMessage });
-        return {
-          message: assistantMessage,
-          followUp: true,
-          state: conversation.state,
-        };
-      }
-
-      conversation.status = "processing";
-      
-      // Merge early symptoms into primaryConcern if available
-      if (conversation.state.earlySymptoms && conversation.state.earlySymptoms.length > 0) {
-        const earlySymptomText = conversation.state.earlySymptoms.join(", ");
-        if (conversation.state.primaryConcern) {
-          conversation.state.primaryConcern = `${earlySymptomText}, ${conversation.state.primaryConcern}`;
-        } else {
-          conversation.state.primaryConcern = earlySymptomText;
-        }
-      }
-      
-      // Use enhanced medical knowledge for better analysis
-      const enhancedAnalysis = enhancedMedicalKnowledge.comprehensiveAnalysis(conversation.state);
-      
-      if (options && typeof options.radiusKm === 'number') {
-        conversation.state.radiusKm = options.radiusKm;
-      }
-      const recommendations = await aiDoctorRecommendationService.getRecommendations(
-        conversation.state
-      );
-      
-      // Merge enhanced analysis with recommendations
-      if (enhancedAnalysis) {
-        recommendations.enhancedAnalysis = enhancedAnalysis;
-        recommendations.medicalContext = enhancedAnalysis.medicalContext;
-        if (enhancedAnalysis.urgencyLevel) {
-          recommendations.medicalContext.urgencyLevel = enhancedAnalysis.urgencyLevel;
-        }
-      }
-
-      const finalMessage = await this.generateFinalMessage(
-        conversation.state,
-        recommendations
-      );
-
-      conversation.status = "completed";
-      conversation.recommendations = recommendations;
-      conversation.history.push({ role: "assistant", content: finalMessage });
-
+      // Chưa đủ → tiếp tục hội thoại
+      conversation.history.push({ role: "assistant", content: groqReply });
+      const nextMissingKey = this._detectNextMissingField(conversation.state);
       return {
-        message: finalMessage,
-        followUp: false,
+        message: groqReply,
+        followUp: true,
         state: conversation.state,
-        recommendations,
+        inputConfig: this.getInputConfig(nextMissingKey),
       };
     }
 
-    return {
-      message:
-        "Hiện tại tôi chưa cần thêm thông tin. Vui lòng đợi kết quả đề xuất của tôi nhé.",
-      followUp: false,
-      state: conversation.state,
-    };
+    // Groq lỗi → fallback về STEPS cũ
+    console.log("🔄 Groq unavailable, fallback to STEPS");
+    return this.processWithSteps(conversation, userMessage, options);
   }
-
   createStateSummary(state) {
     const entries = [
       state.gender ? `Giới tính: ${state.gender}` : null,
       state.age ? `Tuổi: ${state.age}` : null,
       state.location ? `Khu vực: ${state.location}` : null,
-      state.primaryConcern ? `Triệu chứng chính: ${state.primaryConcern}` : null,
+      state.primaryConcern
+        ? `Triệu chứng chính: ${state.primaryConcern}`
+        : null,
       state.symptomDuration
         ? `Thời gian diễn ra: ${state.symptomDuration}`
         : null,
-      state.medicalHistory
-        ? `Tiền sử sức khỏe: ${state.medicalHistory}`
-        : null,
+      state.medicalHistory ? `Tiền sử sức khỏe: ${state.medicalHistory}` : null,
       state.currentMedications
         ? `Thuốc đang dùng: ${state.currentMedications}`
         : null,
@@ -409,15 +365,121 @@ class AiDoctorConversationService {
 
     return entries.join("\n");
   }
+  // Chạy recommendation (tách ra để dùng chung)
+  async runRecommendation(conversation, options = {}) {
+    conversation.status = "processing";
 
+    if (options?.radiusKm) conversation.state.radiusKm = options.radiusKm;
+
+    const enhancedAnalysis = enhancedMedicalKnowledge.comprehensiveAnalysis(
+      conversation.state,
+    );
+    const recommendations =
+      await aiDoctorRecommendationService.getRecommendations(
+        conversation.state,
+      );
+
+    if (enhancedAnalysis) {
+      recommendations.enhancedAnalysis = enhancedAnalysis;
+      recommendations.medicalContext = enhancedAnalysis.medicalContext;
+      if (enhancedAnalysis.urgencyLevel) {
+        recommendations.medicalContext.urgencyLevel =
+          enhancedAnalysis.urgencyLevel;
+      }
+    }
+
+    const finalMessage = await this.generateFinalMessage(
+      conversation.state,
+      recommendations,
+    );
+
+    conversation.status = "completed";
+    conversation.recommendations = recommendations;
+    conversation.history.push({ role: "assistant", content: finalMessage });
+
+    return {
+      message: finalMessage,
+      followUp: false,
+      state: conversation.state,
+      recommendations,
+    };
+  }
+
+  // Fallback về STEPS cũ khi Groq lỗi
+  async processWithSteps(conversation, userMessage, options) {
+    const currentStep = STEPS[conversation.stepIndex];
+
+    if (!currentStep) {
+      return await this.runRecommendation(conversation, options);
+    }
+
+    // Detect emergency đơn giản
+    const emergencyKeywords = [
+      "khó thở",
+      "đau ngực",
+      "bất tỉnh",
+      "ngã",
+      "tai nạn",
+      "chảy máu nhiều",
+    ];
+    if (emergencyKeywords.some((k) => userMessage.toLowerCase().includes(k))) {
+      const emergencyMsg =
+        "🚨 Đây có thể là tình huống khẩn cấp! Hãy gọi 115 hoặc đến cơ sở y tế gần nhất NGAY LẬP TỨC.";
+      conversation.history.push({ role: "assistant", content: emergencyMsg });
+      return {
+        message: emergencyMsg,
+        followUp: true,
+        state: conversation.state,
+      };
+    }
+
+    // Lưu answer vào state
+    const validated = this.validateAndEnhanceInput(
+      currentStep.key,
+      userMessage.trim(),
+    );
+    conversation.state[currentStep.key] = validated.value;
+    conversation.stepIndex += 1;
+
+    if (conversation.stepIndex < STEPS.length) {
+      const ack =
+        typeof currentStep.acknowledgement === "function"
+          ? currentStep.acknowledgement(validated.value)
+          : `Đã ghi nhận: ${validated.value}`;
+      const nextQ = STEPS[conversation.stepIndex].question;
+      const msg = `${ack}\n\n${nextQ}`;
+      conversation.history.push({ role: "assistant", content: msg });
+      const nextStep = STEPS[conversation.stepIndex];
+      return {
+        message: msg,
+        followUp: true,
+        state: conversation.state,
+        inputConfig: this.getInputConfig(nextStep.key),
+      };
+    }
+
+    // Đủ 5 bước → recommend
+    return await this.runRecommendation(conversation, options);
+  }
+  _detectNextMissingField(state) {
+    const order = ["gender", "age", "location", "primaryConcern", "symptomDuration"];
+    for (const key of order) {
+      if (!state[key]) return key;
+    }
+    return null; // tất cả đã đủ
+  }
   createRecommendationSummary(recommendations) {
     if (!recommendations) return "";
 
     const lines = [];
 
-    if (recommendations.specialties && Array.isArray(recommendations.specialties) && recommendations.specialties.length) {
+    if (
+      recommendations.specialties &&
+      Array.isArray(recommendations.specialties) &&
+      recommendations.specialties.length
+    ) {
       lines.push(
-        `Chuyên khoa gợi ý: ${recommendations.specialties.join(", ")}.`
+        `Chuyên khoa gợi ý: ${recommendations.specialties.join(", ")}.`,
       );
     }
 
@@ -436,7 +498,7 @@ class AiDoctorConversationService {
         (hospital, index) =>
           `${index + 1}. ${hospital.name}${
             hospital.address ? ` - ${hospital.address}` : ""
-          }`
+          }`,
       );
       lines.push("Cơ sở y tế gợi ý:\n" + hospitalLines.join("\n"));
     }
@@ -451,17 +513,21 @@ class AiDoctorConversationService {
 
     try {
       // Try improved RAG LLM service first
-      const response = await improvedRagLLM.generateAdvancedAdvice(state, recommendations, {
-        stateSummary: patientSummary,
-        recommendationSummary,
-      });
+      const response = await improvedRagLLM.generateAdvancedAdvice(
+        state,
+        recommendations,
+        {
+          stateSummary: patientSummary,
+          recommendationSummary,
+        },
+      );
       if (response) {
         // Store training data for future improvements
         await aiDoctorTraining.collectTrainingData(
-          state.conversationId || 'unknown',
+          state.conversationId || "unknown",
           state,
           { recommendations, confidence: recommendations.confidence || 0.8 },
-          { helpful: null, accurate: null, rating: null } // Will be filled by user feedback
+          { helpful: null, accurate: null, rating: null }, // Will be filled by user feedback
         );
         return response;
       }
@@ -469,21 +535,29 @@ class AiDoctorConversationService {
       console.error("❌ Advanced RAG LLM generation failed:", error.message);
       // Fallback to original service
       try {
-        const response = await ragLLMService.generateAdvice(state, recommendations, {
-          stateSummary: patientSummary,
-          recommendationSummary,
-        });
+        const response = await ragLLMService.generateAdvice(
+          state,
+          recommendations,
+          {
+            stateSummary: patientSummary,
+            recommendationSummary,
+          },
+        );
         if (response) {
           return response;
         }
       } catch (fallbackError) {
-        console.error("❌ Fallback RAG LLM generation failed:", fallbackError.message);
+        console.error(
+          "❌ Fallback RAG LLM generation failed:",
+          fallbackError.message,
+        );
       }
     }
 
     const fallbackSummary = [
       "Cảm ơn bạn đã cung cấp đầy đủ thông tin. Dựa trên dữ liệu hiện có, tôi đề xuất bạn nên thăm khám tại các chuyên khoa và cơ sở sau:",
-      recommendationSummary || "- Chúng tôi đang cập nhật thêm dữ liệu bác sĩ phù hợp.",
+      recommendationSummary ||
+        "- Chúng tôi đang cập nhật thêm dữ liệu bác sĩ phù hợp.",
       "Vui lòng chuẩn bị sẵn các giấy tờ khám trước đây (nếu có), danh sách thuốc đang dùng và đến khám sớm nếu triệu chứng trở nên nặng, sốt cao, khó thở hoặc đau dữ dội.",
       "Lưu ý: Bác sĩ AI chỉ mang tính chất tham khảo, không thay thế chẩn đoán trực tiếp. Nếu tình trạng khẩn cấp, hãy liên hệ cấp cứu 115 hoặc đến cơ sở y tế gần nhất.",
     ].join("\n\n");
@@ -494,12 +568,12 @@ class AiDoctorConversationService {
   // Validate and enhance user input
   validateAndEnhanceInput(stepKey, input) {
     if (!input) return { value: input, warnings: [] };
-    
+
     const warnings = [];
     let enhancedValue = input;
-    
+
     switch (stepKey) {
-      case 'age':
+      case "age":
         // Extract and validate age (support both Vietnamese and English)
         const ageMatch = input.match(/(\d+)/);
         if (ageMatch) {
@@ -507,66 +581,72 @@ class AiDoctorConversationService {
           if (age > 0 && age <= 120) {
             enhancedValue = age.toString();
           } else {
-            warnings.push('Tuổi không hợp lệ (phải từ 0-120)');
+            warnings.push("Tuổi không hợp lệ (phải từ 0-120)");
           }
         } else {
-          warnings.push('Vui lòng cung cấp tuổi dưới dạng số');
+          warnings.push("Vui lòng cung cấp tuổi dưới dạng số");
         }
         break;
-        
-      case 'gender':
+
+      case "gender":
         // Normalize gender input (support both Vietnamese and English)
         const genderLower = input.toLowerCase();
-        if (genderLower.includes('nam') && !genderLower.includes('nữ')) {
-          enhancedValue = 'Nam';
-        } else if (genderLower.includes('nữ')) {
-          enhancedValue = 'Nữ';
-        } else if (genderLower.includes('khác')) {
-          enhancedValue = 'Khác';
-        } else if (genderLower.includes('male') && !genderLower.includes('female')) {
-          enhancedValue = 'Nam';
-        } else if (genderLower.includes('female')) {
-          enhancedValue = 'Nữ';
-        } else if (genderLower.includes('other')) {
-          enhancedValue = 'Khác';
+        if (genderLower.includes("nam") && !genderLower.includes("nữ")) {
+          enhancedValue = "Nam";
+        } else if (genderLower.includes("nữ")) {
+          enhancedValue = "Nữ";
+        } else if (genderLower.includes("khác")) {
+          enhancedValue = "Khác";
+        } else if (
+          genderLower.includes("male") &&
+          !genderLower.includes("female")
+        ) {
+          enhancedValue = "Nam";
+        } else if (genderLower.includes("female")) {
+          enhancedValue = "Nữ";
+        } else if (genderLower.includes("other")) {
+          enhancedValue = "Khác";
         }
         break;
-        
-      case 'primaryConcern':
+
+      case "primaryConcern":
         // Basic medical term validation (minimum 3 characters for flexibility)
         if (input.length < 3) {
-          warnings.push('Vui lòng mô tả chi tiết hơn về triệu chứng');
+          warnings.push("Vui lòng mô tả chi tiết hơn về triệu chứng");
         }
         // Translate common English symptoms to Vietnamese for consistency
         const symptomTranslations = {
-          'headache': 'đau đầu',
-          'fever': 'sốt',
-          'cough': 'ho',
-          'pain': 'đau',
-          'cold': 'cảm lạnh',
-          'flu': 'cảm cúm'
+          headache: "đau đầu",
+          fever: "sốt",
+          cough: "ho",
+          pain: "đau",
+          cold: "cảm lạnh",
+          flu: "cảm cúm",
         };
-        
+
         let translatedSymptom = input;
-        Object.keys(symptomTranslations).forEach(eng => {
-          const regex = new RegExp(`\\b${eng}\\b`, 'gi');
+        Object.keys(symptomTranslations).forEach((eng) => {
+          const regex = new RegExp(`\\b${eng}\\b`, "gi");
           if (regex.test(translatedSymptom)) {
-            translatedSymptom = translatedSymptom.replace(regex, symptomTranslations[eng]);
+            translatedSymptom = translatedSymptom.replace(
+              regex,
+              symptomTranslations[eng],
+            );
           }
         });
-        
+
         if (translatedSymptom !== input) {
           enhancedValue = translatedSymptom;
         }
         break;
-        
-      case 'location':
+
+      case "location":
         // Keep user's exact location text to maximize geocoding accuracy
         // Only trim excessive whitespace; do not override with generic city names
         enhancedValue = input.trim();
         break;
     }
-    
+
     return { value: enhancedValue, warnings };
   }
 
@@ -581,5 +661,3 @@ class AiDoctorConversationService {
 }
 
 module.exports = new AiDoctorConversationService();
-
-

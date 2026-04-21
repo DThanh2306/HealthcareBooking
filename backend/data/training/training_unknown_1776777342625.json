@@ -1,0 +1,119 @@
+{
+  "id": "unknown_1776777342625",
+  "timestamp": "2026-04-21T13:15:42.625Z",
+  "input": {
+    "symptoms": "đau họng",
+    "age": "22",
+    "gender": "Nam",
+    "duration": "Khoảng 1 tuần"
+  },
+  "systemOutput": {
+    "recommendations": {
+      "specialties": [
+        "Tai Mũi Họng",
+        "Nam khoa"
+      ],
+      "doctors": [
+        {
+          "dr_id": 18,
+          "id": 18,
+          "name": "PGS.TS.BS. Nguyễn Triều Việt",
+          "specialty": "Tai Mũi Họng",
+          "hospitalName": "Bệnh viện Trường Đại Học Y Dược Cần Thơ",
+          "hospitalAddress": "179 Nguyễn Văn Cừ Nối Dài, phường Tân An, Ninh Kiều, Cần Thơ",
+          "price": "150000.00",
+          "matchScore": 1,
+          "image": "/uploads/1766478811050-710478777.png",
+          "description": "Tiến sĩ chuyên ngành Tai Mũi Họng, 20 năm kinh nghiệm",
+          "distance": 3.5,
+          "distanceText": "3.5km",
+          "sameProvince": true,
+          "regionLevel": "same_province",
+          "strongSpecialty": true,
+          "strongPrimarySpecialty": true
+        }
+      ],
+      "hospitals": [
+        {
+          "h_id": 8,
+          "id": 8,
+          "name": "Bệnh viện Quân Y Cần Thơ",
+          "address": "Số 01, Đường 30/4, Phường Ninh Kiều, Thành phố Cần Thơ",
+          "score": 0.696,
+          "phone": "84-4-382636",
+          "description": "Bệnh viện quân y phục vụ cán bộ, chiến sĩ và nhân dân khu vực Tây Nam Bộ.",
+          "distance": 0.9,
+          "distanceText": "0.9km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 3,
+          "id": 3,
+          "name": "Bệnh viện Trường Đại Học Y Dược Cần Thơ",
+          "address": "179 Nguyễn Văn Cừ Nối Dài, phường Tân An, Ninh Kiều, Cần Thơ",
+          "score": 0.682,
+          "phone": "023244234",
+          "description": "Bệnh viện thực hành đào tạo y khoa hàng đầu khu vực Đồng bằng sông Cửu Long.",
+          "distance": 3.5,
+          "distanceText": "3.5km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 6,
+          "id": 6,
+          "name": "Bệnh viện Phương Châu",
+          "address": "300 Nguyễn Văn Cừ nối dài, P. Tân An, Tp. Cần Thơ",
+          "score": 0.68,
+          "phone": "1900 54 54",
+          "description": "Hệ thống chăm sóc sức khỏe của Tập đoàn Y tế Phương Châu bao gồm 4 Bệnh viện tại Việt Nam.",
+          "distance": 4,
+          "distanceText": "4km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        },
+        {
+          "h_id": 15,
+          "id": 15,
+          "name": "Bệnh viện Xuyên Á Vĩnh Long",
+          "address": "QL1A, Tân Ngãi, TP. Vĩnh Long",
+          "score": 0.549,
+          "phone": "(0270) 6250",
+          "description": "Bệnh viện đi vào hoạt động từ năm 2014, là một trong những cơ sở y tế chất lượng khu vực phía Tây Nam Bộ.",
+          "distance": 30.1,
+          "distanceText": "30.1km",
+          "locationMethod": "gps",
+          "sameProvince": false,
+          "regionLevel": "same_region"
+        },
+        {
+          "h_id": 14,
+          "id": 14,
+          "name": "Bệnh viện Hoàn Mỹ Cửu Long",
+          "address": "Lô 20 Võ Nguyên Giáp, Phú Thứ, Cái Răng, Cần Thơ",
+          "score": 0.382,
+          "phone": "0292 3917 3",
+          "description": "Bệnh viện Hoàn Mỹ Cửu Long được thành lập vào năm 2007, phục vụ nhu cầu chăm sóc sức khỏe cho cộng đồng dân cư khu vực Đồng bằng sông Cửu Long.",
+          "distance": 3.7,
+          "distanceText": "3.7km",
+          "locationMethod": "gps",
+          "sameProvince": true,
+          "regionLevel": "same_province"
+        }
+      ],
+      "noDoctorsFound": false,
+      "enhancedAnalysis": {}
+    },
+    "confidence": 0.8
+  },
+  "feedback": {
+    "helpful": null,
+    "accurate": null,
+    "rating": null
+  },
+  "groundTruth": null
+}

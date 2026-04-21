@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div class="doctor-profile">
     <!-- Header -->
     <div class="profile-header">
@@ -253,12 +253,16 @@ async function loadAvailableSlots() {
     )
 
     // normalize data
-    availableSlots.value = (res.data.availableSlots || []).map(s => ({
-      time_slot: s.time_slot,
-      max_slot: s.max_slot,
-      current_slot: s.current_slot,
-      is_full: s.is_full
-    }))
+    availableSlots.value = (res.data.availableSlots || []).map(s => {
+       const max = Number(s.max_slot ?? 5) // default = 5 nếu BE không trả
+
+       return {
+        time_slot: s.time_slot,
+        max_slot: max,
+        current_slot: Number(s.current_slot || 0),
+        is_full: max !== null && Number(s.current_slot || 0) >= max
+      }
+    })
 
     console.log('Slots:', availableSlots.value)
 
@@ -269,7 +273,7 @@ async function loadAvailableSlots() {
 }
 
 // ================= CHECK =================
-function isPastSlot(slot) {
+function isPastSlot(timeSlot) {
   if (!selectedDate.value) return false
 
   const today = new Date()
@@ -279,7 +283,7 @@ function isPastSlot(slot) {
 
   if (!isSameDay) return selected < today
 
-  const match = slot.time_slot.match(/(\d{1,2}):(\d{2})/)
+  const match = timeSlot.match(/(\d{1,2}):(\d{2})/)
   if (!match) return false
 
   const h = parseInt(match[1])
@@ -298,8 +302,10 @@ function isPastSlot(slot) {
 
 // ================= NAVIGATE =================
 function goToBookingForm(slot) {
-  if (slot.is_full) return alert('Khung giờ đã đầy')
-  if (isPastSlot(slot)) return alert('Khung giờ đã qua')
+  if (slot.is_full) 
+    return alert('Khung giờ đã đầy')
+  if (isPastSlot(slot.time_slot)) 
+    return alert('Khung giờ đã qua')
 
   const target = {
     name: 'bookingform',
@@ -310,7 +316,7 @@ function goToBookingForm(slot) {
     }
   }
 
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('userToken') || localStorage.getItem('token')
 
   if (!token) {
     const href = router.resolve(target).href

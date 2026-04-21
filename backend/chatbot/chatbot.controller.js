@@ -2,11 +2,16 @@ const aiDoctorConversationService = require('../services/aiDoctorConversation.se
 
 // START conversation
 exports.startChat = (req, res) => {
-  const { userId } = req.body
-
-  const result = aiDoctorConversationService.startConversation(userId)
-
-  res.json(result)
+  try {
+    console.log('📥 /chatbot/start called')
+    const { userId } = req.body
+    const result = aiDoctorConversationService.startConversation(userId)
+    console.log('✅ Result:', JSON.stringify(result))
+    res.json(result)
+  } catch (e) {
+    console.error('❌ startChat error:', e.message)
+    res.status(500).json({ error: e.message })
+  }
 }
 
 // SEND message

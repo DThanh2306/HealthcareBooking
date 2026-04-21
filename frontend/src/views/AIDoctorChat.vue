@@ -3,8 +3,8 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import axios from '@/axios';
 import { useRouter } from 'vue-router';
 
+// ─── State ────────────────────────────────────────────────────────────────────
 const messages = ref([]);
-const inputMessage = ref('');
 const conversationId = ref(null);
 const loadingInitial = ref(true);
 const sending = ref(false);
@@ -13,8 +13,232 @@ const conversationState = reactive({});
 const recommendations = ref(null);
 const router = useRouter();
 
+// ─── Guided input state ───────────────────────────────────────────────────────
+const inputConfig = ref(null);         // { type, options, allowFreetext, ... }
+const selectedChips = ref([]);         // single: string[], multi: string[]
+const freetextValue = ref('');         // freetext kèm theo
+const gpsLoading = ref(false);
+
+// ─── Chat refs ────────────────────────────────────────────────────────────────
+const chatBodyRef = ref(null);
+const isDarkMode = ref(false);
+const distanceFilterKm = ref(null);
+const defaultRadiusKm = 50;
+
+// ─── Computed ─────────────────────────────────────────────────────────────────
+const isCompleted = computed(() => Boolean(recommendations.value));
+
+const stateEntries = computed(() =>
+  Object.entries(conversationState).filter(([key]) => key !== '_symptomAnalysis')
+);
+
+const stateLabels = {
+  gender: 'Giới tính',
+  age: 'Tuổi',
+  location: 'Khu vực',
+  primaryConcern: 'Triệu chứng chính',
+  symptomDuration: 'Thời gian xuất hiện',
+  medicalHistory: 'Tiền sử sức khỏe',
+};
+
+// Giá trị sẽ gửi lên BE — ưu tiên chip đã chọn, fallback về freetext
+const resolvedMessage = computed(() => {
+  if (!inputConfig.value) return freetextValue.value.trim();
+
+  const { type } = inputConfig.value;
+
+  if (type === 'multi') {
+    // Lọc bỏ chip "Khác..." vì đã có freetext
+    const chips = selectedChips.value.filter((c) => c !== 'Khác...');
+    const parts = [...chips];
+    if (freetextValue.value.trim()) parts.push(freetextValue.value.trim());
+    return parts.join(', ');
+  }
+
+  if (type === 'single' || type === 'location') {
+    if (selectedChips.value.length > 0) {
+      const chip = selectedChips.value[0];
+      // Nếu chip là nhóm tuổi → gửi nguyên, BE sẽ validate
+      if (freetextValue.value.trim() && chip === freetextValue.value.trim()) {
+        return freetextValue.value.trim();
+      }
+      return freetextValue.value.trim() || chip;
+    }
+    return freetextValue.value.trim();
+  }
+
+  return freetextValue.value.trim();
+});
+
+const canSend = computed(() => {
+  if (isCompleted.value || sending.value || loadingInitial.value) return false;
+  return resolvedMessage.value.length > 0;
+});
+
+const filteredHospitals = computed(() => {
+  if (!recommendations.value?.hospitals) return [];
+  const inSystem = recommendations.value.hospitals.filter((h) => h.inDatabase !== false);
+  const radius = typeof distanceFilterKm.value === 'number' ? distanceFilterKm.value : defaultRadiusKm;
+  return inSystem.filter(
+    (h) => (typeof h.distance === 'number' && h.distance <= radius) || (!h.distance && h.sameProvince)
+  );
+});
+
+const filteredDoctors = computed(() => {
+  if (!recommendations.value?.doctors) return [];
+  const radius = typeof distanceFilterKm.value === 'number' ? distanceFilterKm.value : defaultRadiusKm;
+  return recommendations.value.doctors.filter(
+    (d) => (typeof d.distance === 'number' && d.distance <= radius) || (!d.distance && d.sameProvince)
+  );
+});
+
+// ─── Chip logic ───────────────────────────────────────────────────────────────
+function toggleChip(option) {
+  if (!inputConfig.value) return;
+  const { type } = inputConfig.value;
+
+  if (type === 'single' || type === 'location') {
+    if (selectedChips.value[0] === option) {
+      selectedChips.value = [];
+    } else {
+      selectedChips.value = [option];
+      // Khi chọn chip → clear freetext (trừ location vì có thể nhập địa chỉ rõ hơn)
+      if (type !== 'location') freetextValue.value = '';
+    }
+  } else if (type === 'multi') {
+    const idx = selectedChips.value.indexOf(option);
+    if (idx >= 0) {
+      selectedChips.value.splice(idx, 1);
+    } else {
+      selectedChips.value.push(option);
+    }
+  }
+}
+
+function isChipSelected(option) {
+  return selectedChips.value.includes(option);
+}
+
+// ─── GPS ──────────────────────────────────────────────────────────────────────
+async function useGPSLocation() {
+  if (!navigator.geolocation) {
+    errorMessage.value = 'Trình duyệt không hỗ trợ GPS.';
+    return;
+  }
+  gpsLoading.value = true;
+  errorMessage.value = '';
+  try {
+    const position = await new Promise((resolve, reject) =>
+      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
+    );
+    const { latitude, longitude } = position.coords;
+    freetextValue.value = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+    selectedChips.value = [];
+  } catch {
+    errorMessage.value = 'Không thể lấy vị trí GPS. Vui lòng nhập địa chỉ thủ công.';
+  } finally {
+    gpsLoading.value = false;
+  }
+}
+
+// ─── Reset input sau khi gửi ──────────────────────────────────────────────────
+function resetInput() {
+  selectedChips.value = [];
+  freetextValue.value = '';
+}
+
+function applyInputConfig(config) {
+  inputConfig.value = config || null;
+  resetInput();
+}
+
+// ─── Chat helpers ─────────────────────────────────────────────────────────────
+function scrollToBottom() {
+  nextTick(() => {
+    if (chatBodyRef.value) {
+      chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
+    }
+  });
+}
+
+function addMessage(role, content) {
+  messages.value.push({
+    id: `${role}-${Date.now()}-${Math.random()}`,
+    role,
+    content,
+  });
+  scrollToBottom();
+}
+
+// ─── API calls ────────────────────────────────────────────────────────────────
+async function startConversation() {
+  loadingInitial.value = true;
+  errorMessage.value = '';
+  messages.value = [];
+  recommendations.value = null;
+  inputConfig.value = null;
+  resetInput();
+  Object.keys(conversationState).forEach((key) => delete conversationState[key]);
+
+  try {
+    const response = await axios.post('/ai-doctor/start');
+    if (response.data?.success) {
+      const data = response.data.data;
+      conversationId.value = data.conversationId;
+      addMessage('assistant', data.message);
+      applyInputConfig(data.inputConfig);
+    } else {
+      throw new Error(response.data?.message || 'Không thể khởi tạo cuộc trò chuyện.');
+    }
+  } catch (error) {
+    errorMessage.value =
+      error.response?.data?.message || error.message || 'Không thể kết nối tới bác sĩ AI.';
+  } finally {
+    loadingInitial.value = false;
+  }
+}
+
+async function sendMessage() {
+  if (!canSend.value) return;
+
+  const message = resolvedMessage.value;
+  addMessage('user', message);
+  resetInput();
+  sending.value = true;
+  errorMessage.value = '';
+
+  try {
+    const response = await axios.post('/ai-doctor/message', {
+      conversationId: conversationId.value,
+      message,
+      radiusKm: typeof distanceFilterKm.value === 'number' ? distanceFilterKm.value : undefined,
+    });
+
+    if (!response.data?.success) {
+      throw new Error(response.data?.message || 'Không nhận được trả lời từ bác sĩ AI.');
+    }
+
+    const data = response.data.data;
+    if (data.state) Object.assign(conversationState, data.state);
+
+    addMessage('assistant', data.message);
+    applyInputConfig(data.inputConfig || null);
+
+    if (data.recommendations) {
+      recommendations.value = data.recommendations;
+      inputConfig.value = null; // ẩn input khi xong
+    }
+  } catch (error) {
+    errorMessage.value =
+      error.response?.data?.message || error.message || 'Bác sĩ AI đang bận. Vui lòng thử lại.';
+    addMessage('assistant', 'Xin lỗi bạn, tôi đang gặp sự cố. Bạn có thể thử lại sau ít phút.');
+  } finally {
+    sending.value = false;
+  }
+}
+
+// ─── Navigation helpers ───────────────────────────────────────────────────────
 function openInNewTab(routeLocation) {
-  // Resolve route to absolute href and open in a new tab
   const resolved = router.resolve(routeLocation);
   const href = resolved?.href || (typeof routeLocation === 'string' ? routeLocation : '/');
   window.open(href, '_blank');
@@ -32,180 +256,10 @@ function goDoctorDetail(d) {
   if (!did) return;
   openInNewTab({ name: 'doctordetail', params: { dr_id: did } });
 }
-const distanceFilterKm = ref(null);
-
-const defaultRadiusKm = 50;
-const filteredHospitals = computed(() => {
-  if (!recommendations.value?.hospitals) return [];
-  // Always exclude hospitals outside the system
-  const inSystem = recommendations.value.hospitals.filter((h) => h.inDatabase !== false);
-  // Determine current radius: user-selected or default
-  const radius =
-    typeof distanceFilterKm.value === 'number' ? distanceFilterKm.value : defaultRadiusKm;
-  // Keep only nearby hospitals based on distance or sameProvince heuristic
-  return inSystem.filter(
-    (h) =>
-      (typeof h.distance === 'number' && h.distance <= radius) || (!h.distance && h.sameProvince)
-  );
-});
-
-const filteredDoctors = computed(() => {
-  if (!recommendations.value?.doctors) return [];
-  const radius =
-    typeof distanceFilterKm.value === 'number' ? distanceFilterKm.value : defaultRadiusKm;
-  return recommendations.value.doctors.filter(
-    (d) =>
-      (typeof d.distance === 'number' && d.distance <= radius) || (!d.distance && d.sameProvince)
-  );
-});
-const chatBodyRef = ref(null);
-const isDarkMode = ref(false);
-const messageHistory = ref([]);
-const currentMessageIndex = ref(-1);
-
-const isCompleted = computed(() => Boolean(recommendations.value));
-const stateEntries = computed(() =>
-  Object.entries(conversationState).filter(([key]) => key !== '_symptomAnalysis')
-);
-const stateLabels = {
-  gender: 'Giới tính',
-  age: 'Tuổi',
-  location: 'Khu vực',
-  primaryConcern: 'Triệu chứng chính',
-  symptomDuration: 'Thời gian xuất hiện',
-  medicalHistory: 'Tiền sử sức khỏe'
-};
-
-function scrollToBottom() {
-  nextTick(() => {
-    if (chatBodyRef.value) {
-      chatBodyRef.value.scrollTop = chatBodyRef.value.scrollHeight;
-    }
-  });
-}
-
-function addMessage(role, content) {
-  messages.value.push({
-    id: `${role}-${Date.now()}-${Math.random()}`,
-    role,
-    content
-  });
-  scrollToBottom();
-}
-
-async function startConversation() {
-  loadingInitial.value = true;
-  errorMessage.value = '';
-  messages.value = [];
-  recommendations.value = null;
-  Object.keys(conversationState).forEach((key) => delete conversationState[key]);
-
-  try {
-    const response = await axios.post('/ai-doctor/start');
-    if (response.data?.success) {
-      conversationId.value = response.data.data.conversationId;
-      addMessage('assistant', response.data.data.message);
-    } else {
-      throw new Error(response.data?.message || 'Không thể khởi tạo cuộc trò chuyện.');
-    }
-  } catch (error) {
-    console.error('startConversation error:', error);
-    errorMessage.value =
-      error.response?.data?.message ||
-      error.message ||
-      'Không thể kết nối tới bác sĩ AI. Vui lòng kiểm tra lại máy chủ.';
-  } finally {
-    loadingInitial.value = false;
-  }
-}
-
-async function sendMessage() {
-  if (!conversationId.value || !inputMessage.value.trim() || sending.value) {
-    return;
-  }
-
-  const message = inputMessage.value.trim();
-
-  // Save message to history for navigation
-  messageHistory.value.push(message);
-  currentMessageIndex.value = messageHistory.value.length - 1;
-
-  inputMessage.value = '';
-  addMessage('user', message);
-  sending.value = true;
-  errorMessage.value = '';
-
-  try {
-    const response = await axios.post('/ai-doctor/message', {
-      conversationId: conversationId.value,
-      message,
-      radiusKm: typeof distanceFilterKm.value === 'number' ? distanceFilterKm.value : undefined
-    });
-
-    if (!response.data?.success) {
-      throw new Error(response.data?.message || 'Không nhận được trả lời từ bác sĩ AI.');
-    }
-
-    const data = response.data.data;
-    if (data.state) {
-      Object.assign(conversationState, data.state);
-    }
-
-    addMessage('assistant', data.message);
-
-    if (data.recommendations) {
-      recommendations.value = data.recommendations;
-    }
-  } catch (error) {
-    console.error('sendMessage error:', error);
-    errorMessage.value =
-      error.response?.data?.message || error.message || 'Bác sĩ AI đang bận. Vui lòng thử lại sau.';
-    addMessage(
-      'assistant',
-      'Xin lỗi bạn, hiện tôi đang gặp vấn đề khi xử lý câu trả lời. Bạn có thể thử lại sau ít phút nhé.'
-    );
-  } finally {
-    sending.value = false;
-  }
-}
 
 function toggleDarkMode() {
   isDarkMode.value = !isDarkMode.value;
   document.documentElement.classList.toggle('dark', isDarkMode.value);
-}
-
-function navigateMessage(direction) {
-  if (direction === 'prev' && currentMessageIndex.value > 0) {
-    currentMessageIndex.value--;
-    inputMessage.value = messageHistory.value[currentMessageIndex.value];
-  } else if (direction === 'next' && currentMessageIndex.value < messageHistory.value.length - 1) {
-    currentMessageIndex.value++;
-    inputMessage.value = messageHistory.value[currentMessageIndex.value];
-  } else if (
-    direction === 'next' &&
-    currentMessageIndex.value === messageHistory.value.length - 1
-  ) {
-    currentMessageIndex.value = messageHistory.value.length;
-    inputMessage.value = '';
-  }
-}
-
-function clearInput() {
-  inputMessage.value = '';
-  currentMessageIndex.value = messageHistory.value.length;
-}
-
-function editMessage(messageId, messageRole) {
-  if (messageRole === 'user') {
-    const message = messages.value.find((m) => m.id === messageId);
-    if (message) {
-      inputMessage.value = message.content;
-      // Remove this message and all subsequent messages
-      const messageIndex = messages.value.findIndex((m) => m.id === messageId);
-      messages.value.splice(messageIndex);
-      recommendations.value = null;
-    }
-  }
 }
 
 function formatPrice(value) {
@@ -215,216 +269,193 @@ function formatPrice(value) {
   return `${number.toLocaleString('vi-VN')} đ`;
 }
 
-function getUrgencyClass(urgencyLevel) {
-  const classes = {
-    'khẩn cấp': 'urgency-emergency',
-    'cần khám sớm': 'urgency-soon',
-    'có thể đợi': 'urgency-normal',
-    'bình thường': 'urgency-normal'
-  };
-  return classes[urgencyLevel] || 'urgency-normal';
+function getUrgencyClass(u) {
+  return { 'khẩn cấp': 'urgency-emergency', 'cần khám sớm': 'urgency-soon' }[u] || 'urgency-normal';
+}
+function getUrgencyIcon(u) {
+  return { 'khẩn cấp': '🚨', 'cần khám sớm': '⚠️', 'có thể đợi': '📅' }[u] || '✅';
+}
+function getUrgencyText(u) {
+  return (
+    { 'khẩn cấp': 'Cần cấp cứu ngay', 'cần khám sớm': 'Nên khám trong vài ngày', 'có thể đợi': 'Có thể đợi khám' }[u] ||
+    'Tình trạng bình thường'
+  );
 }
 
-function getUrgencyIcon(urgencyLevel) {
-  const icons = {
-    'khẩn cấp': '🚨',
-    'cần khám sớm': '⚠️',
-    'có thể đợi': '📅',
-    'bình thường': '✅'
-  };
-  return icons[urgencyLevel] || '✅';
-}
-
-function getUrgencyText(urgencyLevel) {
-  const texts = {
-    'khẩn cấp': 'Cần cấp cứu ngay',
-    'cần khám sớm': 'Nên khám trong vài ngày',
-    'có thể đợi': 'Có thể đợi khám',
-    'bình thường': 'Tình trạng bình thường'
-  };
-  return texts[urgencyLevel] || 'Tình trạng bình thường';
-}
-
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
   startConversation();
-  // Initialize dark mode from localStorage
-  const savedDarkMode = localStorage.getItem('darkMode');
-  if (savedDarkMode === 'true') {
+  const saved = localStorage.getItem('darkMode');
+  if (saved === 'true') {
     isDarkMode.value = true;
     document.documentElement.classList.add('dark');
   }
 });
 
-// Watch for dark mode changes and save to localStorage
-watch(isDarkMode, (newValue) => {
-  localStorage.setItem('darkMode', newValue.toString());
-});
+watch(isDarkMode, (v) => localStorage.setItem('darkMode', v.toString()));
 </script>
 
 <template>
-  <div
-    class="ai-doctor-page"
-    :class="{ 'dark-mode': isDarkMode }"
-  >
+  <div class="ai-doctor-page" :class="{ 'dark-mode': isDarkMode }">
+
+    <!-- ── Chat panel ── -->
     <div class="chat-container">
       <header class="chat-header">
         <div class="header-content">
           <div class="header-title">
             <h1>🩺 Bác sĩ AI</h1>
             <div class="ai-status">
-              <div
-                class="status-indicator"
-                :class="{ active: !loadingInitial }"
-              ></div>
+              <div class="status-indicator" :class="{ active: !loadingInitial }"></div>
               <span>{{ loadingInitial ? 'Đang kết nối...' : 'Trực tuyến' }}</span>
             </div>
           </div>
-          <p>
-            Trò chuyện với bác sĩ AI để được gợi ý chuyên khoa, bệnh viện, bác sĩ phù hợp. Đây là tư
-            vấn tham khảo và không thay thế khám chữa bệnh trực tiếp.
-          </p>
+          <p>Trả lời các câu hỏi để nhận gợi ý chuyên khoa, bác sĩ và bệnh viện phù hợp.</p>
         </div>
         <div class="header-controls">
-          <button
-            class="control-btn dark-mode-btn"
-            @click="toggleDarkMode"
-            :title="isDarkMode ? 'Chế độ sáng' : 'Chế độ tối'"
-          >
+          <button class="control-btn dark-mode-btn" @click="toggleDarkMode"
+            :title="isDarkMode ? 'Chế độ sáng' : 'Chế độ tối'">
             {{ isDarkMode ? '☀️' : '🌙' }}
           </button>
-          <button
-            class="control-btn restart-btn"
-            @click="startConversation"
-            :disabled="loadingInitial || sending"
-            title="Bắt đầu lại cuộc trò chuyện"
-          >
+          <button class="control-btn restart-btn" @click="startConversation"
+            :disabled="loadingInitial || sending" title="Bắt đầu lại">
             🔄 Bắt đầu lại
           </button>
         </div>
       </header>
 
-      <div
-        class="chat-body"
-        ref="chatBodyRef"
-      >
-        <div
-          v-if="loadingInitial"
-          class="chat-loading"
-        >
+      <!-- Messages -->
+      <div class="chat-body" ref="chatBodyRef">
+        <div v-if="loadingInitial" class="chat-loading">
           <div class="spinner"></div>
           <p>Đang kết nối với bác sĩ AI...</p>
         </div>
 
         <template v-else>
-          <div
-            v-for="message in messages"
-            :key="message.id"
-            class="chat-message"
-            :class="message.role"
-          >
+          <div v-for="message in messages" :key="message.id"
+            class="chat-message" :class="message.role">
             <div class="avatar">
               <span v-if="message.role === 'assistant'">🩺</span>
               <span v-else>👤</span>
             </div>
-            <div class="message-wrapper">
-              <div
-                class="bubble"
-                v-html="message.content.replace(/\n/g, '<br/>')"
-              ></div>
-              <div
-                class="message-actions"
-                v-if="message.role === 'user'"
-              >
-                <button
-                  class="action-btn edit-btn"
-                  @click="editMessage(message.id, message.role)"
-                  title="Chỉnh sửa tin nhắn này"
-                >
-                  ✏️
-                </button>
-              </div>
-            </div>
+            <div class="bubble" v-html="message.content.replace(/\n/g, '<br/>')"></div>
           </div>
 
-          <div
-            v-if="sending"
-            class="chat-message assistant typing"
-          >
+          <div v-if="sending" class="chat-message assistant typing">
             <div class="avatar">🩺</div>
             <div class="bubble typing-indicator"><span></span><span></span><span></span></div>
           </div>
         </template>
       </div>
 
-      <div class="chat-footer">
-        <div class="input-wrapper">
-          <div class="input-container">
+      <!-- ── Guided input footer ── -->
+      <div class="chat-footer" v-if="!loadingInitial && !isCompleted">
+
+        <!-- SINGLE / MULTI chips -->
+        <template v-if="inputConfig && (inputConfig.type === 'single' || inputConfig.type === 'multi')">
+          <div class="input-hint">
+            <span v-if="inputConfig.type === 'single'">Chọn một lựa chọn</span>
+            <span v-else>Có thể chọn nhiều</span>
+          </div>
+          <div class="chips-container">
+            <button
+              v-for="option in inputConfig.options"
+              :key="option"
+              class="chip"
+              :class="{
+                'chip--selected': isChipSelected(option),
+                'chip--multi': inputConfig.type === 'multi',
+                'chip--other': option === 'Khác...',
+              }"
+              @click="toggleChip(option)"
+              :disabled="sending"
+            >
+              <span class="chip-check" v-if="isChipSelected(option)">✓</span>
+              {{ option }}
+            </button>
+          </div>
+
+          <!-- Freetext bổ sung -->
+          <div v-if="inputConfig.allowFreetext &&
+              (inputConfig.type === 'multi' || selectedChips.length === 0 || inputConfig.type === 'single')"
+            class="freetext-row">
+            <input
+              v-model="freetextValue"
+              :placeholder="inputConfig.freetextPlaceholder || 'Nhập thêm...'"
+              :disabled="sending"
+              @keyup.enter="sendMessage"
+              class="freetext-input"
+            />
+          </div>
+        </template>
+
+        <!-- LOCATION input -->
+        <template v-else-if="inputConfig && inputConfig.type === 'location'">
+          <div class="input-hint">Nhập địa chỉ hoặc dùng GPS</div>
+          <div class="location-row">
+            <input
+              v-model="freetextValue"
+              :placeholder="inputConfig.freetextPlaceholder"
+              :disabled="sending || gpsLoading"
+              @keyup.enter="sendMessage"
+              class="freetext-input location-input"
+            />
+            <button
+              class="gps-btn"
+              @click="useGPSLocation"
+              :disabled="sending || gpsLoading"
+              title="Dùng vị trí GPS hiện tại"
+            >
+              <span v-if="gpsLoading" class="gps-spinner"></span>
+              <span v-else>📍</span>
+              {{ gpsLoading ? 'Đang lấy vị trí...' : 'GPS' }}
+            </button>
+          </div>
+        </template>
+
+        <!-- FREETEXT thuần (fallback khi BE không gửi inputConfig) -->
+        <template v-else>
+          <div class="freetext-row freetext-row--full">
             <textarea
-              v-model="inputMessage"
-              :disabled="loadingInitial || sending || isCompleted"
+              v-model="freetextValue"
+              :disabled="sending"
               placeholder="Nhập câu trả lời của bạn..."
               @keyup.enter.exact.prevent="sendMessage"
-              @keyup.up.prevent="navigateMessage('prev')"
-              @keyup.down.prevent="navigateMessage('next')"
+              class="freetext-textarea"
+              rows="2"
             />
-            <div class="input-actions">
-              <button
-                v-if="inputMessage.trim()"
-                class="action-btn clear-btn"
-                @click="clearInput"
-                title="Xóa tin nhắn"
-              >
-                ✖️
-              </button>
-              <button
-                class="action-btn nav-btn"
-                @click="navigateMessage('prev')"
-                :disabled="currentMessageIndex <= 0 || !messageHistory.length"
-                title="Tin nhắn trước (↑)"
-              >
-                ⬆️
-              </button>
-              <button
-                class="action-btn nav-btn"
-                @click="navigateMessage('next')"
-                :disabled="currentMessageIndex >= messageHistory.length"
-                title="Tin nhắn sau (↓)"
-              >
-                ⬇️
-              </button>
-            </div>
           </div>
-          <button
-            class="send-btn"
-            :disabled="!inputMessage.trim() || loadingInitial || sending || isCompleted"
-            @click="sendMessage"
-          >
+        </template>
+
+        <!-- Send button -->
+        <div class="footer-actions">
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+          <button class="send-btn" :disabled="!canSend" @click="sendMessage">
             <span v-if="sending">⏳</span>
             <span v-else>📤</span>
             Gửi
           </button>
         </div>
+
         <p class="disclaimer">
-          Bác sĩ AI chỉ mang tính tham khảo. Nếu bạn có dấu hiệu nguy hiểm (sốt cao, khó thở, đau
-          ngực dữ dội...), hãy liên hệ cấp cứu 115 hoặc đến cơ sở y tế gần nhất.
+          Bác sĩ AI chỉ mang tính tham khảo. Trường hợp khẩn cấp hãy gọi 115.
         </p>
-        <p
-          v-if="errorMessage"
-          class="error-message"
-        >
-          {{ errorMessage }}
-        </p>
+      </div>
+
+      <!-- Completed state footer -->
+      <div class="chat-footer chat-footer--done" v-if="isCompleted">
+        <p class="done-text">✅ Đã hoàn tất tư vấn. Xem kết quả ở bên phải.</p>
+        <button class="control-btn restart-btn" @click="startConversation">
+          🔄 Tư vấn lần khác
+        </button>
       </div>
     </div>
 
+    <!-- ── Sidebar ── -->
     <aside class="sidebar">
       <section class="info-card">
         <h2>Thông tin đã thu thập</h2>
         <ul>
-          <li
-            v-for="[key, value] in stateEntries"
-            :key="key"
-          >
+          <li v-for="[key, value] in stateEntries" :key="key">
             <strong>{{ stateLabels[key] || key }}</strong>
             <span>{{ value }}</span>
           </li>
@@ -434,24 +465,14 @@ watch(isDarkMode, (newValue) => {
         </ul>
       </section>
 
-      <section
-        v-if="recommendations"
-        class="info-card"
-      >
+      <section v-if="recommendations" class="info-card">
         <h2>Kết quả gợi ý</h2>
 
-        <div
-          v-if="recommendations.specialties?.length"
-          class="result-block"
-        >
+        <div v-if="recommendations.specialties?.length" class="result-block">
           <h3>Chuyên khoa phù hợp</h3>
           <div class="chip-list">
-            <span
-              v-for="specialty in recommendations.specialties"
-              :key="specialty"
-              class="chip"
-            >
-              {{ specialty }}
+            <span v-for="s in recommendations.specialties" :key="s" class="chip chip--specialty">
+              {{ s }}
             </span>
           </div>
         </div>
@@ -459,8 +480,7 @@ watch(isDarkMode, (newValue) => {
         <div class="result-block">
           <h3>Bác sĩ đề xuất</h3>
           <div class="filter-row">
-            <label style="font-weight: 600; color: #475569">
-              Lọc theo bán kính:
+            <label>Bán kính:
               <select v-model.number="distanceFilterKm">
                 <option :value="null">Tất cả</option>
                 <option :value="5">≤ 5 km</option>
@@ -468,114 +488,64 @@ watch(isDarkMode, (newValue) => {
                 <option :value="20">≤ 20 km</option>
                 <option :value="50">≤ 50 km</option>
                 <option :value="100">≤ 100 km</option>
-                <option :value="150">≤ 150 km</option>
-                <option :value="200">≤ 200 km</option>
               </select>
             </label>
           </div>
-          <div
-            v-if="filteredDoctors.length === 0"
-            class="empty-state"
-            style="color: #475569; font-weight: 600"
-          >
-            Không tìm thấy bác sĩ phù hợp với bạn.
+          <div v-if="filteredDoctors.length === 0" class="empty-state">
+            Không tìm thấy bác sĩ phù hợp.
           </div>
-          <article
-            v-else
-            v-for="doctor in filteredDoctors"
-            :key="doctor.id || doctor.name"
-            class="doctor-card"
-            :class="{ disabled: !(doctor.dr_id || doctor.id) }"
-            @click="goDoctorDetail(doctor)"
-          >
+          <article v-else v-for="doctor in filteredDoctors" :key="doctor.id || doctor.name"
+            class="doctor-card" :class="{ disabled: !(doctor.dr_id || doctor.id) }"
+            @click="goDoctorDetail(doctor)">
             <div class="doctor-info">
-              <div class="hospital-header">
+              <div class="card-header-row">
                 <h4>{{ doctor.name }}</h4>
-                <span
-                  v-if="doctor.distanceText"
-                  class="distance-badge"
-                  title="Khoảng cách tới cơ sở làm việc"
-                >
-                  {{ doctor.distanceText }}
-                </span>
+                <span v-if="doctor.distanceText" class="distance-badge">{{ doctor.distanceText }}</span>
               </div>
               <p class="doctor-specialty">{{ doctor.specialty }}</p>
-              <p class="doctor-hospital">
-                {{ doctor.hospitalName }}
-              </p>
-              <p
-                v-if="doctor.hospitalAddress"
-                class="doctor-address"
-              >
-                {{ doctor.hospitalAddress }}
-              </p>
+              <p class="doctor-hospital">{{ doctor.hospitalName }}</p>
+              <p v-if="doctor.hospitalAddress" class="doctor-address">{{ doctor.hospitalAddress }}</p>
             </div>
             <div class="doctor-meta">
               <span class="price">{{ formatPrice(doctor.price) }}</span>
-              <span
-                class="score"
-                v-if="doctor.matchScore"
-              >
-                Độ phù hợp: {{ (doctor.matchScore * 100).toFixed(0) }}%
+              <span class="score" v-if="doctor.matchScore">
+                Phù hợp: {{ (doctor.matchScore * 100).toFixed(0) }}%
               </span>
             </div>
           </article>
         </div>
 
-        <!-- Enhanced Medical Context Display -->
-        <div
-          v-if="recommendations._symptomAnalysis"
-          class="result-block medical-context"
-        >
+        <div v-if="recommendations._symptomAnalysis" class="result-block medical-context">
           <h3>Phân tích y khoa</h3>
           <div class="medical-info">
-            <div
-              class="urgency-level"
-              :class="getUrgencyClass(recommendations._symptomAnalysis.urgencyLevel)"
-            >
-              <span class="urgency-icon">{{
-                getUrgencyIcon(recommendations._symptomAnalysis.urgencyLevel)
-              }}</span>
-              <span class="urgency-text">{{
-                getUrgencyText(recommendations._symptomAnalysis.urgencyLevel)
-              }}</span>
+            <div class="urgency-level" :class="getUrgencyClass(recommendations._symptomAnalysis.urgencyLevel)">
+              <span>{{ getUrgencyIcon(recommendations._symptomAnalysis.urgencyLevel) }}</span>
+              <span>{{ getUrgencyText(recommendations._symptomAnalysis.urgencyLevel) }}</span>
             </div>
-            <div
-              v-if="recommendations._symptomAnalysis.matchedSymptoms?.length"
-              class="matched-symptoms"
-            >
-              <strong>Triệu chứng được nhận diện:</strong>
+            <div v-if="recommendations._symptomAnalysis.matchedSymptoms?.length" class="matched-symptoms">
+              <strong>Triệu chứng nhận diện:</strong>
               <div class="symptom-tags">
-                <span
-                  v-for="symptom in recommendations._symptomAnalysis.matchedSymptoms"
-                  :key="symptom"
-                  class="symptom-tag"
-                >
-                  {{ symptom }}
+                <span v-for="s in recommendations._symptomAnalysis.matchedSymptoms" :key="s" class="symptom-tag">
+                  {{ s }}
                 </span>
               </div>
             </div>
             <div class="confidence-score">
-              <strong>Độ tin cậy phân tích:</strong>
+              <strong>Độ tin cậy:</strong>
               <div class="confidence-bar">
-                <div
-                  class="confidence-fill"
-                  :style="{ width: recommendations._symptomAnalysis.confidence * 100 + '%' }"
-                ></div>
+                <div class="confidence-fill"
+                  :style="{ width: recommendations._symptomAnalysis.confidence * 100 + '%' }">
+                </div>
               </div>
               <span>{{ (recommendations._symptomAnalysis.confidence * 100).toFixed(0) }}%</span>
             </div>
           </div>
         </div>
 
-        <div
-          v-if="recommendations.hospitals?.length"
-          class="result-block"
-        >
+        <div v-if="recommendations.hospitals?.length" class="result-block">
           <h3>Cơ sở y tế gợi ý</h3>
           <div class="filter-row">
-            <label style="font-weight: 600; color: #475569">
-              Lọc theo bán kính:
+            <label>Bán kính:
               <select v-model.number="distanceFilterKm">
                 <option :value="null">Tất cả</option>
                 <option :value="5">≤ 5 km</option>
@@ -583,51 +553,23 @@ watch(isDarkMode, (newValue) => {
                 <option :value="20">≤ 20 km</option>
                 <option :value="50">≤ 50 km</option>
                 <option :value="100">≤ 100 km</option>
-                <option :value="150">≤ 150 km</option>
-                <option :value="200">≤ 200 km</option>
               </select>
             </label>
           </div>
-          <div
-            v-if="filteredHospitals.length === 0"
-            class="empty-state"
-            style="color: #475569; font-weight: 600"
-          >
-            Không tìm thấy cơ sở y tế phù hợp trong bán kính
-            {{ typeof distanceFilterKm === 'number' ? distanceFilterKm : defaultRadiusKm }} km.
+          <div v-if="filteredHospitals.length === 0" class="empty-state">
+            Không tìm thấy cơ sở y tế phù hợp.
           </div>
-          <article
-            v-else
-            v-for="hospital in filteredHospitals"
-            :key="hospital.id || hospital.name"
+          <article v-else v-for="hospital in filteredHospitals" :key="hospital.id || hospital.name"
             class="hospital-card"
-            :class="{
-              disabled: hospital.inDatabase === false || !(hospital.h_id || hospital.dbId)
-            }"
-            @click="goHospitalDetail(hospital)"
-          >
-            <div class="hospital-header">
+            :class="{ disabled: hospital.inDatabase === false || !(hospital.h_id || hospital.dbId) }"
+            @click="goHospitalDetail(hospital)">
+            <div class="card-header-row">
               <h4>{{ hospital.name }}</h4>
-              <span
-                v-if="hospital.inDatabase === false"
-                class="external-badge"
-                title="Bệnh viện ngoài hệ thống"
-                >Ngoài hệ thống</span
-              >
-              <span
-                v-if="hospital.distanceText"
-                class="distance-badge"
-                :title="
-                  hospital.locationMethod === 'gps'
-                    ? 'Khoảng cách tính theo GPS'
-                    : 'Khoảng cách ước lượng'
-                "
-              >
-                {{ hospital.distanceText }}
-              </span>
+              <span v-if="hospital.inDatabase === false" class="external-badge">Ngoài hệ thống</span>
+              <span v-if="hospital.distanceText" class="distance-badge">{{ hospital.distanceText }}</span>
             </div>
             <p v-if="hospital.address">{{ hospital.address }}</p>
-            <p v-if="hospital.phone">Điện thoại: {{ hospital.phone }}</p>
+            <p v-if="hospital.phone">📞 {{ hospital.phone }}</p>
           </article>
         </div>
       </section>
@@ -636,761 +578,299 @@ watch(isDarkMode, (newValue) => {
 </template>
 
 <style scoped>
+/* ── Layout ── */
 .ai-doctor-page {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-  padding: 24px 32px 32px;
-  background: linear-gradient(135deg, #f5f7fb 0%, #e0f2fe 100%);
-  min-height: calc(100vh - 64px);
-  box-sizing: border-box;
-  transition: all 0.3s ease;
+  display: flex;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f8fafc;
+  color: #1e293b;
 }
+.dark-mode { background: #0f172a; color: #e2e8f0; }
 
-.ai-doctor-page.dark-mode {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-}
-
-.dark-mode .chat-container,
-.dark-mode .info-card {
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #010811;
-}
-
-.dark-mode .chat-header {
-  border-bottom-color: #334155;
-}
-
-.dark-mode .chat-body {
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-}
-
-.dark-mode .bubble {
-  background: #334155;
-  color: #e2e8f0;
-}
-
-.dark-mode .chat-message.user .bubble {
-  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
-}
-
-.dark-mode .input-wrapper textarea {
-  background: #334155;
-  border-color: #475569;
-  color: #e2e8f0;
-}
-
-.dark-mode .input-wrapper textarea::placeholder {
-  color: #94a3b8;
-}
-
-.dark-mode .chat-footer {
-  background: #0f172a;
-  border-top-color: #334155;
-}
-
+/* ── Chat container ── */
 .chat-container {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  flex: 1;
   display: flex;
   flex-direction: column;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
+  max-height: 90vh;
 }
+.dark-mode .chat-container { background: #1e293b; border-color: #334155; }
 
+/* ── Header ── */
 .chat-header {
-  padding: 24px;
+  padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
-  backdrop-filter: blur(10px);
+  align-items: flex-start;
+  gap: 1rem;
+  background: #f8fafc;
 }
-
-.header-title {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.chat-header h1 {
-  margin: 0;
-  font-size: 1.75rem;
-  color: #1e293b;
-  background: #175457;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.ai-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
+.dark-mode .chat-header { background: #1e293b; border-color: #334155; }
+.header-title { display: flex; align-items: center; gap: 0.75rem; }
+.header-title h1 { font-size: 1.25rem; font-weight: 600; margin: 0; }
+.header-content p { margin: 0.4rem 0 0; font-size: 0.85rem; color: #64748b; }
+.ai-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #64748b; }
 .status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ef4444;
-  animation: pulse 2s infinite;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #94a3b8; transition: background 0.3s;
 }
-
-.status-indicator.active {
-  background: #10b981;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.chat-header p {
-  margin: 0;
-  color: #475569;
-  line-height: 1.6;
-}
-
-.header-controls {
-  display: flex;
-  gap: 12px;
-}
-
+.status-indicator.active { background: #22c55e; }
+.header-controls { display: flex; gap: 0.5rem; flex-shrink: 0; }
 .control-btn {
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid #e2e8f0;
+  background: transparent; cursor: pointer; font-size: 0.85rem;
+  color: inherit; transition: background 0.15s;
 }
+.control-btn:hover:not(:disabled) { background: #f1f5f9; }
+.dark-mode .control-btn:hover:not(:disabled) { background: #334155; }
+.control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.dark-mode-btn {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
-}
-
-.restart-btn {
-  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
-  color: white;
-}
-
-.control-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.control-btn:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
+/* ── Chat body ── */
 .chat-body {
-  min-height: 400px;
-  max-height: 2000px;
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+  flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
 }
-
-.chat-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 12px;
-  color: #475569;
-}
-
+.chat-loading { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 2rem; color: #64748b; }
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #cbd5f5;
-  border-top-color: #6366f1;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 3px solid #e2e8f0; border-top-color: #6366f1;
+  animation: spin 0.8s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+/* ── Messages ── */
+.chat-message { display: flex; gap: 0.75rem; align-items: flex-start; }
+.chat-message.user { flex-direction: row-reverse; }
+.avatar { font-size: 1.25rem; flex-shrink: 0; margin-top: 2px; }
+.bubble {
+  max-width: 78%; padding: 0.75rem 1rem;
+  border-radius: 14px; font-size: 0.925rem; line-height: 1.6;
 }
-
-.chat-message {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 18px;
-  animation: slideIn 0.3s ease-out;
+.assistant .bubble {
+  background: #f1f5f9; color: #1e293b;
+  border-bottom-left-radius: 4px;
 }
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.user .bubble {
+  background: #6366f1; color: #fff;
+  border-bottom-right-radius: 4px;
 }
+.dark-mode .assistant .bubble { background: #334155; color: #e2e8f0; }
 
-.chat-message.user {
-  flex-direction: row-reverse;
-}
-
-.chat-message .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #eef2ff 0%, #dbeafe 100%);
-  font-size: 18px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 2px solid white;
-}
-
-.chat-message.user .avatar {
-  background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);
-}
-
-.message-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 75%;
-}
-
-.chat-message .bubble {
-  padding: 16px 20px;
-  border-radius: 18px;
-  background: white;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
-  line-height: 1.6;
-  font-size: 0.95rem;
-  color: #1e293b;
-  position: relative;
-  border: 1px solid rgba(226, 232, 240, 0.5);
-}
-
-.chat-message.user .bubble {
-  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
-  color: white;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.message-actions {
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.chat-message:hover .message-actions {
-  opacity: 1;
-}
-
-.action-btn {
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.1);
-  color: #475569;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  background: rgba(0, 0, 0, 0.2);
-  transform: scale(1.1);
-}
-
-.typing .bubble {
-  display: flex;
-  gap: 6px;
-  justify-content: flex-start;
-  align-items: center;
-}
-
+/* Typing */
+.typing-indicator { display: flex; gap: 5px; align-items: center; padding: 0.75rem 1rem; }
 .typing-indicator span {
-  width: 8px;
-  height: 8px;
-  background: #94a3b8;
-  border-radius: 50%;
-  display: inline-block;
-  animation: blink 1.4s infinite;
+  width: 7px; height: 7px; border-radius: 50%; background: #94a3b8;
+  animation: bounce 1.2s ease-in-out infinite;
 }
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
 
-.typing-indicator span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.typing-indicator span:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes blink {
-  0%,
-  80%,
-  100% {
-    opacity: 0.2;
-  }
-  40% {
-    opacity: 1;
-  }
-}
-
+/* ── Footer ── */
 .chat-footer {
-  padding: 20px 24px;
+  padding: 1rem 1.5rem;
   border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  background: #fafafa;
 }
-
-.input-wrapper {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
+.dark-mode .chat-footer { background: #1e293b; border-color: #334155; }
+.chat-footer--done {
+  flex-direction: row; align-items: center; justify-content: space-between;
 }
+.done-text { font-size: 0.9rem; color: #22c55e; font-weight: 500; }
 
-.input-container {
-  flex: 1;
-  position: relative;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-  overflow: hidden;
+.input-hint { font-size: 0.8rem; color: #64748b; }
+
+/* ── Chips ── */
+.chips-container {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
 }
-
-.dark-mode .input-container {
-  background: #334155;
-  border-color: #475569;
-}
-
-.input-container:focus-within {
-  border-color: #3b82f6;
-  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15);
-}
-
-.input-wrapper textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding-right: 90px;
-  padding: 16px 20px;
-  border: none;
-  border-radius: 0;
-  resize: none;
-  min-height: 70px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  background: transparent;
-  outline: none;
-  color: #1e293b;
-}
-
-.input-actions {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  gap: 4px;
-  background: rgba(248, 250, 252, 0.9);
-  padding: 4px;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
-}
-
-.input-actions .action-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.nav-btn:disabled {
-  opacity: 0.3;
-}
-
-.send-btn {
-  padding: 16px 24px;
-  border-radius: 16px;
-  border: none;
-  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 70px;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
-}
-
-.send-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.send-btn:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
-}
-
-.disclaimer {
-  margin: 12px 0 0;
-  font-size: 0.85rem;
-  color: #64748b;
-  line-height: 1.5;
-}
-
-.error-message {
-  margin-top: 8px;
-  color: #dc2626;
-  font-size: 0.9rem;
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.info-card {
-  background: white;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-}
-
-.dark-mode .info-card h2 {
-  margin: 0 0 16px;
-  color: #f0f2f6;
-}
-
-.info-card h2 {
-  color: #02060c;
-}
-
-.info-card ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.info-card li {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-}
-
-.info-card li strong {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: #475569;
-  letter-spacing: 0.02em;
-}
-
-.dark-mode .info-card li span {
-  color: #0f172a;
-  font-weight: 600;
-}
-
-.info-card li,
-.info-card li span {
-  color: #0f172a;
-}
-
-.result-block {
-  margin-bottom: 20px;
-}
-
-.result-block h3 {
-  margin: 0 0 12px;
-  color: #1e293b;
-}
-
-.chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .chip {
-  padding: 6px 12px;
+  padding: 0.45rem 0.9rem;
   border-radius: 999px;
-  background: #e0f2fe;
-  color: #0369a1;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.doctor-card,
-.hospital-card {
-  color: #475569;
-  cursor: pointer;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 16px;
-  background: #f8fafc;
-  margin-bottom: 12px;
-}
-
-.hospital-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.hospital-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.doctor-card h4,
-.hospital-card h4 {
-  margin: 0 0 8px;
-  color: #1e293b;
-}
-
-.distance-badge {
-  background: #dcfce7;
-  color: #16a34a;
-  border: 1px solid #86efac;
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.filter-row {
-  margin: 8px 0 12px;
-}
-.filter-row select {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
+  border: 1.5px solid #cbd5e1;
   background: #fff;
-  color: #1e293b;
+  color: #334155;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 5px;
+  user-select: none;
+}
+.chip:hover:not(:disabled) { border-color: #6366f1; color: #6366f1; background: #eef2ff; }
+.chip--selected {
+  background: #eef2ff; border-color: #6366f1;
+  color: #4338ca; font-weight: 500;
+}
+.chip--multi { border-style: dashed; }
+.chip--multi.chip--selected { border-style: solid; }
+.chip--other { border-style: dotted; }
+.chip--specialty {
+  background: #f0fdf4; border-color: #86efac;
+  color: #15803d; border-style: solid; cursor: default;
+}
+.chip-check { font-size: 0.75rem; }
+.dark-mode .chip { background: #334155; border-color: #475569; color: #cbd5e1; }
+.dark-mode .chip:hover:not(:disabled) { border-color: #818cf8; color: #818cf8; background: #1e1b4b; }
+.dark-mode .chip--selected { background: #1e1b4b; border-color: #818cf8; color: #a5b4fc; }
+
+/* ── Freetext & Location ── */
+.freetext-row { display: flex; gap: 0.5rem; }
+.freetext-row--full { width: 100%; }
+.freetext-input {
+  flex: 1; padding: 0.55rem 0.875rem;
+  border-radius: 10px; border: 1.5px solid #cbd5e1;
+  font-size: 0.9rem; background: #fff; color: inherit;
+  outline: none; transition: border-color 0.15s;
+  font-family: inherit;
+}
+.freetext-input:focus { border-color: #6366f1; }
+.dark-mode .freetext-input { background: #334155; border-color: #475569; color: #e2e8f0; }
+.freetext-textarea {
+  width: 100%; padding: 0.65rem 0.875rem;
+  border-radius: 10px; border: 1.5px solid #cbd5e1;
+  font-size: 0.9rem; background: #fff; color: inherit;
+  outline: none; resize: none; font-family: inherit;
+  transition: border-color 0.15s;
+}
+.freetext-textarea:focus { border-color: #6366f1; }
+.dark-mode .freetext-textarea { background: #334155; border-color: #475569; color: #e2e8f0; }
+.location-row { display: flex; gap: 0.5rem; }
+.location-input { flex: 1; }
+.gps-btn {
+  padding: 0.55rem 1rem; border-radius: 10px;
+  border: 1.5px solid #cbd5e1; background: #fff;
+  color: #475569; cursor: pointer; font-size: 0.85rem;
+  display: flex; align-items: center; gap: 5px;
+  white-space: nowrap; transition: all 0.15s;
+}
+.gps-btn:hover:not(:disabled) { border-color: #6366f1; color: #6366f1; }
+.gps-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.gps-spinner {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #e2e8f0; border-top-color: #6366f1;
+  animation: spin 0.8s linear infinite; display: inline-block;
 }
 
-.distance-badge {
-  background: #dcfce7;
-  color: #16a34a;
-  border: 1px solid #86efac;
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  white-space: nowrap;
+/* ── Send button ── */
+.footer-actions { display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; }
+.send-btn {
+  padding: 0.6rem 1.5rem; border-radius: 10px;
+  background: #6366f1; color: #fff; border: none;
+  font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background 0.15s, opacity 0.15s;
 }
+.send-btn:hover:not(:disabled) { background: #4f46e5; }
+.send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.doctor-specialty {
-  margin: 4px 0;
-  color: #0f172a;
-  font-weight: 600;
+.disclaimer { font-size: 0.78rem; color: #94a3b8; margin: 0; }
+.error-message { font-size: 0.85rem; color: #ef4444; margin: 0; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 340px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 1rem;
+  max-height: 90vh; overflow-y: auto;
 }
-
-.doctor-hospital,
-.doctor-address {
-  margin: 2px 0;
-  color: #475569;
-  font-size: 0.9rem;
+.info-card {
+  background: #fff; border-radius: 14px;
+  border: 1px solid #e2e8f0; padding: 1.25rem;
 }
+.dark-mode .info-card { background: #1e293b; border-color: #334155; }
+.info-card h2 { font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem; }
+.info-card h3 { font-size: 0.875rem; font-weight: 600; margin: 0.75rem 0 0.5rem; color: #475569; }
+.dark-mode .info-card h3 { color: #94a3b8; }
+.info-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.info-card li { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.875rem; }
+.info-card li strong { color: #64748b; flex-shrink: 0; }
 
+/* ── Result blocks ── */
+.result-block { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f1f5f9; }
+.dark-mode .result-block { border-color: #334155; }
+.chip-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+.filter-row { margin-bottom: 0.5rem; font-size: 0.85rem; }
+.filter-row select {
+  margin-left: 0.4rem; padding: 2px 6px;
+  border-radius: 6px; border: 1px solid #cbd5e1;
+  background: #fff; color: inherit; font-size: 0.85rem;
+}
+.dark-mode .filter-row select { background: #334155; border-color: #475569; }
+.empty-state { font-size: 0.875rem; color: #94a3b8; padding: 0.5rem 0; }
+
+/* ── Doctor/Hospital cards ── */
+.doctor-card, .hospital-card {
+  padding: 0.875rem; border-radius: 10px;
+  border: 1px solid #e2e8f0; margin-top: 0.5rem;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.doctor-card:hover, .hospital-card:hover { border-color: #6366f1; background: #fafafe; }
+.dark-mode .doctor-card, .dark-mode .hospital-card { border-color: #334155; }
+.dark-mode .doctor-card:hover, .dark-mode .hospital-card:hover {
+  border-color: #818cf8; background: #1e1b4b;
+}
+.doctor-card.disabled, .hospital-card.disabled { cursor: default; opacity: 0.7; }
+.doctor-card.disabled:hover, .hospital-card.disabled:hover {
+  border-color: #e2e8f0; background: inherit;
+}
+.card-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+.card-header-row h4 { font-size: 0.9rem; font-weight: 600; margin: 0; }
+.doctor-specialty { font-size: 0.8rem; color: #6366f1; margin: 0.2rem 0 0; }
+.doctor-hospital { font-size: 0.8rem; color: #64748b; margin: 0.15rem 0 0; }
+.doctor-address { font-size: 0.78rem; color: #94a3b8; margin: 0.1rem 0 0; }
 .doctor-meta {
-  margin-top: 12px;
-  display: flex;
-  justify-content: space-between;
-  color: #1d4ed8;
-  font-weight: 600;
-  font-size: 0.9rem;
+  display: flex; justify-content: space-between;
+  margin-top: 0.5rem; font-size: 0.8rem;
 }
-
-.doctor-meta .price {
-  color: #0f172a;
-}
-
-.doctor-meta .score {
-  color: #16a34a;
-}
-
-/* Enhanced Medical Context Styles */
-.medical-context {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border: 2px solid #0ea5e9;
-  border-radius: 16px;
-  padding: 20px;
-}
-
-.medical-info {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.urgency-level {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-.urgency-emergency {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 2px solid #f87171;
-}
-
-.urgency-soon {
-  background: #fef3c7;
-  color: #d97706;
-  border: 2px solid #fbbf24;
-}
-
-.urgency-normal {
-  background: #dcfce7;
-  color: #16a34a;
-  border: 2px solid #4ade80;
-}
-
-.urgency-icon {
-  font-size: 1.2rem;
-}
-
-.matched-symptoms {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.symptom-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.symptom-tag {
-  padding: 6px 12px;
-  background: #dbeafe;
-  color: #1e40af;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  border: 1px solid #bfdbfe;
-}
-
-.confidence-score {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.confidence-bar {
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.confidence-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-@media (max-width: 1200px) {
-  .ai-doctor-page {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    order: -1;
-  }
-}
-
-@media (max-width: 768px) {
-  .ai-doctor-page {
-    padding: 16px;
-  }
-
-  .chat-container {
-    border-radius: 16px;
-  }
-
-  .chat-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .input-wrapper {
-    flex-direction: column;
-  }
-
-  .input-wrapper textarea {
-    min-height: 120px;
-  }
-
-  .send-btn {
-    width: 100%;
-    height: 48px;
-  }
-}
-.hospital-card.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.price { color: #16a34a; font-weight: 500; }
+.score { color: #6366f1; }
+.distance-badge {
+  font-size: 0.75rem; padding: 2px 8px;
+  border-radius: 999px; background: #f0fdf4;
+  color: #16a34a; border: 1px solid #86efac;
+  white-space: nowrap; flex-shrink: 0;
 }
 .external-badge {
-  margin-left: 8px;
-  background: #f97316;
-  color: #fff;
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-size: 12px;
+  font-size: 0.72rem; padding: 2px 7px;
+  border-radius: 999px; background: #fef9c3;
+  color: #854d0e; border: 1px solid #fde047;
 }
-.doctor-hospital.linkable {
-  cursor: pointer;
-  text-decoration: underline;
+
+/* ── Medical context ── */
+.urgency-level {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0.75rem; border-radius: 8px;
+  font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;
+}
+.urgency-emergency { background: #fee2e2; color: #b91c1c; }
+.urgency-soon { background: #fef9c3; color: #854d0e; }
+.urgency-normal { background: #dcfce7; color: #15803d; }
+.symptom-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.35rem; }
+.symptom-tag {
+  font-size: 0.78rem; padding: 2px 8px;
+  border-radius: 999px; background: #eff6ff; color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+.confidence-score { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; margin-top: 0.5rem; }
+.confidence-bar {
+  flex: 1; height: 6px; background: #e2e8f0;
+  border-radius: 999px; overflow: hidden;
+}
+.confidence-fill { height: 100%; background: #6366f1; border-radius: 999px; transition: width 0.4s; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .ai-doctor-page { flex-direction: column; padding: 1rem; }
+  .sidebar { width: 100%; max-height: none; }
 }
 </style>
