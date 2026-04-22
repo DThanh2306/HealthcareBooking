@@ -407,65 +407,72 @@ export default {
       }
     },
 
-    async submitForm() {
-      const token = localStorage.getItem('userToken') || localStorage.getItem('token');
-      if (!token) {
-        alert('Bạn cần đăng nhập để đặt lịch.');
-        // redirect tới trang đăng nhập, kèm đường dẫn quay lại bookingform hiện tại
-        const currentHref = this.$router.resolve({
-          name: 'bookingform',
-          query: { dr_id: this.doctor?.dr_id || this.$route.query.dr_id, date: this.selectedDate, time: this.selectedTime }
-        }).href;
-        this.$router.push({ name: 'auth', query: { redirect: encodeURIComponent(currentHref) } });
-        return;
-      }
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      const id_u = decoded.id_u;
+async submitForm() {
+  const token = localStorage.getItem('userToken') || localStorage.getItem('token');
 
-      // Chặn đặt nếu slot quá khứ (phòng đi thẳng link)
-      if (this.isPastSelectedSlot()) {
-        alert('Không thể đặt khung giờ đã qua!');
-        return;
-      }
+  if (!token) {
+    alert('Bạn cần đăng nhập để đặt lịch.');
 
-      if (!this.form.name || !this.form.phone || !this.form.reason) {
-        alert('Vui lòng điền đầy đủ Họ tên, SĐT và Lý do khám.');
-        return;
+    // ✅ GIỮ redirect login (QUAN TRỌNG)
+    const currentHref = this.$router.resolve({
+      name: 'bookingform',
+      query: { 
+        dr_id: this.doctor?.dr_id || this.$route.query.dr_id, 
+        date: this.selectedDate, 
+        time: this.selectedTime 
       }
+    }).href;
 
-      // Validate phone number
-      if (!this.validatePhone(this.form.phone)) {
-        return;
-      }
+    this.$router.push({ 
+      name: 'auth', 
+      query: { redirect: encodeURIComponent(currentHref) } 
+    });
 
-      // Validate email if provided
-      if (this.form.email && !this.validateEmail(this.form.email)) {
-        return;
-      }
-      
-      // Validate birth date if provided
-      if (this.form.dob && !this.validateBirthDate(this.form.dob)) {
-        return;
-      }
+    return;
+  }
 
-      const payload = {
-        ...this.form,
-        dr_id: this.doctor?.dr_id,
-        appointment_date: this.selectedDate,
-        time_slot: this.selectedTime,
-        id_u: id_u
-      };
+  const decoded = JSON.parse(atob(token.split('.')[1]));
+  const id_u = decoded.id_u;
 
-      try {
-        await axios.post('http://localhost:3000/api/patients', payload);
-        alert('✅ Đặt lịch thành công!');
-        // Tự động chuyển về trang chủ sau khi đặt lịch thành công
-        this.router.push('/');
-      } catch (error) {
-        console.error('❌ Lỗi khi đặt lịch:', error);
-        alert('Đặt lịch thất bại. Vui lòng thử lại.');
-      }
-    }
+  // ✅ GIỮ check slot
+  if (this.isPastSelectedSlot()) {
+    alert('Không thể đặt khung giờ đã qua!');
+    return;
+  }
+
+  // ✅ validate giữ nguyên
+  if (!this.form.name || !this.form.phone || !this.form.reason) {
+    alert('Vui lòng điền đầy đủ Họ tên, SĐT và Lý do khám.');
+    return;
+  }
+
+  if (!this.validatePhone(this.form.phone)) return;
+  if (this.form.email && !this.validateEmail(this.form.email)) return;
+  if (this.form.dob && !this.validateBirthDate(this.form.dob)) return;
+
+  // 🔥 payload gửi sang backend payment
+  const payload = {
+    ...this.form,
+    dr_id: this.doctor?.dr_id,
+    appointment_date: this.selectedDate,
+    time_slot: this.selectedTime,
+    id_u: id_u,
+    amount: this.doctor?.dr_price // ⚠️ bắt buộc cho VNPay
+  };
+
+  try {
+    const res = await axios.post(
+      "http://localhost:3000/api/payment/vnpay/create",
+      payload
+    );
+
+    window.location.href = res.data.payment_url;
+
+  } catch (error) {
+    console.error('Lỗi tạo thanh toán:', error);
+    alert('Không thể chuyển đến trang thanh toán');
+  }
+}
   }
 };
 </script>
@@ -493,7 +500,6 @@ export default {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #e6f0ff;
-  margin-top: 40px;
   box-shadow: 0 6px 18px rgba(59, 130, 246, 0.18);
 }
 .info-block {
@@ -502,14 +508,13 @@ export default {
 .title {
   font-weight: 800;
   color: #1e3a8a;
-  font-size: 30px;
+  font-size: 13px;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  background: #1e3a8a;
+  background: linear-gradient(135deg, #1176eb 0%, #3b82f6 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-   text-align: center;
 }
 .doctor-name {
   color: #0f172a;
@@ -601,7 +606,7 @@ textarea {
 }
 input:focus,
 textarea:focus {
-  border-color: #ffffff;
+  border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 .gender-group {
@@ -669,7 +674,7 @@ textarea:focus {
 }
 .btn-confirm {
   width: 100%;
-  background: linear-gradient(135deg, #EEAECA 0%, #94BBE9 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
   font-weight: 700;
   font-size: 16px;
@@ -683,8 +688,8 @@ textarea:focus {
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
 }
 .btn-confirm:hover {
-  background: linear-gradient(135deg, #FF599E 0%, #2F64A1 100%);
   transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
 }
 @media (max-width: 600px) {
   .booking-container {

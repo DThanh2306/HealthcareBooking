@@ -37,7 +37,6 @@ const routes = [
         path: '/hospital/:h_id',
         component: HospitalDetail
       },
-    
 
       {
         path: '/doctor/:dr_id/booking',
@@ -86,6 +85,15 @@ const routes = [
         component: () => import('@/views/HospitalPage.vue')
       }
     ]
+  },
+  {
+    path: '/payment-success',
+    component: () => import('../views/PaymentSuccess.vue')
+  },
+
+  {
+    path: '/payment-failed',
+    component: () => import('../views/PaymentFailed.vue')
   },
 
   {

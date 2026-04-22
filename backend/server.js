@@ -57,6 +57,9 @@ app.use("/api", notificationRoutes);
 const adminNotificationRoutes = require("./routes/admin.notification.routes");
 app.use("/api", adminNotificationRoutes);
 
+const paymentRoutes = require("./routes/payment.routes");
+app.use("/api/payment", paymentRoutes);
+
 const aiDoctorKnowledge = require("./services/aiDoctorKnowledge.service");
 aiDoctorKnowledge
   .initialize()
